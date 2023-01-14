@@ -1,0 +1,195 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>艺恩票房API逆向 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    艺恩票房API逆向
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-12-20 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>这里以单月票房为例：<br>
+<a href="https://www.endata.com.cn/BoxOffice/BO/Month/oneMonth.html">https://www.endata.com.cn/BoxOffice/BO/Month/oneMonth.html</a></p>
+<h2 id="逆向">逆向</h2>
+<p>先观察响应：<br>
+<img src="https://sz134055.github.io//post-images/1671521136546.png" alt="响应结果" loading="lazy"><br>
+其请求表单或是请求头都无加密参数，响应结果为乱码，看着像十六进制数据，因此本次目标就是找寻解密这串数据的办法</p>
+<p>可以通过XHR断点来找到对应代码位置，但是通过API发起程序去找更快，因为要做的是处理返回的结果，因此可以往下找，发现此处：<br>
+<img src="https://sz134055.github.io//post-images/1671521382951.png" alt="入口" loading="lazy"></p>
+<p>e便是响应的结果</p>
+<pre><code class="language-js">1 == (e = &quot;{&quot; == e[0] ? JSON.parse(e) : JSON.parse(webInstace.shell(e))).Status || 200 == e.Code ? r(e.Data) : 200 == e.code ? r(e.data) : a(e.Msg)
+</code></pre>
+<p>这里得要盘一盘逻辑，但是不妨大胆一点，既然是解析拿到的数据，<code>e</code>是原始响应结果，肯定得先处理才能<code>JSON.parse()</code>，这里有两个函数调用有嫌疑：<code>r(e.Data)</code>以及<code>webInstace.shell(e)</code>，<code>webInstace.shell(e)</code>肯定先于<code>r(e.Data)</code>执行</p>
+<p>并且注意前面三元表达式<code>e = &quot;{&quot; == e[0] ? JSON.parse(e) : JSON.parse(webInstace.shell(e))</code>，<code>e</code>作为一个十六进制数据，自然没有<code>{</code>，因此此处三元表达式结果即为：<code>e = JSON.parse(webInstace.shell(e))</code></p>
+<p>这就很合理了，先格式化后才能有<code>e.Data</code>等操作，因此<code>webInstace.shell(e)</code>便是我们要找寻的解密函数</p>
+<p>同时在该处下断点，待运行后，可手动在控制台输出验证：<br>
+<img src="https://sz134055.github.io//post-images/1671522480438.png" alt="注意e的值以及调用后的结果" loading="lazy"></p>
+<p>跳转至<code>webInstace.shell(e)</code>处<br>
+<img src="https://sz134055.github.io//post-images/1671523001231.png" alt="webDES" loading="lazy"></p>
+<p>发现其实没必要单独扣代码， 偷懒直接全部复制<br>
+但是问题来了，不存在<code>webInstace.shell()</code>这个方法，这很正常，毕竟都是混效果，上图的<code>_0x2246('0x257', 'nArV')</code>其结果很明显就是<code>shell</code>，因此要么手动改掉上面的为<code>shell</code>，要么调用时就采用<code>webInstace[_0x2246('0x257', 'nArV')]()</code>形式</p>
+<p>注意，这样直接全复制的代码可能需要补环境，先直接运行看看：<br>
+<img src="https://sz134055.github.io//post-images/1671523879061.png" alt="缺少环境" loading="lazy"></p>
+<p>报错，恰好<code>_0x2246('0x26d', '0I#o')</code>就是 <code>'userAgent'</code>，而<code>!navigator || !navigator[_0x2246('0x26d', '0I#o')]</code>运行结果为<code>false</code>，此时要么直接覆盖填写<code>false</code>，或者将<code>navigator['userAgent']</code>补上，这里选择补上，再运行：<br>
+<img src="https://sz134055.github.io//post-images/1671524101062.png" alt="success" loading="lazy"></p>
+<p>成功拿到结果，简单粗暴的一次逆向就此完成...</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/dui-cheng-jia-mi-xue-xi-bi-ji/" class="post-title gt-a-link">
+                    对称加密-DES学习笔记及天翼云逆向
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

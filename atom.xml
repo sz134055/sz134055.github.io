@@ -1,0 +1,2577 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://sz134055.github.io/</id>
+    <title>Hyasea</title>
+    <updated>2023-01-14T08:09:40.783Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://sz134055.github.io/"/>
+    <link rel="self" href="https://sz134055.github.io/atom.xml"/>
+    <subtitle>笔记BLOG</subtitle>
+    <logo>https://sz134055.github.io/images/avatar.png</logo>
+    <icon>https://sz134055.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2023, Hyasea</rights>
+    <entry>
+        <title type="html"><![CDATA[JS RPC学习及实战]]></title>
+        <id>https://sz134055.github.io/post/js-rpc-xue-xi-ji-shi-zhan/</id>
+        <link href="https://sz134055.github.io/post/js-rpc-xue-xi-ji-shi-zhan/">
+        </link>
+        <updated>2023-01-09T10:21:13.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="介绍">介绍</h2>
+<blockquote>
+<p>RPC（Remote Procedure Call）中文名「远程过程调用」，又是一个很蹩脚的翻译。我们拆开理解下，「过程」也叫方法或函数，「远程」就是说方法不在当前进程里，而是在其他进程或机器上面，合起来 RPC 就是调用其他进程或机器上面的函数。<br>
+——<a href="https://zhuanlan.zhihu.com/p/38012481">聊聊 Node.js RPC（一）— 协议</a></p>
+</blockquote>
+<blockquote>
+<p>JS RPC是指在浏览器开启一个ws和go服务连接，以调用http接口的形式来通信，浏览器端收到调用通信执行原先设置好的js代码。可以用于js逆向调用加密函数直接返回结果，也可以用来直接获取数据。<br>
+——<a href="https://www.jianshu.com/p/57c4a483fb87">Python网络爬虫之js逆向之远程调用(rpc)免去抠代码补环境简介</a></p>
+</blockquote>
+<p>上次实战，其实就算是实现了一次JS RPC实战， 对于JS RPC，和爬虫一样，可以手搓，也可以选择成熟的第三方框架，这里推荐使用 <a href="https://github.com/virjar/sekiro">Sekrio</a>-<a href="https://sekiro.virjar.com/sekiro-doc/index.html">官方文档</a></p>
+<h2 id="sekiro">Sekiro</h2>
+<blockquote>
+<p><img src="https://sekiro.virjar.com/sekiro-doc/img/sekiro.svg" alt="" loading="lazy"><br>
+SEKIRO 是一个android下的API服务暴露框架，可以用在app逆向、app数据抓取、android群控等场景。同时Sekiro也是目前公开方案唯一稳定的JSRPC框架。<br>
+——来自<a href="https://sekiro.virjar.com/sekiro-doc/index.html">官方文档</a></p>
+</blockquote>
+<p>下载：https://oss.iinti.cn/sekiro/sekiro-demo</p>
+<h3 id="使用">使用</h3>
+<p>首先需要确保已准备好 Java 环境，需要下载并配置JDK，随后运行<code>bin/sekiro.bat</code>（或<code>bin/sekiro.sh</code>）即可开启本地服务端</p>
+<p>而客户端，请参考官方文档 <a href="https://sekiro.virjar.com/sekiro-doc/01_user_manual/1.quick_start.html#webJs">浏览器入门</a></p>
+<p>下载或者注入<a href="https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js">JsClient</a></p>
+<p>然后使用以下代码暴露RPC服务：</p>
+<pre><code class="language-js">function guid() {
+    function S4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    }
+
+    return (S4() + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + S4() + S4());
+}
+
+var client = new SekiroClient(&quot;wss://sekiro.virjar.com/business/register?group=ws-group-2&amp;clientId=&quot; + guid());
+
+client.registerAction(&quot;clientTime&quot;, function (request, resolve, reject) {
+    resolve(&quot;SekiroTest：&quot; + new Date());
+});
+
+client.registerAction(&quot;executeJs&quot;, function (request, resolve, reject) {
+    var code = request['code'];
+    if (!code) {
+        reject(&quot;need param:{code}&quot;);
+        return;
+    }
+
+    code = &quot;return &quot; + code;
+
+    console.log(&quot;executeJs: &quot; + code);
+
+    try {
+        var result = new Function(code)();
+        resolve(result);
+    } catch (e) {
+        reject(&quot;error: &quot; + e);
+    }
+
+});
+</code></pre>
+<p>但是在开始之前，我们先了解下一些概念</p>
+<blockquote>
+<p><strong>名词解释</strong><br>
+<strong>group</strong><br>
+业务类型（接口组），每个业务一个group。group下面可以注册多个终端(SekiroClient),同时Group可以挂载多个Action。 Group指代一个确定的业务，group下注册的client代码需要保持协议的完全一致。如微信机器人为一个group、xxx爬虫为另一个group。sekiro系统中Group全局唯一，同时Sekiro根据Group进行调用转发路由，并认为统一个group下面的所有client能够提供一致性的服务能力.也就是说，对sekiro来说，转发请求的时候，sekiro认为统一个group下的任意一个设备(手机、浏览器、客户端代码等)都是等价的，转发到任意一个终端都是相同的语义</p>
+<p><strong>SekiroClient</strong><br>
+服务提供者客户端，主要场景为手机/浏览器等。最终的sekiro调用会转发到SekiroClient。每个client需要有一个惟一的clientId， ClientId最好用户自己生成，并且保证ClientId具备特定含义</p>
+<p><strong>action</strong><br>
+接口，同一个Group下面可以有多个接口，分别做不同的功能。如视频app，区分用户搜索接口、用户视频接口、直播接口、用户详情接口等。action是为了方便用户开发的时候隔离多个业务进行的抽象，在sekiro层面可以帮你进行一次路由。 这是因为在实际开发过程中可以发现同一个设备，可能可以提供多个接口</p>
+<p><strong>clientId</strong><br>
+ClientId指代设备，多个设备使用多个机器提供API服务，提供群控能力和负载均衡能力。如在手机上，同一个接口组下面可以挂载多台设备， ClientId大家需要保证每个客户端的ClientId的唯一性。建议使用mac地址、IMEI、ip地址+进程号等真实的物理ID作为ClientId。</p>
+<p>使用ClientId可以作为调度策略控制的ID，完成对特定设备的调用管理。</p>
+<p><strong>转自官网</strong></p>
+</blockquote>
+<p>同时如果你已经打开了本地服务，Sekiro提供了以下API：</p>
+<ul>
+<li>
+<p>查看分组列表：http://127.0.0.1:5620/business-demo/groupList</p>
+</li>
+<li>
+<p>查看分组下队列状态：http://127.0.0.1:5620/business-demo/clientQueue?group=test</p>
+<ul>
+<li>group参数：需要查看的指定分组名</li>
+</ul>
+</li>
+<li>
+<p>调用转发：http://127.0.0.1:5620/business-demo/invoke?group=test&amp;action=test&amp;param=testparm</p>
+<ul>
+<li>group参数：同上</li>
+<li>action参数：需要调用的action名</li>
+<li>param参数：需要传递的参数，注意这里param是自定义的参数名！也就是说在<code>action</code>参数后可以接比如<code>sign</code>，Sekiro客户端可以拿到此参数</li>
+</ul>
+</li>
+</ul>
+<p>现在来测试一下，以下代码是已经写好的DEMO</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Sekiro TEST&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Sekiro TEST&lt;/h1&gt;
+&lt;!--加载JsClient--&gt;
+&lt;script src=&quot;https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+        function guid() {
+            function S4() {
+                  return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+            }
+            return (S4()+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+S4()+S4());
+        }
+        
+        //注册Group，名为rpc-test
+        var client = new SekiroClient(&quot;ws://127.0.0.1:5620/business-demo/register?group=rpc-test&amp;clientId=&quot; + guid());
+        
+        //注册Action，名为clientTime
+        client.registerAction(&quot;clientTime&quot;,function(request, resolve,reject ){
+            resolve(&quot;&quot;+new Date());
+        })
+
+        //注册Action，名为getPwd
+        client.registerAction(&quot;getPwd&quot;,function(request, resolve,reject ){
+            const pwd = request['pwd']
+            //调用假设的加密方法直接返回对应的结果
+            resolve(pwdEncypt(pwd))
+        })
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>浏览器打开此文件，确保本地服务开启，可以在浏览器开发人员工具中看到WS连接，访问<code>http://127.0.0.1:5620/business-demo/groupList</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;rpc-test&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>访问<code>http://127.0.0.1:5620/business-demo/clientQueue?group=rpc-test</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;eddc8434-4c23-f7bb-31a6-21c4523b00d2&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>现在，来调用以下刚才注册的Action。访问<code>http://127.0.0.1:5620/business-demo/invoke?group=rpc-test&amp;action=clientTime</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;eddc8434-4c23-f7bb-31a6-21c4523b00d2&quot;,&quot;data&quot;:&quot;Wed Jan 11 2023 21:27:39 GMT+0800 (香港标准时间)&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>可以看到，其将JS代码<code>new Date()</code>的结果转发了出来。</p>
+<p><strong>传递参数</strong><br>
+现在需要加密一个数据，明文为<code>123456</code>，得到其加密后的结果，DEMO中注册了一个Action名为<code>getPwd</code>，它需要一个<code>pwd</code>参数，并调用返回加密结果，因此需要调用：<br>
+<code>http://127.0.0.1:5620/business-demo/invoke?group=rpc-test&amp;action=getPwd&amp;pwd=123456</code><br>
+响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:3,&quot;clientId&quot;:&quot;38617c08-b07d-40c0-d256-0ec1670cf20d&quot;,&quot;data&quot;:&quot;123456abc123&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>其中<code>data</code>便是期待的加密值（模拟）</p>
+<h3 id="实战-控制台注入方式">实战-控制台注入方式</h3>
+<p>地址：<code>http://q.10jqka.com.cn/</code></p>
+<p>目标是<code>个股行情</code>，每次翻页都带有Cookie且不一致，为Cookie反爬<br>
+<img src="https://sz134055.github.io//post-images/1673446300754.png" alt="" loading="lazy"></p>
+<p>控制台中执行<code>document.cookie</code>，可以拿到对应的Cookie值，并猜测有JS代码在生成其值，可以在控制台执行以下代码，以在每次<code>document.cookie</code>值发生改变时，自动断住，方便在堆栈中找到可能的生成代码：</p>
+<pre><code class="language-js">(function () {
+  Object.defineProperty(document, 'cookie', {
+    set: function (val) {
+      if (val.indexOf('v') != -1) {
+        debugger;
+      }
+      console.log('Hook捕获到cookie设置-&gt;', val);
+      return val;
+    }
+  });
+})();
+</code></pre>
+<p>执行后，翻页一下，在堆栈中搜索，可以轻松找到相关代码：<br>
+<img src="https://sz134055.github.io//post-images/1673446952346.png" alt="" loading="lazy"></p>
+<p>按往常是可以开始扣代码了，但是现在使用RPC方式，要做的就是将对应加密函数导出到全局然后供RPC客户端调用，在控制台输入并执行：</p>
+<pre><code class="language-js">encypt = O
+</code></pre>
+<p>然后选择右上角的<code>停用断点</code>，取消调试状态并放行，这样就可以注入对应的RPC代码了</p>
+<p>同时记得确保JS上下文为TOP，这样才能在控制台执行刚刚导出的<code>encypt</code>，并且后面的操作都要在此种执行</p>
+<p>在控制台，输入JsClient所有源码然后执行，以及暴露RPC服务的代码：</p>
+<pre><code class="language-js">function guid() {
+    function S4() {
+          return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    }
+    return (S4()+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+S4()+S4());
+}
+
+var client = new SekiroClient(&quot;ws://127.0.0.1:5620/business-demo/register?group=ths&amp;clientId=&quot; + guid());
+
+client.registerAction(&quot;getCookie&quot;,function(request, resolve,reject ){
+    resolve(encypt());
+})
+</code></pre>
+<p>此时打开<code>http://127.0.0.1:5620/business-demo/groupList</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;ths&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>表明一切正常</p>
+<p>此时再访问<code>http://127.0.0.1:5620/business-demo/invoke?group=ths&amp;action=getCookie</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;8db06d70-f1d1-defa-e975-13d3b9a0573a&quot;,&quot;data&quot;:&quot;AzUv6rCtukrtP9729bCNgsH8RLrqsuEjs3XNPbdb8wT7mlskfwL5lEO23YdE&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>可以看到Cookie值已成功被导出</p>
+<p>现在就可以用Python脚本愉快地爬取：</p>
+<pre><code class="language-python">import requests
+
+def get_cookie():
+    api = 'http://127.0.0.1:5620/business-demo/invoke?group=ths&amp;action=getCookie'
+    res = requests.get(api)
+
+    return res.json()['data']
+
+def get_info(page):
+    
+    api = f'http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/{page}/ajax/1/'
+    headers = {
+        &quot;Accept&quot;: &quot;application/json&quot;,
+        &quot;Accept-Encoding&quot;: &quot;gzip, deflate, br&quot;,
+        &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.9&quot;,
+        &quot;Cache-Control&quot;: &quot;no-cache&quot;,
+        &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.54&quot;,
+        &quot;Cookie&quot;:f&quot;v={get_cookie()}&quot;
+    }
+
+    res = requests.get(api,headers=headers)
+
+    print(res.text)
+
+if __name__ == '__main__':
+    get_info(1)
+</code></pre>
+<h3 id="实战-油猴注入方式">实战-油猴注入方式</h3>
+<blockquote>
+<p>Tampermonkey (油猴) 是拥有 超过 1000 万用户 的最流行的浏览器扩展之一。 它适用于 Chrome、Microsoft Edge、Safari、Opera Next 和 Firefox。</p>
+<p>它允许用户自定义并增强您最喜爱的网页的功能。用户脚本是小型 JavaScript 程序，可用于向网页添加新功能或修改现有功能。使用 Tampermonkey，您可以轻松在任何网站上创建、管理和运行这些用户脚本。</p>
+<p>——转自<a href="https://www.tampermonkey.net/">官网</a></p>
+</blockquote>
+<p>油猴可以让用户自行在添加脚本，并在开启对应页面时应用，可以把它认为是一个给自己注入脚本的一个工具。</p>
+<p>可以在拓展上点击<code>添加脚本</code>来添加一个新脚本<br>
+<img src="https://sz134055.github.io//post-images/1673452559212.png" alt="" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">@name</td>
+<td style="text-align:left">脚本的名称</td>
+</tr>
+<tr>
+<td style="text-align:left">@namespace</td>
+<td style="text-align:left">命名空间，用来区分相同名称的脚本，一般写作者名字或者网址就可以</td>
+</tr>
+<tr>
+<td style="text-align:left">@version</td>
+<td style="text-align:left">脚本版本，油猴脚本的更新会读取这个版本号</td>
+</tr>
+<tr>
+<td style="text-align:left">@description</td>
+<td style="text-align:left">描述这个脚本是干什么用的</td>
+</tr>
+<tr>
+<td style="text-align:left">@author</td>
+<td style="text-align:left">编写这个脚本的作者的名字</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>@match</strong></td>
+<td style="text-align:left">从字符串的起始位置匹配正则表达式，只有匹配的网址才会执行对应的脚本，例如 <code>*</code> 匹配所有，<code>https://www.baidu.com/*</code> 匹配百度等，可以参考 Python re 模块里面的 <code>re.match()</code> 方法，允许多个实例</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>@include</strong></td>
+<td style="text-align:left">和 @match 类似，只有匹配的网址才会执行对应的脚本，但是 @include 不会从字符串起始位置匹配，例如 <code>*://*baidu.com/*</code> 匹配百度，具体区别可以参考 <strong>TamperMonkey 官方文档</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">@icon</td>
+<td style="text-align:left">脚本的 icon 图标</td>
+</tr>
+<tr>
+<td style="text-align:left">@grant</td>
+<td style="text-align:left">指定脚本运行所需权限，如果脚本拥有相应的权限，就可以调用油猴扩展提供的 API 与浏览器进行交互。如果设置为 none 的话，则不使用沙箱环境，脚本会直接运行在网页的环境中，这时候无法使用大部分油猴扩展的 API。如果不指定的话，油猴会默认添加几个最常用的 API</td>
+</tr>
+<tr>
+<td style="text-align:left">@require</td>
+<td style="text-align:left">如果脚本依赖其他 JS 库的话，可以使用 require 指令导入，在运行脚本之前先加载其它库</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>@run-at</strong></td>
+<td style="text-align:left">脚本注入时机，该选项是能不能 hook 到的关键，有五个值可选：<code>document-start</code>：网页开始时；<code>document-body</code>：body出现时；<code>document-end</code>：载入时或者之后执行；<code>document-idle</code>：载入完成后执行，默认选项；<code>context-menu</code>：在浏览器上下文菜单中单击该脚本时，一般将其设置为 <code>document-start</code></td>
+</tr>
+</tbody>
+</table>
+<p>接下来将通过油猴脚本方式注入RPC来逆向一个网站</p>
+<p>目标地址：<code>https://www.toutiao.com/</code></p>
+<p>获取<code>推荐</code>栏榜单数据时，有一个关键的<code>_signature</code>参数<br>
+<img src="https://sz134055.github.io//post-images/1673453181758.png" alt="" loading="lazy"></p>
+<p>任意方式搜寻可能的生成代码（推荐搜索<code>_signature</code>），发现以下代码：<br>
+<img src="https://sz134055.github.io//post-images/1673453398054.png" alt="" loading="lazy"></p>
+<p>但是这并不意味着逆向结束，直接转发<code>n</code>，因为<code>n</code>的值是生成后的结果，要导出的目标应该是一个方法，因此进入<code>I</code>方法一探究竟<br>
+<img src="https://sz134055.github.io//post-images/1673453579812.png" alt="" loading="lazy"></p>
+<p>注意观察最后一段代码：</p>
+<pre><code class="language-js">var o = {
+                url: r + e
+            };
+return t.data &amp;&amp; (o.body = t.data), (null === (n = window.byted_acrawler) || void 0 === n || null === (a = n.sign) || void 0 === a ? void 0 : a.call(n, o)) || &quot;&quot;
+</code></pre>
+<p>重点放在后面：</p>
+<pre><code class="language-js"> (null === (n = window.byted_acrawler) || void 0 === n || null === (a = n.sign) || void 0 === a ? void 0 : a.call(n, o)) || &quot;&quot;
+</code></pre>
+<p>此处解析可参考<a href="https://pythonmana.com/2022/03/202203291733382695.html#%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90">Python 爬虫进阶必备 | 某新闻资讯站点参数 _signature 逻辑分析 (无代码)</a></p>
+<p>所以这段代码执行时其实干了以下事：</p>
+<pre><code class="language-js">n = window.byted_acrawler
+a = n.sign
+a.call(n,o)
+</code></pre>
+<p>总结一下就是<code>window.byted_acrawler.sign(window.byted_acrawler,o)</code>，其中<code>window.byted_acrawler</code>是可以忽略的，参考<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/call#%E5%8F%82%E6%95%B0">Function.prototype.call()</a>，也就是说可以进一步简化为<code>window.byted_acrawler.sign(o)</code></p>
+<p>可以在控制台调用下：<br>
+<img src="https://sz134055.github.io//post-images/1673454996044.png" alt="" loading="lazy"></p>
+<p>成功拿到结果</p>
+<p>现在可以准备RPC代码了，同时对于<code>o</code>，可以试着自行构建一个一并返回，因此油猴代码如下：</p>
+<pre><code class="language-js">// ==UserScript==
+// @name         今日头条-RPC
+// @namespace    替换成你的命名空间
+// @version      0.1
+// @description  今日头条-RPC
+// @author       注意替换很你的名字
+// @match        https://www.toutiao.com/*
+// @icon         替换成你的图标或者干脆删除这一行
+// @grant        none
+// @require      https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+    function guid() {
+        function S4() {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        }
+    
+        return (S4() + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + S4() + S4());
+    }
+    
+    var client = new SekiroClient(&quot;ws://127.0.0.1:5620/business-demo/register?group=jrtt&amp;clientId=&quot; + guid());
+
+    client.registerAction(&quot;getUrl&quot;, function (request, resolve, reject) {
+        var channelId = request.channel;
+        if (!channelId){
+            channelId = 0;
+        }
+        var urlParams = {
+            url:'https://www.toutiao.com/api/pc/list/feed?min_behot_time='+Math.round(new Date().getTime()/1000)+'&amp;refresh_count=5&amp;category=pc_profile_recommend&amp;aid=24&amp;app_name=toutiao_web&amp;channel_id='+channelId
+        }
+
+
+        resolve(&quot;&quot;+urlParams.url+&quot;&amp;_signature=&quot;+window.byted_acrawler.sign(urlParams));
+    });
+    
+})();
+</code></pre>
+<p>并且因为<code>window.byted_acrawler</code>是全局的，因此并不需要导出。保存油猴脚本并启动，回到今日头条并刷新，访问Sekiro的分组情况：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;jrtt&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>可以看到成功连接</p>
+<p>现在来调用一下：<br>
+<code>http://127.0.0.1:5620/business-demo/invoke?group=jrtt&amp;action=getUrl</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;72c7dff4-3e96-565e-449a-b5b5d397eb1b&quot;,&quot;data&quot;:&quot;https://www.toutiao.com/api/pc/list/feed?min_behot_time=1673458709&amp;refresh_count=5&amp;category=pc_profile_recommend&amp;aid=24&amp;app_name=toutiao_web&amp;channel_id=0&amp;_signature=_02B4Z6wo00d01Ws5WIQAAIDAe2e9vmHbDGlrHVwAADl0A6cZQQXdRzJsXzV.yrJchiysvjx.ROE4yE2PVl450x0oeAmttZk.TZlJl6Zl1arOspUvyovWNV5x7vUHvHs3SXK2nZQubYjww-1965&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>可以额外添加一个<code>channel</code>参数，用来调用不同的栏目，默认<code>channel</code>为<code>0</code></p>
+<p>尝试使用Python来爬一下，发现<code>200</code>却一直乱码，在源码里翻找了一番也没看到有解密的意思，直接拿生成的url试试浏览器里编辑重放却没问题，编码也设置成了<code>utf-8</code>，找了半天才终于发现，<code>requests</code>响应头里有个<code>'Transfer-Encoding': 'chunked'</code>，我猜测问题就出在这了，<code>requests</code>并没有把完整的文件下载完，然后尝试添加<code>stream=True</code>参数也没有用。</p>
+<p>后来发现，请求头只保留一个<code>user-agent</code>就行，我TM@#!~&amp;*，折腾两小时才发现这样就行了，淦<br>
+Python 代码：</p>
+<pre><code class="language-python">import requests
+
+def get_list(channel=None):
+    def get_url(c=None):
+        params = {
+            'group':'jrtt',
+            'action':'getUrl',
+            'channel': c if c else ''
+        }
+        return requests.get('http://127.0.0.1:5620/business-demo/invoke',params=params).json()['data']
+
+    s = requests.session()
+    headers = {
+        &quot;user-agent&quot;: &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76&quot;
+
+    }
+
+    res = s.get(url=get_url(channel),headers=headers)
+    res_json = res.json()
+    return res_json['data']
+
+
+if __name__ == &quot;__main__&quot;:
+    print(get_list())
+</code></pre>
+<h3 id="实战-注入-替换方式">实战-注入、替换方式</h3>
+<p>目标：<a href="https://ygp.gdzwfw.gov.cn/#/44/jygg">广东省公共资源交易平台</a></p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1673590124871.png" alt="" loading="lazy"></figure>
+<p>表单以及响应结果都为明文，只有在请求头有签名，总共为3个，其中一个明显为时间戳，因此总共待破解的为2个</p>
+<p>对于头部参数，可以采用头部HOOK方式。<br>
+在控制台输入以下代码来断住：</p>
+<pre><code class="language-js">var code = function(){
+    var org = window.XMLHttpRequest.prototype.setRequestHeader;
+    window.XMLHttpRequest.prototype.setRequestHeader = function(k,v){
+        if(k == 'X-Dgi-Req-Signature' || k == 'X-Dgi-Req-Nonce'){
+            debugger;
+        }
+        return org.apply(this,arguments);
+    }
+}
+var script = document.createElement('script');
+script.textContent = '('+code+')()';
+(document.head||document.documentElement).appendChild(script);
+script.parentNode.removeChild(script);
+</code></pre>
+<p>在调用堆栈里一顿找，最终找到此处：<br>
+<img src="https://sz134055.github.io//post-images/1673592397400.png" alt="" loading="lazy"></p>
+<p>断点的位置便是两个参数的生成位置，相关代码如下：</p>
+<pre><code class="language-js">const a = Date.now(),
+    l = lK(16),
+    c = sr([8, 28, 20, 42, 21, 53, 65, 6]);
+
+const d = Sg({
+    p: QC.stringify(o.data, {
+        allowDots: !0
+    }),
+    t: a,
+    n: l,
+    k: c
+});
+</code></pre>
+<p><code>f</code>就是请求头的副本，因此没有给出，同时<code>sr</code>方法仅仅是通过Array解析字符串的，因此<code>c</code>为固定值，为<code>'k8tUyS$m'</code>。按照以往可以开始扣代码了，但是现在是打算使用PRC，因此可以将<code>lK</code>、<code>Sg</code>以及<code>QC</code>全部挂载到<code>window</code>对象上，方便Sekiro客户端调用。</p>
+<p>现在使用本地替换的方式来注入RPC，启用本地替代，然后保存源码已备用<br>
+<img src="https://sz134055.github.io//post-images/1673597400255.png" alt="" loading="lazy"></p>
+<p>然后在顶部注入JsClient源码，以及注册一个client，这里挂载到<code>window</code>对象上，然后刷新页面，继续来到断点位置，导出需要的三个方法，同样控制台输入：</p>
+<pre><code class="language-js">window.lK = lK
+window.Sg = Sg
+window.QC = QC
+</code></pre>
+<p>输入完毕后是时候放行然后注册Action了，放行代码，然后在控制台输入以下代码：</p>
+<pre><code class="language-js">window.rpcClient.registerAction(&quot;getPost&quot;, function (request, resolve, reject) {
+    let pageNum = request.page;
+    if(!pageNum){
+        pageNum = 1;
+    }
+
+    const c = 'k8tUyS$m',
+        l = window.lK(16),
+        a = Date.now(),
+        formData = {
+            dataType:&quot;&quot;,
+            openConvert:true,
+            pageNo:pageNum,
+            pageSize:10,
+            projectType:&quot;&quot;,
+            publishEndTime:&quot;&quot;,
+            publishStartTime:&quot;&quot;,
+            secondType:&quot;A&quot;,
+            siteCode:&quot;44&quot;,
+            thirdType:&quot;&quot;,
+            total:0,
+            type:&quot;trading-type&quot;
+        },
+        d = window.Sg({
+            p: window.QC.stringify(formData, {
+                allowDots: !0
+            }),
+            t: a,
+            n: l,
+            k: c
+        });
+
+    resolve(JSON.stringify({
+        &quot;headers&quot;:{
+            &quot;X-Dgi-Req-Nonce&quot;:l,
+            &quot;X-Dgi-Req-Signature&quot;:d.toString(),
+            &quot;X-Dgi-Req-Timestamp&quot;:a
+        },
+        &quot;form&quot;:formData
+    }))
+
+});
+</code></pre>
+<p>这时候访问<code>http://127.0.0.1:5620/business-demo/invoke?group=gdggzy&amp;action=getPost</code>就能拿到需要的数据了，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;d006a706-d960-0ff8-e7e5-3e79f761bac0&quot;,&quot;form&quot;:{&quot;dataType&quot;:&quot;&quot;,&quot;openConvert&quot;:true,&quot;pageNo&quot;:1,&quot;pageSize&quot;:10,&quot;projectType&quot;:&quot;&quot;,&quot;publishEndTime&quot;:&quot;&quot;,&quot;publishStartTime&quot;:&quot;&quot;,&quot;secondType&quot;:&quot;A&quot;,&quot;siteCode&quot;:&quot;44&quot;,&quot;thirdType&quot;:&quot;&quot;,&quot;total&quot;:0,&quot;type&quot;:&quot;trading-type&quot;},&quot;headers&quot;:{&quot;X-Dgi-Req-Nonce&quot;:&quot;V6yYQSTDBQk3KWrA&quot;,&quot;X-Dgi-Req-Signature&quot;:&quot;a65c32bc126fb2c17231b94139666889bef365bcf44f17e10b6aad531b306a62&quot;,&quot;X-Dgi-Req-Timestamp&quot;:1673595897604},&quot;status&quot;:0}
+</code></pre>
+<p>当然，既然已经修改了代码，那干脆修改的彻底一点，直接在相关代码处进行注册然后再转发也是可以的，这里不再做演示</p>
+<p>注意，这里只是演示通过RPC拿数据，签名是否有效不在讨论范围，想爬自己再研究把</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Websocket逆向与B站直播间弹幕爬取实战]]></title>
+        <id>https://sz134055.github.io/post/websocket-ni-xiang-yu-shi-zhan/</id>
+        <link href="https://sz134055.github.io/post/websocket-ni-xiang-yu-shi-zhan/">
+        </link>
+        <updated>2023-01-07T11:27:30.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="介绍">介绍</h2>
+<ul>
+<li>WebSocket是HTML5下一种新的协议（websocket协议本质上是一个基于tcp的协议）</li>
+<li>它实现了浏览器与服务器全双工通信，能更好的节省服务器资源和带宽并达到实时通讯的目的</li>
+<li>Websocket是一个<strong>持久化</strong>的协议</li>
+<li>websocket约定了一个通信的规范，通过一个握手的机制，客户端和服务器之间能建立一个类似tcp的连接，从而方便它们之间的通信</li>
+<li>在websocket出现之前，web交互一般是基于http协议的短连接或者长连接</li>
+<li>websocket是一种全新的协议，不属于http无状态协议，协议名为&quot;ws&quot;</li>
+<li>和HTTP都是基于tcp的，都是可靠性传输协议，都是应用层协议</li>
+<li>WebSocket是双向通信协议，模拟Socket协议，可以双向发送或接受信息，但HTTP是单向的</li>
+<li>WebSocket是需要浏览器和服务器握手进行建立连接的，而http是浏览器发起向服务器的连接，服务器预先并不知道这个连接</li>
+</ul>
+<h2 id="js实现">JS实现</h2>
+<p>js websocket主要有以下几个方法：</p>
+<pre><code class="language-js">//连接发生错误的回调方法
+websocket.onerror = function () {
+    setMessageInnerHTML(&quot;WebSocket连接发生错误&quot;);
+};
+
+//连接成功建立的回调方法
+websocket.onopen = function () {
+    setMessageInnerHTML(&quot;WebSocket连接成功&quot;);
+}
+
+//接收到消息的回调方法  接服务器信息的方法
+websocket.onmessage = function (event) {
+    setMessageInnerHTML(event.data);
+}
+
+//连接关闭的回调方法
+websocket.onclose = function () {
+    setMessageInnerHTML(&quot;WebSocket连接关闭&quot;);
+}
+</code></pre>
+<p>当然这些都是浏览器环境</p>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>此次目标为B站，随便找个直播间，来爬一下直播间的弹幕</p>
+<p>首先找到给出WSS信息的API，这个是B站的<br>
+<img src="https://sz134055.github.io//post-images/1673094658056.png" alt="" loading="lazy"></p>
+<p>其实B站还有一个API能够拿到弹幕，详见 <a href="https://www.bilibili.com/read/cv8186413">Bilibili直播API</a>，我估计是为了填补WSS连接前的空档期</p>
+<p>同时也可以在<code>WS</code>这看到建立的连接：<br>
+<img src="https://sz134055.github.io//post-images/1673095050698.png" alt="" loading="lazy"></p>
+<p>当然数据是加密的，通过发起程序或者搜索关键字找到代码处：<br>
+最终给我一顿找找到这里：<br>
+<img src="https://sz134055.github.io//post-images/1673159737531.png" alt="" loading="lazy"></p>
+<p>这个要说明一下就是WS建立可能会因为你调试导致失败，比如我这个就导致直播推流失败，但是弹幕仍然有效，因此并不影响<br>
+<img src="https://sz134055.github.io//post-images/1673159806833.png" alt="" loading="lazy"></p>
+<p>失败的会自动重新建立几次连接，记得关注URL适当放行几次，这个得自己把握，同时每次数据都会变，不像HTTP每次请求对应一次数据，像B站这个，点开就一个二进制数据选项，每次进每次数据不一样，但有一点可以确定的是数据加密过</p>
+<p>在上下不断寻找后，最终找到可能的解密处：<br>
+<img src="https://sz134055.github.io//post-images/1673160291004.png" alt="" loading="lazy"></p>
+<p>其实现在可以有两种办法，一是植入代码，浏览器保持运行，本地一个客户端同时接受，即做一个转发，另一个种那就是本地客户端直接接受了，但是那种可能还需要处理心跳问题，这里直接试试不用逆向解密方法的植入方式。</p>
+<h3 id="植入代码">植入代码</h3>
+<p>植入方式最大好处就是浏览器环境，难以被反爬了吧</p>
+<p>准备好js代码：</p>
+<pre><code class="language-js">!function(){
+    const ws = new WebSocket('ws://127.0.0.1:7788');
+    window.wsHook = ws;
+    ws.onopen = function(e){
+        ws.send('CONNECTED')
+    }
+    ws.onmessage = function(e){
+        ws.send(JSON.stringify(n.body))
+    }
+}();
+</code></pre>
+<p>然后选择替换（或者覆盖），然后对对应的JS文件右键-保存以覆盖（记住选择未格式化的！），直接在浏览器中打开已保存的代码进行编辑，在这段解密后的代码后面添加上面的代码即可<br>
+<img src="https://sz134055.github.io//post-images/1673165523541.png" alt="" loading="lazy"></p>
+<p>当然这不够优雅，可以考虑以下代码：<br>
+在文件头部加入</p>
+<pre><code class="language-js">!function(){
+    const ws = new WebSocket('ws://127.0.0.1:7788');
+    window.wsHook = ws;
+    ws.onopen = function(e){
+        ws.send('CONNECTED')
+    }
+
+}();
+</code></pre>
+<p>然后在对应地方加入以下代码：</p>
+<pre><code class="language-js">window.wsHook.send(JSON.stringify(n.body));
+</code></pre>
+<p>现在确保开发者工具开启且启用覆盖，刷新一下页面，如果你恰好看着控制台，你会看到连接到<code>127.0.0.1:7788</code>失败的消息，这是因为还没有客户端来接收</p>
+<p>再用一下下面抄来的Python代码（懒）：</p>
+<pre><code class="language-python">import asyncio
+# encoding: utf-8
+import asyncio
+import websockets
+
+
+async def echo(websocket):
+    # 使用WebSocket在客户端和服务器之间建立全双工双向连接后，就可以在连接打开时调用send()方法。
+    message = 'hello world'
+    # 发送数据
+    await websocket.send(message)
+    return True
+
+
+async def recv_msg(websocket):
+    while 1:
+        # 接收数据
+        recv_text = await websocket.recv()
+        print(recv_text)
+
+
+async def main_logic(websocket, path):
+    await echo(websocket)
+    await recv_msg(websocket)
+
+
+start_server = websockets.serve(main_logic, '127.0.0.1', 7788)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(start_server)
+loop.run_forever()
+</code></pre>
+<p>开RUN，可以看到直播间的消息已经都摆在你面前了<br>
+<img src="https://sz134055.github.io//post-images/1673165753184.png" alt="" loading="lazy"></p>
+<p>这时候是存入MongoDB还是现场就开始分析全看个人，仅仅插入一段代码，不用破解任何方法，正常看着直播就把弹幕爬了，这还扣啥代码，要什么自行车。</p>
+<p><strong>思路拓展</strong><br>
+当遇到一个极难的网站，即使找到了解密方法，也很难扣的时候，是否可以使用这种办法转发解密后的数据给本地？这样虽然还是需要配合自动化但却省去了用BeautifulSoup等工具对网页的解析，自动化只需要做到能帮助翻页等功能即可。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[octet-stream及实战]]></title>
+        <id>https://sz134055.github.io/post/octet-stream-ji-shi-zhan/</id>
+        <link href="https://sz134055.github.io/post/octet-stream-ji-shi-zhan/">
+        </link>
+        <updated>2023-01-07T06:57:06.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2>
+<blockquote>
+<p>当浏览器在请求资源时，会通过<code>http</code>返回头中的<code>content-type</code>决定如何显示/处理将要加载的数据，如果这个类型浏览器能够支持阅览，浏览器就会直接展示该资源，比如<code>png</code>、<code>jpeg</code>、<code>video</code>等格式。在某些下载文件的场景中，服务端可能会返回文件流，并在返回头中带上<code>Content-Type: application/octet-stream</code>，告知浏览器这是一个字节流，浏览器处理字节流的默认方式就是下载。</p>
+<p><code>application/octet-stream</code>是应用程序文件的默认值。意思是未知的应用程序文件 ，浏览器一般不会自动执行或询问执行。浏览器会像对待，设置了<code>HTTP</code>头<code>Content-Disposition</code>值为 <code>attachment</code> 的文件一样来对待这类文件，即浏览器会触发下载行为。</p>
+<p>说人话就是，浏览器并不认得这是什么类型，也不知道应该如何展示，只知道这是一种二进制文件，因此遇到<code>content-type</code>为<code>application/octet-stream</code>的文件时，浏览器会直接把它下载下来。这个类型一般会配合另一个响应头<code>Content-Disposition</code>，该响应头指示回复的内容该以何种形式展示，是以内联的形式（即网页或者页面的一部分），还是以附件的形式下载并保存到本地。<br>
+——<a href="https://juejin.cn/post/6979224810681270309">没有Peter你就是个d</a></p>
+</blockquote>
+<p>简而言之就是<code>octet-stream</code>指任意类型的二进制流数据</p>
+<p>下面直接以实战来学习</p>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>目标：<a href="http://zhengce.2b.cn/">中国产业政策大数据平台</a>（域名多少有点逆天）<br>
+关键词搜索</p>
+<p>此网站同样有无限debugger，参照上篇文章解决，</p>
+<p>搜索<code>python</code>，可以看到API上参数乱码，<code>Content-Type</code>为<code>application/octet-stream</code><br>
+<img src="https://sz134055.github.io//post-images/1673076522112.png" alt="" loading="lazy"></p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1673076525694.png" alt="" loading="lazy"></figure>
+<p>响应结果未加密：<br>
+<img src="https://sz134055.github.io//post-images/1673076540989.png" alt="" loading="lazy"></p>
+<p>因此本次难点在于表单构造</p>
+<p>通过XHR断点或发起程序寻找可疑处<br>
+同时加密处理可能在拦截器中完成，两个拦截器基本都会写在一起，因此可以通过寻找到其中一个来找到另一个</p>
+<p>可以找到以下代码：<br>
+<img src="https://sz134055.github.io//post-images/1673077489044.png" alt="" loading="lazy"><br>
+这里可能就是发送请求的起点，<br>
+而<code>posh</code>：<br>
+<img src="https://sz134055.github.io//post-images/1673077588661.png" alt="" loading="lazy"><br>
+其中一段代码可以看成以下：</p>
+<pre><code class="language-js">ExpirationTime[&quot;wrapRequest&quot;](axiosInstance[&quot;post&quot;], e, t, n);
+</code></pre>
+<p>其中<code>e</code>为api,<code>t</code>为表单，<code>n</code>为<code>false</code><br>
+通过一顿搜索，猜测这个<code>ExpirationTime</code>是某框架用来管理调度的？</p>
+<blockquote>
+<p><a href="https://blog.csdn.net/jingshui1234/article/details/116481959">04.ExpirationTime计算</a></p>
+</blockquote>
+<p>现在关注点放在后面，猜测后面基本等同于调用了<code>axiosInstance[&quot;post&quot;]</code>并给它安排了<code>e</code>和<code>t</code>，手动追踪到<code>axiosInstance[&quot;post&quot;]</code>代码段<br>
+<img src="https://sz134055.github.io//post-images/1673078821933.png" alt="" loading="lazy"><br>
+不过好像仍然没有对表单进行加密</p>
+<p>那么现在只能去怀疑以下拦截器了，拦截器一般关键词<code>'interceptors'.request.use</code>或<code>'interceptors'.response.use</code>，不过这里直接搜不太现实，但是可以搜<code>axiosInstance</code>，进行广撒网，<br>
+最终找到此处（注意断好位置，图片里这样是断不住的）<br>
+<img src="https://sz134055.github.io//post-images/1673079712712.png" alt="" loading="lazy"></p>
+<p>慢慢排查，来到此处：<br>
+<img src="https://sz134055.github.io//post-images/1673080170604.png" alt="" loading="lazy"></p>
+<p>很明显是要对表单<code>data</code>值进行改变了，而后面的代码结果便是加密后的数据</p>
+<p>那么现在直接扣，等同于以下代码</p>
+<pre><code class="language-js">function enc_data(data){
+    return PolicyInfoSearchParam$encode(data)[&quot;finish&quot;]()[&quot;slice&quot;]()
+}
+</code></pre>
+<p>再跳转至<code>PolicyInfoSearchParam$encode</code><br>
+<img src="https://sz134055.github.io//post-images/1673080840031.png" alt="" loading="lazy"><br>
+复制<code>return</code>的函数尝试运行发现找不到<code>Writer</code>，此时可以下断点然后跳转，发现又回去了，且有点像Webpack，这时候伴以搜索形式找<code>Writer</code>，可以全扣或者半扣，不过全扣下来发现能搜到的关键字都在这一块<br>
+<img src="https://sz134055.github.io//post-images/1673081147458.png" alt="" loading="lazy"><br>
+那么可以试试半扣</p>
+<p>再尝试运行，发现缺少<code>commonjsGlobal</code>，直接使用<code>global</code>代替，同时记得在原有导出模块后，直接调用出<code>Writer</code><br>
+<img src="https://sz134055.github.io//post-images/1673081998592.png" alt="" loading="lazy"></p>
+<p>最后运行结果：<br>
+<img src="https://sz134055.github.io//post-images/1673082006960.png" alt="" loading="lazy"></p>
+<p>与之对比可以发现结果一致<br>
+<img src="https://sz134055.github.io//post-images/1673082163829.png" alt="" loading="lazy"></p>
+<p>逆向完毕</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JS混淆学习及实战]]></title>
+        <id>https://sz134055.github.io/post/js-hun-yao-xue-xi-ji-shi-zhan/</id>
+        <link href="https://sz134055.github.io/post/js-hun-yao-xue-xi-ji-shi-zhan/">
+        </link>
+        <updated>2023-01-06T07:09:44.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2>
+<blockquote>
+<p>JavaScript 压缩即去除 JavaScript 代码中的不必要的空格、换行等内容或者把一些可能公用的代码进行处理实现共享，最后输出的结果都被压缩为几行内容，代码可读性变得很差，同时也能提高网站加载速度。</p>
+</blockquote>
+<blockquote>
+<p>如果仅仅是去除空格换行这样的压缩方式，其实几乎是没有任何防护作用的，因为这种压缩方式仅仅是降低了代码的直接可读性。如果我们有一些格式化工具可以轻松将 JavaScript 代码变得易读，比如利用 IDE、在线工具或 Chrome 浏览器都能还原格式化的代码。</p>
+</blockquote>
+<blockquote>
+<p>目前主流的前端开发技术大多都会利用 Webpack 进行打包，Webpack 会对源代码进行编译和压缩，输出几个打包好的 JavaScript 文件，其中我们可以看到输出的 JavaScript 文件名带有一些不规则字符串，同时文件内容可能只有几行内容，变量名都是一些简单字母表示。这其中就包含 JavaScript 压缩技术，比如一些公共的库输出成 bundle 文件，一些调用逻辑压缩和转义成几行代码，这些都属于 JavaScript 压缩。另外其中也包含了一些很基础的 JavaScript 混淆技术，比如把变量名、方法名替换成一些简单字符，降低代码可读性。<br>
+JavaScript 加密基本思路是将一些核心逻辑使用诸如 C/C++ 语言来编写，并通过 JavaScript 调用执行，从而起到防护作用。</p>
+<p>其加密的方式现在有 Emscripten 和 WebAssembly 等，其中后者越来越成为主流。</p>
+<p>Emscripten： Emscripten编译器可以将 C/C++ 代码编译成 asm.js 的 JavaScript 变体，再由 JavaScript 调用执行。因此某些 JavaScript 的核心功能可以使用 C/C++ 语言实现，这可以算是一种前端加密技术。</p>
+<p>WebAssembly： WebAssembly 的技术也能将 C/C++ 转成 JavaScript 引擎可以运行的代码，但转出来的代码是二进制字节码，而asm.js 是文本，</p>
+<p>因此运行速度更快、体积更小。得到的字节码具有和 JavaScript 相同的功能，在语法上完全脱离 JavaScript，同时具有沙盒化的执行环境。</p>
+<p>利用 WebAssembly 技术，我们可以将一些核心的功能利用 C/C++ 语言实现，形成浏览器字节码的形式。然后在 JavaScript 中通过类似如下的方式调用：</p>
+<pre><code class="language-js">WebAssembly.compile(new Uint8Array(`
+  00 61 73 6d  01 00 00 00  01 0c 02 60  02 7f 7f 01
+  7f 60 01 7f  01 7f 03 03  02 00 01 07  10 02 03 61
+  64 64 00 00  06 73 71 75  61 72 65 00  01 0a 13 02
+  08 00 20 00  20 01 6a 0f  0b 08 00 20  00 20 00 6c
+  0f 0b`.trim().split(/[\s\r\n]+/g).map(str =&gt; parseInt(str, 16))
+)).then(module =&gt; {
+  const instance = new WebAssembly.Instance(module)
+  const { add, square } = instance.exports
+  console.log('2 + 4 =', add(2, 4))
+  console.log('3^2 =', square(3))
+  console.log('(2 + 5)^2 =', square(add(2 + 5)))
+})
+</code></pre>
+<p>这种加密方式更加安全，想要逆向或破解那得需要逆向 WebAssembly，难度极大。</p>
+<p>但整体来说，JavaScript 压缩技术只能在很小的程度上起到防护作用，要想真正提高防护效果还得依靠 JavaScript 混淆和加密技术。<a href="https://blog.csdn.net/as604049322/article/details/114159252">原文链接「小小明-代码实体」</a></p>
+</blockquote>
+<blockquote>
+<p>混淆主要涉及两种思路：<br>
+a.通过正则替换实现的混淆器；<br>
+b.通过语法树替换实现的混淆器。<br>
+第一种实现成本低，但是效果也一般，适合对混淆要求不高的场景。第二种实现成本较高，但是更灵活，而且更安全，更适合对抗场景。<br>
+<a href="https://zhuanlan.zhihu.com/p/88300966">JS混淆简单参考：几个实用的JS混淆工具。</a></p>
+</blockquote>
+<p>主要混淆技术：</p>
+<ul>
+<li>
+<p>变量混淆<br>
+将带有含意的变量名、方法名、常量名随机变为无意义的类乱码字符串，降低代码可读性，如转成单个字符或十六进制字符串。</p>
+</li>
+<li>
+<p>字符串混淆<br>
+将字符串阵列化集中放置、并可进行 <code>MD5</code> 或 <code>Base64</code> 加密存储，使代码中不出现明文字符串，这样可以避免使用全局搜索字符串的方式定位到入口点。</p>
+</li>
+<li>
+<p>属性加密<br>
+针对 JavaScript 对象的属性进行加密转化，隐藏代码之间的调用关系。</p>
+</li>
+<li>
+<p>控制流平坦化<br>
+打乱函数原有代码执行流程及函数调用关系，使代码逻变得混乱无序。</p>
+</li>
+<li>
+<p>僵尸代码<br>
+随机在代码中插入无用的僵尸代码、僵尸函数，进一步使代码混乱。</p>
+</li>
+<li>
+<p>调试保护<br>
+基于调试器特性，对当前运行环境进行检验，加入一些强制调试 <code>debugger</code> 语句，使其在调试模式下难以顺利执行 JavaScript 代码。</p>
+</li>
+<li>
+<p>多态变异<br>
+使 JavaScript 代码每次被调用时，将代码自身即立刻自动发生变异，变化为与之前完全不同的代码，即功能完全不变，只是代码形式变异，以此杜绝代码被动态分析调试。</p>
+</li>
+<li>
+<p>锁定域名<br>
+使 JavaScript 代码只能在指定域名下执行。</p>
+</li>
+<li>
+<p>反格式化<br>
+如果对 JavaScript 代码进行格式化，则无法执行，导致浏览器假死。</p>
+</li>
+<li>
+<p>特殊编码<br>
+将 JavaScript 完全编码为人不可读的代码，如表情符号、特殊表示内容等等。</p>
+</li>
+</ul>
+<p>总之，以上方案都是 JavaScript 混淆的实现方式，可以在不同程度上保护 JavaScript 代码。</p>
+<p>混淆工具有UglifyJS，JScrambler，jsbeautifier，JSDetox，obfuscator等</p>
+<p>此次介绍OB混淆，即obfuscator</p>
+<h2 id="ob混淆">OB混淆</h2>
+<h3 id="介绍">介绍</h3>
+<p>OB混淆官网：<a href="https://obfuscator.io/">JavaScript Obfuscator Tool</a><br>
+来自官方的混淆示例：</p>
+<pre><code class="language-js">// Paste your JavaScript code here
+function hi() {
+  console.log(&quot;Hello World!&quot;);
+}
+hi();
+</code></pre>
+<p>混淆后（已格式化）：</p>
+<pre><code class="language-js">(function (_0x5e3669, _0x797fa0) { 
+    var _0x4222ee = _0x4119, _0x40a199 = _0x5e3669();
+    while (!![]) {
+        try {
+            var _0xf23fb6 = parseInt(_0x4222ee(0xd9)) / 0x1 + parseInt(_0x4222ee(0xdc)) / 0x2 + parseInt(_0x4222ee(0xd3)) / 0x3 + -parseInt(_0x4222ee(0xda)) / 0x4 + parseInt(_0x4222ee(0xd7)) / 0x5 + parseInt(_0x4222ee(0xd6)) / 0x6 * (-parseInt(_0x4222ee(0xd8)) / 0x7) + -parseInt(_0x4222ee(0xd5)) / 0x8;
+            if (_0xf23fb6 === _0x797fa0) break;
+            else _0x40a199['push'](_0x40a199['shift']()); 
+        } catch (_0x2d2067) {
+            _0x40a199['push'](_0x40a199['shift']()); 
+        } 
+    } 
+}(_0x5ac2, 0xa50c3));
+function hi() { 
+    var _0x543b06 = _0x4119; 
+    console[_0x543b06(0xdb)](_0x543b06(0xd4)); 
+} 
+function _0x4119(_0x13dc26, _0xc31dd5) {
+    var _0x5ac260 = _0x5ac2(); 
+    return _0x4119 = function (_0x4119c2, _0xbffe6d) { 
+        _0x4119c2 = _0x4119c2 - 0xd3; 
+        var _0x42ea54 = _0x5ac260[_0x4119c2]; 
+        return _0x42ea54; 
+    },
+    _0x4119(_0x13dc26, _0xc31dd5); 
+} 
+hi(); 
+function _0x5ac2() { 
+    var _0x3de06f = ['Hello\x20World!', '3046168LiXzXu', '6JNGVAy', '4550545CwPJCt', '5231807GgAdWc', '847568YVXvAQ', '2733296cTWkBb', 'log', '879906prswui', '869703bTiBZl']; 
+    _0x5ac2 = function () { 
+        return _0x3de06f; 
+    }; 
+    return _0x5ac2(); 
+}
+</code></pre>
+<p>OB 混淆特点</p>
+<ul>
+<li>一般由一个大数组或者含有大数组的函数、自执行函数、解密函数和加密后函数四部分组成</li>
+<li>函数名和变量名通常以<code>_0x</code>或者<code>0x</code>开头，后接1~6位数字或字母组合</li>
+<li>自执行函数进行移位操作有明显的<code>push</code>、<code>shift</code>关键字</li>
+</ul>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>目标：<a href="https://bz.zzzmh.cn/index">极简壁纸</a><br>
+该网站有无限debugger，在首页加载完毕后，可以用将以下代码保存到片段里并运行来绕过（或直接在控制台运行）：</p>
+<pre><code class="language-js">Function.prototype.constructor_ = Function.prototype.constructor;
+Function.prototype.constructor = function (a) {
+    if (a == 'debugger') {
+        return function () {};
+    }
+    return Function.prototype.constructor_(a);
+}
+</code></pre>
+<p>同时本网站有滑块（并不是每次请求都有），滑块不在讨论范围，因此以没有进行滑块验证后的请求作为研究目标<br>
+可以看到表单中无加密（请求头中也无）<br>
+<img src="https://sz134055.github.io//post-images/1673020019446.png" alt="" loading="lazy"></p>
+<p>而响应结果加密：<br>
+<img src="https://sz134055.github.io//post-images/1673020033975.png" alt="" loading="lazy"></p>
+<p>通过XHR断点或者发起程序开找，找到以下疑似处（可以多下断点广撒网）<br>
+<img src="https://sz134055.github.io//post-images/1673020954012.png" alt="" loading="lazy"></p>
+<p>可以发现基本就是这了<br>
+<img src="https://sz134055.github.io//post-images/1673021045976.png" alt="" loading="lazy"></p>
+<p>以下代码便是解密代码：</p>
+<pre><code class="language-js">_0xa60097['a']['decipher'](_0x3bb7ad[_0x430ddf(0x1f7, 'JJcn')]['result'])
+</code></pre>
+<p>而<code>_0x3bb7ad[_0x430ddf(0x1f7, 'JJcn')]['result']</code>便是响应结果中的<code>result</code>，因此只需要扣<code>_0xa60097['a']['decipher']</code>即可<br>
+跳转代码如下（已封装至本地）：</p>
+<pre><code class="language-js">function get_data(result){
+    return _0x1372a9(_0x230351(_0x43f8fa(result)));
+}
+</code></pre>
+<p>开始慢扣三个函数，发现运行无结果，于是在已扣出<code>_0x1372a9</code>、<code>_0x230351</code>和<code>_0x43f8fa</code>的情况下（因为这三个函数包含在一个对象中，有点像webpack），直接全盘复制，不过要注意去掉涉及到无限<code>debugger</code>的代码（不要和老夫说什么半扣优雅，老夫上来就是一个全扣，省时省力），运行，结果正常，这样就拿到了图片的ID（但是想获取图片还需要逆向对应的API，这里点到为止），逆向结束<br>
+<img src="https://sz134055.github.io//post-images/1673023202919.png" alt="" loading="lazy"></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[国密（SM）系列逆向学习及实战]]></title>
+        <id>https://sz134055.github.io/post/guo-mi-smxi-lie-ni-xiang-xue-xi/</id>
+        <link href="https://sz134055.github.io/post/guo-mi-smxi-lie-ni-xiang-xue-xi/">
+        </link>
+        <updated>2023-01-04T07:09:43.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="简介">简介</h2>
+<p>例如SM4：<a href="http://www.sca.gov.cn/sca/xwdt/2021-07/08/content_1060866.shtml">我国SM4分组密码算法正式成为ISO/IEC国际标准</a></p>
+<blockquote>
+<p>国密算法，即国家商用密码算法。是由国家密码管理局认定和公布的密码算法标准及其应用规范，其中部分密码算法已经成为国际标准。如SM系列密码，SM代表商密，即商业密码，是指用于商业的、不涉及国家秘密的密码技术。<br>
+——<a href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="https://pic3.zhimg.com/v2-58c351513a73515fea7ccd48894f3196_r.jpg" alt="" loading="lazy"></figure>
+<p>这里常用的为<code>SM2</code>和<code>SM4</code>算法</p>
+<h2 id="sm2">SM2</h2>
+<h3 id="简介-2">简介</h3>
+<blockquote>
+<p>它是基于椭圆曲线密码的公钥密码算法标准，其秘钥长度256bit，包含数字签名、密钥交换和公钥加密，<strong>用于替换RSA/DH/ECDSA/ECDH等国际算法</strong>。可以满足电子认证服务系统等应用需求，由国家密码管理局于2010年12月17号发布。<br>
+SM2采用的是ECC 256位的一种，其安全强度比RSA 2048位高，且运算速度快于RSA。<br>
+——<a href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<h3 id="js实现">JS实现</h3>
+<p>JS已有较为成熟的实现库，这里推荐<a href="https://www.npmjs.com/package/sm-crypto"><code>sm-crypto</code></a>，可实现<code>SM2</code>、<code>SM3</code>和<code>SM4</code></p>
+<p>上面链接的NPM库间接已给出示例，这里直接照搬：<br>
+密钥对</p>
+<pre><code class="language-js">const sm2 = require('sm-crypto').sm2
+
+let keypair = sm2.generateKeyPairHex()
+
+publicKey = keypair.publicKey // 公钥
+privateKey = keypair.privateKey // 私钥
+
+// 默认生成公钥 130 位太长，可以压缩公钥到 66 位
+const compressedPublicKey = sm2.compressPublicKeyHex(publicKey) // compressedPublicKey 和 publicKey 等价
+sm2.comparePublicKeyHex(publicKey, compressedPublicKey) // 判断公钥是否等价
+
+// 自定义随机数，参数会直接透传给 jsbn 库的 BigInteger 构造器
+// 注意：开发者使用自定义随机数，需要自行确保传入的随机数符合密码学安全
+let keypair2 = sm2.generateKeyPairHex('123123123123123')
+let keypair3 = sm2.generateKeyPairHex(256, SecureRandom)
+
+let verifyResult = sm2.verifyPublicKey(publicKey) // 验证公钥
+verifyResult = sm2.verifyPublicKey(compressedPublicKey) // 验证公钥
+</code></pre>
+<p>加解密</p>
+<pre><code class="language-js">const cipherMode = 1 // 1 - C1C3C2，0 - C1C2C3，默认为1
+
+let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode) // 加密结果
+let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode) // 解密结果
+
+encryptData = sm2.doEncrypt(msgArray, publicKey, cipherMode) // 加密结果，输入数组
+decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode, {output: 'array'}) // 解密结果，输出数组
+</code></pre>
+<p>来测试一下：</p>
+<pre><code class="language-js">const sm2 = require('sm-crypto').sm2
+
+let keypair = sm2.generateKeyPairHex()
+
+publicKey = keypair.publicKey // 公钥
+privateKey = keypair.privateKey // 私钥
+
+// 默认生成公钥 130 位太长，可以压缩公钥到 66 位
+const compressedPublicKey = sm2.compressPublicKeyHex(publicKey) // compressedPublicKey 和 publicKey 等价
+sm2.comparePublicKeyHex(publicKey, compressedPublicKey) // 判断公钥是否等价
+
+// 自定义随机数，参数会直接透传给 jsbn 库的 BigInteger 构造器
+// 注意：开发者使用自定义随机数，需要自行确保传入的随机数符合密码学安全
+//let keypair2 = sm2.generateKeyPairHex('123123123123123')
+//let keypair3 = sm2.generateKeyPairHex(256, SecureRandom)
+
+let verifyResult = sm2.verifyPublicKey(publicKey) // 验证公钥
+verifyResult = sm2.verifyPublicKey(compressedPublicKey) // 验证公钥
+
+console.log(verifyResult)
+
+const cipherMode = 1 // 1 - C1C3C2，0 - C1C2C3，默认为1
+
+msgString = 'HELLO WORLD'
+
+let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode) // 加密结果
+let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode) // 解密结果
+
+console.log(encryptData)
+console.log(decryptData)
+
+//encryptData = sm2.doEncrypt(msgArray, publicKey, cipherMode) // 加密结果，输入数组
+//decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode, {output: 'array'}) // 解密结果，输出数组
+
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">true
+f378b1ea6ee7d8d1729ee38fc5bbe8ccc2c2813f7fc07bcad877169d57fa5e2212d994cbf4c4dff78bd58acc82304373013e5d2e793c0ad2aafc90ab2c65083af6762f53b00324f091f67df9cac9d851a31baee07dfc19114bc0188dcb7aa37c9c9f9bfb43dec6a0712225
+HELLO WORLD
+</code></pre>
+<h2 id="sm4">SM4</h2>
+<blockquote>
+<p>是我国自主设计的分组对称密码算法，<strong>用于替代DES/AES等国际算法</strong>。SM4算法与AES算法具有相同的密钥长度、分组长度，都是128bit。于2012年3月21日发布，适用于密码应用中使用分组密码的需求。<br>
+——<a href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<p>SM4 NPM库中也给出了示例，同样照搬：<br>
+加密</p>
+<pre><code class="language-js">const sm4 = require('sm-crypto').sm4
+const msg = 'hello world! 我是 juneandgreen.' // 可以为 utf8 串或字节数组
+const key = '0123456789abcdeffedcba9876543210' // 可以为 16 进制串或字节数组，要求为 128 比特
+
+let encryptData = sm4.encrypt(msg, key) // 加密，默认输出 16 进制字符串，默认使用 pkcs#7 填充（传 pkcs#5 也会走 pkcs#7 填充）
+let encryptData = sm4.encrypt(msg, key, {padding: 'none'}) // 加密，不使用 padding
+let encryptData = sm4.encrypt(msg, key, {padding: 'none', output: 'array'}) // 加密，不使用 padding，输出为字节数组
+let encryptData = sm4.encrypt(msg, key, {mode: 'cbc', iv: 'fedcba98765432100123456789abcdef'}) // 加密，cbc 模式
+</code></pre>
+<p>解密</p>
+<pre><code class="language-js">const encryptData = '0e395deb10f6e8a17e17823e1fd9bd98a1bff1df508b5b8a1efb79ec633d1bb129432ac1b74972dbe97bab04f024e89c' // 可以为 16 进制串或字节数组
+const key = '0123456789abcdeffedcba9876543210' // 可以为 16 进制串或字节数组，要求为 128 比特
+
+let decryptData = sm4.decrypt(encryptData, key) // 解密，默认输出 utf8 字符串，默认使用 pkcs#7 填充（传 pkcs#5 也会走 pkcs#7 填充）
+let decryptData = sm4.decrypt(encryptData, key, {padding: 'none'}) // 解密，不使用 padding
+let decryptData = sm4.decrypt(encryptData, key, {padding: 'none', output: 'array'}) // 解密，不使用 padding，输出为字节数组
+let decryptData = sm4.decrypt(encryptData, key, {mode: 'cbc', iv: 'fedcba98765432100123456789abcdef'}) // 解密，cbc 模式
+</code></pre>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p><a href="https://fuwu.nhsa.gov.cn/nationalHallSt/#/search/medical">定点医疗机构查询-国家医保服务平台</a><br>
+<strong>注意：只做技术研究、交流！</strong></p>
+<p>可以看到需要逆向的参数有很多：<br>
+请求头：<br>
+<img src="https://sz134055.github.io//post-images/1672918755783.png" alt="" loading="lazy"><br>
+表单：<br>
+<img src="https://sz134055.github.io//post-images/1672918774847.png" alt="" loading="lazy"><br>
+响应结果：<br>
+<img src="https://sz134055.github.io//post-images/1672918785027.png" alt="" loading="lazy"></p>
+<p>一顿找（推荐搜索关键字）：<br>
+<img src="https://sz134055.github.io//post-images/1672918799438.png" alt="" loading="lazy"></p>
+<p>本来想半扣的，毕竟这里面比如那个<code>r</code>就是个标准的SHA256加密，可以直接用三方库，SM不就说了，当时在半扣的过程中，越扣越多，索性全扣得了</p>
+<p>同时需要一个参数<code>t</code>，直接在控制台输出<code>t</code>看看：</p>
+<pre><code class="language-js">vat t ={
+    &quot;transformRequest&quot;: {},
+    &quot;transformResponse&quot;: {},
+    &quot;timeout&quot;: 30000,
+    &quot;xsrfCookieName&quot;: &quot;XSRF-TOKEN&quot;,
+    &quot;xsrfHeaderName&quot;: &quot;X-XSRF-TOKEN&quot;,
+    &quot;maxContentLength&quot;: -1,
+    &quot;headers&quot;: {
+        &quot;common&quot;: {
+            &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;
+        },
+        &quot;delete&quot;: {},
+        &quot;get&quot;: {},
+        &quot;head&quot;: {},
+        &quot;post&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;put&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;patch&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;Accept&quot;: &quot;application/json&quot;,
+        &quot;Content-Type&quot;: &quot;application/json&quot;,
+        &quot;channel&quot;: &quot;web&quot;
+    },
+    &quot;withCredentials&quot;: false,
+    &quot;baseURL&quot;: &quot;/ebus/fuwu/api&quot;,
+    &quot;method&quot;: &quot;post&quot;,
+    &quot;url&quot;: &quot;/nthl/api/CommQuery/queryFixedHospital&quot;,
+    &quot;data&quot;: {
+        &quot;addr&quot;: &quot;&quot;,
+        &quot;regnCode&quot;: &quot;340600&quot;,
+        &quot;medinsName&quot;: &quot;&quot;,
+        &quot;medinsLvCode&quot;: &quot;&quot;,
+        &quot;medinsTypeCode&quot;: &quot;&quot;,
+        &quot;openElec&quot;: &quot;&quot;,
+        &quot;pageNum&quot;: 5,
+        &quot;pageSize&quot;: 10
+    }
+}
+</code></pre>
+<p><code>t</code>明显可直接写死，其中一些参数猜测可能为：</p>
+<ul>
+<li>regnCode：地区代码（打开此网站会检测你IP位置并在控制台输出）</li>
+<li>pageNum：翻页</li>
+<li>pageSize：一页内容量</li>
+</ul>
+<p>如下所示，打开网站在开发人员工具开启下重新刷新页面，会看到地区检测结果：<br>
+<img src="https://sz134055.github.io//post-images/1672925003815.png" alt="" loading="lazy"></p>
+<p>如果想要获取到其它位置，自行研究API了</p>
+<p>将其封装进代码，最终Webpack代码6W行，如果想将生成相关的代码自己扣下来的话（因为这段代码被包含在了Webpack中）同时还要注意去掉（仅自己封装用于生成表单和请求头的代码）<code>try-catch</code>语句，不然少了参数都不知道。</p>
+<p>因为生成加密参数的代码被包含在Webpack中<code>&quot;7d92&quot;</code>，所以可以试试不自己扣（因为上面所有的Webpack代码已经全扣了），那么要如何调用呢？</p>
+<p>可以知道代码在<code>&quot;7d92&quot;</code>，那么先输出一下<code>webpack(&quot;7d92&quot;)</code>（这里是自行导出了加载器，详见Webpack文章）</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;))
+</code></pre>
+<p>结果：</p>
+<pre><code class="language-shell">{ a: [Getter], b: [Getter] }
+</code></pre>
+<p>选择<code>a</code>再输出：</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;).a)
+</code></pre>
+<p>结果：</p>
+<pre><code class="language-shell">[Function: f]
+</code></pre>
+<p>可以看到<code>a</code>为一个函数，并且其名字似乎预示选对了<br>
+再调用一下函数：</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;).a())
+</code></pre>
+<p>结果（只截取片段）：</p>
+<pre><code class="language-shell"> return t.headers[&quot;x-tif-paasid&quot;] = l.paasId,
+</code></pre>
+<p>发现报错，很明显，这里便是我们要找的加密方法，把上面的找到的<code>t</code>塞进去看看结果：</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;).a(t))
+</code></pre>
+<p>结果：</p>
+<pre><code class="language-shell">{
+  transformRequest: {},
+  transformResponse: {},
+  timeout: 30000,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+  maxContentLength: -1,
+  headers: {
+    common: { Accept: 'application/json, text/plain, */*' },
+    delete: {},
+    get: {},
+    head: {},
+    post: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    put: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    patch: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    channel: 'web',
+    'x-tif-paasid': undefined,
+    'x-tif-signature': '092eeb43442f3633e5d22790695b39264f0f0834e14f60dfe99d514e95a2cf93',
+    'x-tif-timestamp': 1672929556,
+    'x-tif-nonce': 'Y4aUfjoK',
+    contentType: 'application/x-www-form-urlencoded'
+  },
+  withCredentials: false,
+  baseURL: '/ebus/fuwu/api',
+  method: 'post',
+  url: '/nthl/api/CommQuery/queryFixedHospital',
+  data: '{&quot;data&quot;:{&quot;data&quot;:{&quot;encData&quot;:&quot;3DFBCA4667B978F639BB23B95DCE4CC73F6F89D76EF932292FE8BA14BC87DB17CCD20943B4DAE96380B41164D761DE9742C84A985FE3BABC31CB352556BB87C9C1495DB24A29AB6BC3A85AB7FCA00F338EE714ACFC4C924F01CF575098AEF167B7A135B72DAC6C2F3CD510E411A3C63A7D334AF16D66C5F4C5E72412B915CB27&quot;},&quot;appCode&quot;:&quot;T98HPCGN5ZVVQBS8LZQNOAEXVI9GYHKQ&quot;,&quot;version&quot;:&quot;1.0.0&quot;,&quot;encType&quot;:&quot;SM4&quot;,&quot;signType&quot;:&quot;SM2&quot;,&quot;timestamp&quot;:1672929556,&quot;signData&quot;:&quot;2+IZoksuP1rgU4LhVryfmBs1icvANuGmjR3FNk95bJyTjyqm3TK66ts3oV7L1d3Aot5RXvB7GRCK9QjnypILxw==&quot;}}'
+}
+</code></pre>
+<p>成功拿到需要的数据！</p>
+<p>暂时放下，来看看结果如何处理。</p>
+<p>最终找到此处：<br>
+<img src="https://sz134055.github.io//post-images/1672919599116.png" alt="" loading="lazy"><br>
+此时<code>e.data</code>还是原始响应结果，并未解密：</p>
+<pre><code class="language-js">{
+    &quot;code&quot;: 0,
+    &quot;data&quot;: {
+        &quot;signData&quot;: &quot;+EJhLYxiMpbwjGCsEvK+wyXNoAyMKpkGnjb7tGZ3OoFNWqKzDjIeDfqE9ZSO0anEt3z4rNoFJ5lgHxeDuddVdg==&quot;,
+        &quot;encType&quot;: &quot;SM4&quot;,
+        &quot;data&quot;: {
+            &quot;encData&quot;: &quot;2DC8C08C5C251B04B9CCBA9436917607527A4CC8F48CC3C8D7C226EB9483D8FA03CECA79ABA4AC1CE5 ....篇幅有限，这里省略.....FCF4D05388AA6A2E4E171B6486547C2E9DB06B68A81A61409372E7E00A0D1691A2F222D7698DCAC&quot;
+        },
+        &quot;signType&quot;: &quot;SM2&quot;,
+        &quot;appCode&quot;: &quot;T98HPCGN5ZVVQBS8LZQNOAEXVI9GYHKQ&quot;,
+        &quot;version&quot;: &quot;1.0.0&quot;,
+        &quot;timestamp&quot;: &quot;1672919504404&quot;
+    },
+    &quot;message&quot;: &quot;成功&quot;,
+    &quot;timestamp&quot;: &quot;1672919504&quot;,
+    &quot;type&quot;: &quot;success&quot;
+}
+</code></pre>
+<p>复制到本地备后测试使用。</p>
+<p>同时这段代码也被包含在Webpack中，可以选择不扣，不过因为实际涉及解密的代码都集中在了一行上，这里选择半扣：</p>
+<pre><code class="language-js">function get_data(data){
+    const e = {data:data},
+        c = webpack(&quot;7d92&quot;);
+
+    return e.data.data.appCode &amp;&amp; (e.data.data = Object(c.b)(&quot;SM4&quot;, e.data)),e.data
+}
+</code></pre>
+<p>看到这里可以猜测，<code>webpack(&quot;7d92&quot;)</code>里<code>a</code>负责加密，<code>b</code>负责解密<br>
+将备好的数据放进去看运行结果：<br>
+<img src="https://sz134055.github.io//post-images/1672920513167.png" alt="" loading="lazy"><br>
+成功解密</p>
+<p>简单封装下代码，准备模拟请求</p>
+<h3 id="模拟请求">模拟请求</h3>
+<p>这里继续使用Python来模拟请求，只爬取一页数据<br>
+同时要注意，从js代码获取的值需要进行一些处理才能让<code>requests</code>得以正确传递，<br>
+同时如果遇到<code>UnicodeEncodeError: 'gbk' codec...</code>问题请参照此文章：<a href="https://sz134055.github.io/post/shi-yong-pyexecjs-wei-python-pa-chong-ti-gong-jia-mi-can-shu/#%E5%87%BA%E7%8E%B0unicodeencodeerror-gbk-codec%E9%97%AE%E9%A2%98">使用PyExecJS为Python爬虫提供加密参数</a><br>
+<img src="https://sz134055.github.io//post-images/1672931066558.png" alt="" loading="lazy"></p>
+<p>完整代码请见仓库 <a href="https://github.com/sz134055/learning-practice/tree/main/SM/gjyb">国家医疗保障服务平台-SM/gjyb</a></p>
+<p><strong>代码仅作学习交流之用，请勿用于非法用途！</strong></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[JS逆向关于Webpack的学习]]></title>
+        <id>https://sz134055.github.io/post/js-ni-xiang-guan-yu-webpack-da-bao-de-xue-xi/</id>
+        <link href="https://sz134055.github.io/post/js-ni-xiang-guan-yu-webpack-da-bao-de-xue-xi/">
+        </link>
+        <updated>2022-12-23T09:24:59.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="webpack打包介绍">Webpack打包介绍</h2>
+<blockquote>
+<p>——<a href="https://www.runoob.com/w3cnote/webpack-tutorial.html">RUNOOB-Webpack入门教程</a><br>
+Webpack 是一个前端资源加载/打包工具。它将根据模块的依赖关系进行静态分析，然后将这些模块按照指定的规则生成对应的静态资源。</p>
+</blockquote>
+<blockquote>
+<p>——<a href="https://zhuanlan.zhihu.com/p/65574428">知乎-什么是webpack</a><br>
+webpack是一个打包器（bundler），它能将多个js文件打包成一个文件（其实不止能打包js文件，也能打包其他类型的文件，比如css文件，json文件等）。<br>
+可以查看官方文档，官方文档也明确表明webpack是一个打包器：<br>
+<img src="https://pic2.zhimg.com/80/v2-4e86d81c8e73f8d121a14bb7662113f5_720w.webp" alt="" loading="lazy"><br>
+但是webpack不是一个翻译器，它只能理解诸如&quot;imort&quot;、&quot;from&quot;等模块导入语句，其他的JS语句等它是不能够识别理解的。</p>
+</blockquote>
+<p><img src="https://sz134055.github.io//post-images/1671788176491.png" alt="" loading="lazy"><br>
+如上所示，打包后会呈现一个自执行函数，结构如下：</p>
+<pre><code class="language-js">!function(形参){加载器;}([模块])
+//OR
+!function(形参){加载器;}({模块})
+</code></pre>
+<p>模块以数组形式储存，每个元素都是函数</p>
+<p>特征：</p>
+<ul>
+<li>加载器代码几乎一致</li>
+<li>开头便是自执行函数</li>
+<li>结构如上</li>
+<li>关键字：
+<ul>
+<li><code>exports</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="逆向实战">逆向实战</h2>
+<p><a href="https://agent.leju.com/ucenter/passportlogin/">目标</a><br>
+注意使用旧版登录，新版登录有账号检测，未注册账号不能触发登录<br>
+登录表单中的加密参数</p>
+<p>XHR断点或者发起程序找到如下：<br>
+<img src="https://sz134055.github.io//post-images/1672225079123.png" alt="" loading="lazy"></p>
+<p>可以看到加密参数<code>s</code>的定义代码：</p>
+<pre><code class="language-js">(0,r.encryptedString)(n, i)
+</code></pre>
+<p>这里采用了<a href="https://blog.csdn.net/Winne_Shen/article/details/102684878"><code>(0,function)</code></a>的形式，可以直接看作：<br>
+<code>r.encryptedString(n, i)</code><br>
+这里<code>n</code>已在上面定义，<code>i</code>为输入的密码，因此本地代码为：</p>
+<pre><code class="language-js">function getPwdEncrypt(pwd){
+    var n = new r.RSAKeyPair(&quot;10001&quot;,&quot;&quot;,$(&quot;#pubkey&quot;).val()),
+        s = r.encryptedString(n, pwd);
+    return s
+}
+</code></pre>
+<p><code>$(&quot;#pubkey&quot;).val()</code>从HTML文档中取值，可以新开一个网页查看原始文档中是否就已经存在：<br>
+<img src="https://sz134055.github.io//post-images/1672225706895.png" alt="" loading="lazy"></p>
+<p>将其复制进本地代码：</p>
+<pre><code class="language-js">function getPwdEncrypt(pwd){
+    var pubKey = 'BC087C7C00848CE8A349C9072C3229E0D595F817EDDE9ABF6FC72B41942A759E97956CE9CB7D1F2E99399EADBACC0531F16EAE8EFCB68553DE0E125B2231ED955ADBF5208E65DC804237C93EB23C83E7ECDA0B586ECF31839038EE6B640E0EEC5FF17D219FDEA33E730F287F0D384C74A53DFE1F91ACC63C7C92039A43AC6E97',
+        n = new r.RSAKeyPair(&quot;10001&quot;,&quot;&quot;,pubKey),
+        s = r.encryptedString(n, pwd);
+    return s
+}
+</code></pre>
+<p>现在就是来解决两个函数的时候，先跳转到第一个：<br>
+<img src="https://sz134055.github.io//post-images/1672225941819.png" alt="" loading="lazy"><br>
+一眼Webpack，并且第二个函数也在其中。<br>
+以往都是直接无脑全复制，这次优雅一点，先只将跳转到的代码复制到本地（别忘了Webpack格式及加载器）</p>
+<p>代码：</p>
+<pre><code class="language-js">var webpack;
+
+!function (t) {
+    var e = {};
+    function i(n) {
+        if (e[n])
+            return e[n].exports;
+        var s = e[n] = {
+            i: n,
+            l: !1,
+            exports: {}
+        };
+        return t[n].call(s.exports, s, s.exports, i),
+            s.l = !0,
+            s.exports
+    }
+    i.m = t,
+        i.c = e,
+        i.d = function (t, e, n) {
+            i.o(t, e) || Object.defineProperty(t, e, {
+                enumerable: !0,
+                get: n
+            })
+        }
+        ,
+        i.r = function (t) {
+            &quot;undefined&quot; != typeof Symbol &amp;&amp; Symbol.toStringTag &amp;&amp; Object.defineProperty(t, Symbol.toStringTag, {
+                value: &quot;Module&quot;
+            }),
+                Object.defineProperty(t, &quot;__esModule&quot;, {
+                    value: !0
+                })
+        }
+        ,
+        i.t = function (t, e) {
+            if (1 &amp; e &amp;&amp; (t = i(t)),
+                8 &amp; e)
+                return t;
+            if (4 &amp; e &amp;&amp; &quot;object&quot; == typeof t &amp;&amp; t &amp;&amp; t.__esModule)
+                return t;
+            var n = Object.create(null);
+            if (i.r(n),
+                Object.defineProperty(n, &quot;default&quot;, {
+                    enumerable: !0,
+                    value: t
+                }),
+                2 &amp; e &amp;&amp; &quot;string&quot; != typeof t)
+                for (var s in t)
+                    i.d(n, s, function (e) {
+                        return t[e]
+                    }
+                        .bind(null, s));
+            return n
+        }
+        ,
+        i.n = function (t) {
+            var e = t &amp;&amp; t.__esModule ? function () {
+                return t.default
+            }
+                : function () {
+                    return t
+                }
+                ;
+            return i.d(e, &quot;a&quot;, e),
+                e
+        }
+        ,
+        i.o = function (t, e) {
+            return Object.prototype.hasOwnProperty.call(t, e)
+        }
+        ,
+        i.p = &quot;//esfres.leju.com/agent_www_new/dist/&quot;,
+        //这里将其注释掉，否则会报缺少参数错误
+        //i(i.s = 301),
+        webpack = i
+}(
+    {
+        228: function (t, e, i) {
+            &quot;use strict&quot;;
+            Object.defineProperty(e, &quot;__esModule&quot;, {
+                value: !0
+            });
+            var n, s;
+            function o(t) {
+                n = new Array(t);
+                for (var e = 0; e &lt; n.length; e++)
+                    n[e] = 0;
+                new a,
+                    (s = new a).digits[0] = 1
+            }
+            o(20);
+            l(1e15);
+            function a(t) {
+                this.digits = &quot;boolean&quot; == typeof t &amp;&amp; 1 == t ? null : n.slice(0),
+                    this.isNeg = !1
+            }
+            function r(t) {
+                var e = new a(!0);
+                return e.digits = t.digits.slice(0),
+                    e.isNeg = t.isNeg,
+                    e
+            }
+            function l(t) {
+                var e = new a;
+                e.isNeg = t &lt; 0,
+                    t = Math.abs(t);
+                for (var i = 0; t &gt; 0;)
+                    e.digits[i++] = 65535 &amp; t,
+                        t &gt;&gt;= 16;
+                return e
+            }
+            function c(t) {
+                for (var e = &quot;&quot;, i = t.length - 1; i &gt; -1; --i)
+                    e += t.charAt(i);
+                return e
+            }
+            new Array(&quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;f&quot;, &quot;g&quot;, &quot;h&quot;, &quot;i&quot;, &quot;j&quot;, &quot;k&quot;, &quot;l&quot;, &quot;m&quot;, &quot;n&quot;, &quot;o&quot;, &quot;p&quot;, &quot;q&quot;, &quot;r&quot;, &quot;s&quot;, &quot;t&quot;, &quot;u&quot;, &quot;v&quot;, &quot;w&quot;, &quot;x&quot;, &quot;y&quot;, &quot;z&quot;);
+            var u = new Array(&quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;f&quot;);
+            function d(t) {
+                for (var e = &quot;&quot;, i = 0; i &lt; 4; ++i)
+                    e += u[15 &amp; t],
+                        t &gt;&gt;&gt;= 4;
+                return c(e)
+            }
+            function p(t) {
+                return t &gt;= 48 &amp;&amp; t &lt;= 57 ? t - 48 : t &gt;= 65 &amp;&amp; t &lt;= 90 ? 10 + t - 65 : t &gt;= 97 &amp;&amp; t &lt;= 122 ? 10 + t - 97 : 0
+            }
+            function h(t) {
+                for (var e = 0, i = Math.min(t.length, 4), n = 0; n &lt; i; ++n)
+                    e &lt;&lt;= 4,
+                        e |= p(t.charCodeAt(n));
+                return e
+            }
+            function f(t, e) {
+                var i;
+                if (t.isNeg != e.isNeg)
+                    e.isNeg = !e.isNeg,
+                        i = g(t, e),
+                        e.isNeg = !e.isNeg;
+                else {
+                    i = new a;
+                    for (var n, s = 0, o = 0; o &lt; t.digits.length; ++o)
+                        n = t.digits[o] + e.digits[o] + s,
+                            i.digits[o] = 65535 &amp; n,
+                            s = Number(n &gt;= 65536);
+                    i.isNeg = t.isNeg
+                }
+                return i
+            }
+            function g(t, e) {
+                var i;
+                if (t.isNeg != e.isNeg)
+                    e.isNeg = !e.isNeg,
+                        i = f(t, e),
+                        e.isNeg = !e.isNeg;
+                else {
+                    var n, s;
+                    i = new a,
+                        s = 0;
+                    for (var o = 0; o &lt; t.digits.length; ++o)
+                        n = t.digits[o] - e.digits[o] + s,
+                            i.digits[o] = 65535 &amp; n,
+                            i.digits[o] &lt; 0 &amp;&amp; (i.digits[o] += 65536),
+                            s = 0 - Number(n &lt; 0);
+                    if (-1 == s) {
+                        s = 0;
+                        for (o = 0; o &lt; t.digits.length; ++o)
+                            n = 0 - i.digits[o] + s,
+                                i.digits[o] = 65535 &amp; n,
+                                i.digits[o] &lt; 0 &amp;&amp; (i.digits[o] += 65536),
+                                s = 0 - Number(n &lt; 0);
+                        i.isNeg = !t.isNeg
+                    } else
+                        i.isNeg = t.isNeg
+                }
+                return i
+            }
+            function m(t) {
+                for (var e = t.digits.length - 1; e &gt; 0 &amp;&amp; 0 == t.digits[e];)
+                    --e;
+                return e
+            }
+            function y(t) {
+                var e, i = m(t), n = t.digits[i], s = 16 * (i + 1);
+                for (e = s; e &gt; s - 16 &amp;&amp; 0 == (32768 &amp; n); --e)
+                    n &lt;&lt;= 1;
+                return e
+            }
+            function v(t, e) {
+                for (var i, n, s, o = new a, r = m(t), l = m(e), c = 0; c &lt;= l; ++c) {
+                    i = 0,
+                        s = c;
+                    for (var u = 0; u &lt;= r; ++u,
+                        ++s)
+                        n = o.digits[s] + t.digits[u] * e.digits[c] + i,
+                            o.digits[s] = 65535 &amp; n,
+                            i = n &gt;&gt;&gt; 16;
+                    o.digits[c + r + 1] = i
+                }
+                return o.isNeg = t.isNeg != e.isNeg,
+                    o
+            }
+            function b(t, e) {
+                var i, n, s, o = new a;
+                i = m(t),
+                    n = 0;
+                for (var r = 0; r &lt;= i; ++r)
+                    s = o.digits[r] + t.digits[r] * e + n,
+                        o.digits[r] = 65535 &amp; s,
+                        n = s &gt;&gt;&gt; 16;
+                return o.digits[1 + i] = n,
+                    o
+            }
+            function w(t, e, i, n, s) {
+                for (var o = Math.min(e + s, t.length), a = e, r = n; a &lt; o; ++a,
+                    ++r)
+                    i[r] = t[a]
+            }
+            var k = new Array(0, 32768, 49152, 57344, 61440, 63488, 64512, 65024, 65280, 65408, 65472, 65504, 65520, 65528, 65532, 65534, 65535);
+            function C(t, e) {
+                var i = Math.floor(e / 16)
+                    , n = new a;
+                w(t.digits, 0, n.digits, i, n.digits.length - i);
+                for (var s = e % 16, o = 16 - s, r = n.digits.length - 1, l = r - 1; r &gt; 0; --r,
+                    --l)
+                    n.digits[r] = n.digits[r] &lt;&lt; s &amp; 65535 | (n.digits[l] &amp; k[s]) &gt;&gt;&gt; o;
+                return n.digits[0] = n.digits[r] &lt;&lt; s &amp; 65535,
+                    n.isNeg = t.isNeg,
+                    n
+            }
+            var x = new Array(0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535);
+            function _(t, e) {
+                var i = Math.floor(e / 16)
+                    , n = new a;
+                w(t.digits, i, n.digits, 0, t.digits.length - i);
+                for (var s = e % 16, o = 16 - s, r = 0, l = r + 1; r &lt; n.digits.length - 1; ++r,
+                    ++l)
+                    n.digits[r] = n.digits[r] &gt;&gt;&gt; s | (n.digits[l] &amp; x[s]) &lt;&lt; o;
+                return n.digits[n.digits.length - 1] &gt;&gt;&gt;= s,
+                    n.isNeg = t.isNeg,
+                    n
+            }
+            function $(t, e) {
+                var i = new a;
+                return w(t.digits, 0, i.digits, e, i.digits.length - e),
+                    i
+            }
+            function S(t, e) {
+                if (t.isNeg != e.isNeg)
+                    return 1 - 2 * Number(t.isNeg);
+                for (var i = t.digits.length - 1; i &gt;= 0; --i)
+                    if (t.digits[i] != e.digits[i])
+                        return t.isNeg ? 1 - 2 * Number(t.digits[i] &gt; e.digits[i]) : 1 - 2 * Number(t.digits[i] &lt; e.digits[i]);
+                return 0
+            }
+            function j(t, e) {
+                var i, n, o = y(t), l = y(e), c = e.isNeg;
+                if (o &lt; l)
+                    return t.isNeg ? ((i = r(s)).isNeg = !e.isNeg,
+                        t.isNeg = !1,
+                        e.isNeg = !1,
+                        n = g(e, t),
+                        t.isNeg = !0,
+                        e.isNeg = c) : (i = new a,
+                            n = r(t)),
+                        new Array(i, n);
+                i = new a,
+                    n = t;
+                for (var u = Math.ceil(l / 16) - 1, d = 0; e.digits[u] &lt; 32768;)
+                    e = C(e, 1),
+                        ++d,
+                        ++l,
+                        u = Math.ceil(l / 16) - 1;
+                n = C(n, d),
+                    o += d;
+                for (var p = Math.ceil(o / 16) - 1, h = $(e, p - u); -1 != S(n, h);)
+                    ++i.digits[p - u],
+                        n = g(n, h);
+                for (var v = p; v &gt; u; --v) {
+                    var w = v &gt;= n.digits.length ? 0 : n.digits[v]
+                        , k = v - 1 &gt;= n.digits.length ? 0 : n.digits[v - 1]
+                        , x = v - 2 &gt;= n.digits.length ? 0 : n.digits[v - 2]
+                        , j = u &gt;= e.digits.length ? 0 : e.digits[u]
+                        , A = u - 1 &gt;= e.digits.length ? 0 : e.digits[u - 1];
+                    i.digits[v - u - 1] = w == j ? 65535 : Math.floor((65536 * w + k) / j);
+                    for (var T = i.digits[v - u - 1] * (65536 * j + A), q = 4294967296 * w + (65536 * k + x); T &gt; q;)
+                        --i.digits[v - u - 1],
+                            T = i.digits[v - u - 1] * (65536 * j | A),
+                            q = 65536 * w * 65536 + (65536 * k + x);
+                    (n = g(n, b(h = $(e, v - u - 1), i.digits[v - u - 1]))).isNeg &amp;&amp; (n = f(n, h),
+                        --i.digits[v - u - 1])
+                }
+                return n = _(n, d),
+                    i.isNeg = t.isNeg != c,
+                    t.isNeg &amp;&amp; (i = c ? f(i, s) : g(i, s),
+                        n = g(e = _(e, d), n)),
+                    0 == n.digits[0] &amp;&amp; 0 == m(n) &amp;&amp; (n.isNeg = !1),
+                    new Array(i, n)
+            }
+            e.setMaxDigits = o,
+                e.biFromHex = function (t) {
+                    for (var e = new a, i = t.length, n = 0; i &gt; 0; i -= 4,
+                        ++n)
+                        e.digits[n] = h(t.substr(Math.max(i - 4, 0), Math.min(i, 4)));
+                    return e
+                }
+                ,
+                e.biHighIndex = m,
+                e.biCopy = r,
+                e.BigInt = a,
+                e.biDivide = function (t, e) {
+                    return j(t, e)[0]
+                }
+                ,
+                e.biMultiply = v,
+                e.biDivideByRadixPower = function (t, e) {
+                    var i = new a;
+                    return w(t.digits, e, i.digits, 0, i.digits.length - e),
+                        i
+                }
+                ,
+                e.biModuloByRadixPower = function (t, e) {
+                    var i = new a;
+                    return w(t.digits, 0, i.digits, 0, e),
+                        i
+                }
+                ,
+                e.biSubtract = g,
+                e.biCompare = S,
+                e.biShiftRight = _,
+                e.biToHex = function (t) {
+                    for (var e = &quot;&quot;, i = (m(t),
+                        m(t)); i &gt; -1; --i)
+                        e += d(t.digits[i]);
+                    return e
+                }
+        },
+        306: function(t, e, i) {
+            &quot;use strict&quot;;
+            Object.defineProperty(e, &quot;__esModule&quot;, {
+                value: !0
+            }),
+            e.BarrettMu_powMod = e.BarrettMu_multiplyMod = e.BarrettMu_modulo = e.BarrettMu = void 0;
+            var n = i(228);
+            function s(t) {
+                var e = (0,
+                n.biDivideByRadixPower)(t, this.k - 1)
+                  , i = (0,
+                n.biMultiply)(e, this.mu)
+                  , s = (0,
+                n.biDivideByRadixPower)(i, this.k + 1)
+                  , o = (0,
+                n.biModuloByRadixPower)(t, this.k + 1)
+                  , a = (0,
+                n.biMultiply)(s, this.modulus)
+                  , r = (0,
+                n.biModuloByRadixPower)(a, this.k + 1)
+                  , l = (0,
+                n.biSubtract)(o, r);
+                l.isNeg &amp;&amp; (l = biAdd(l, this.bkplus1));
+                for (var c = (0,
+                n.biCompare)(l, this.modulus) &gt;= 0; c; )
+                    l = (0,
+                    n.biSubtract)(l, this.modulus),
+                    c = (0,
+                    n.biCompare)(l, this.modulus) &gt;= 0;
+                return l
+            }
+            function o(t, e) {
+                var i = (0,
+                n.biMultiply)(t, e);
+                return this.modulo(i)
+            }
+            function a(t, e) {
+                var i = new n.BigInt;
+                i.digits[0] = 1;
+                for (var s = t, o = e; 0 != (1 &amp; o.digits[0]) &amp;&amp; (i = this.multiplyMod(i, s)),
+                0 != (o = (0,
+                n.biShiftRight)(o, 1)).digits[0] || 0 != (0,
+                n.biHighIndex)(o); )
+                    s = this.multiplyMod(s, s);
+                return i
+            }
+            e.BarrettMu = function(t) {
+                this.modulus = (0,
+                n.biCopy)(t),
+                this.k = (0,
+                n.biHighIndex)(this.modulus) + 1;
+                var e = new n.BigInt;
+                e.digits[2 * this.k] = 1,
+                this.mu = (0,
+                n.biDivide)(e, this.modulus),
+                this.bkplus1 = new n.BigInt,
+                this.bkplus1.digits[this.k + 1] = 1,
+                this.modulo = s,
+                this.multiplyMod = o,
+                this.powMod = a
+            }
+            ,
+            e.BarrettMu_modulo = s,
+            e.BarrettMu_multiplyMod = o,
+            e.BarrettMu_powMod = a
+        },
+        305: function (t, e, i) {
+            &quot;use strict&quot;;
+            Object.defineProperty(e, &quot;__esModule&quot;, {
+                value: !0
+            }),
+                e.encryptedString = e.RSAKeyPair = void 0;
+            var n = i(228)
+                , s = i(306)
+                , o = {};
+            o.NoPadding = &quot;NoPadding&quot;,
+                o.PKCS1Padding = &quot;PKCS1Padding&quot;,
+                o.RawEncoding = &quot;RawEncoding&quot;,
+                o.NumericEncoding = &quot;NumericEncoding&quot;,
+                e.RSAKeyPair = function (t, e, i, o) {
+                    this.e = (0,
+                        n.biFromHex)(t),
+                        this.d = (0,
+                            n.biFromHex)(e),
+                        this.m = (0,
+                            n.biFromHex)(i),
+                        this.chunkSize = &quot;number&quot; != typeof o ? 2 * (0,
+                            n.biHighIndex)(this.m) : o / 8,
+                        this.radix = 16,
+                        this.barrett = new s.BarrettMu(this.m)
+                }
+                ,
+                e.encryptedString = function (t, e, i, s) {
+                    var a, r, l, c, u, d, p, h, f, g = new Array, m = e.length, y = &quot;&quot;;
+                    for (c = &quot;string&quot; == typeof i ? i == o.NoPadding ? 1 : i == o.PKCS1Padding ? 2 : 0 : 0,
+                        u = &quot;string&quot; == typeof s &amp;&amp; s == o.RawEncoding ? 1 : 0,
+                        1 == c ? m &gt; t.chunkSize &amp;&amp; (m = t.chunkSize) : 2 == c &amp;&amp; m &gt; t.chunkSize - 11 &amp;&amp; (m = t.chunkSize - 11),
+                        a = 0,
+                        r = 2 == c ? m - 1 : t.chunkSize - 1; a &lt; m;)
+                        c ? g[r] = e.charCodeAt(a) : g[a] = e.charCodeAt(a),
+                            a++,
+                            r--;
+                    for (1 == c &amp;&amp; (a = 0),
+                        r = t.chunkSize - m % t.chunkSize; r &gt; 0;) {
+                        if (2 == c) {
+                            for (d = Math.floor(256 * Math.random()); !d;)
+                                d = Math.floor(256 * Math.random());
+                            g[a] = d
+                        } else
+                            g[a] = 0;
+                        a++,
+                            r--
+                    }
+                    for (2 == c &amp;&amp; (g[m] = 0,
+                        g[t.chunkSize - 2] = 2,
+                        g[t.chunkSize - 1] = 0),
+                        p = g.length,
+                        a = 0; a &lt; p; a += t.chunkSize) {
+                        for (h = new n.BigInt,
+                            r = 0,
+                            l = a; l &lt; a + t.chunkSize; ++r)
+                            h.digits[r] = g[l++],
+                                h.digits[r] += g[l++] &lt;&lt; 8;
+                        f = t.barrett.powMod(h, t.e),
+                            y += 1 == u ? biToBytes(f) : 16 == t.radix ? (0,
+                                n.biToHex)(f) : biToString(f, t.radix)
+                    }
+                    return y
+                }
+        }
+    })
+
+
+
+
+function getPwdEncrypt(pwd) {
+    var r = webpack(305),
+        pubKey = 'BC087C7C00848CE8A349C9072C3229E0D595F817EDDE9ABF6FC72B41942A759E97956CE9CB7D1F2E99399EADBACC0531F16EAE8EFCB68553DE0E125B2231ED955ADBF5208E65DC804237C93EB23C83E7ECDA0B586ECF31839038EE6B640E0EEC5FF17D219FDEA33E730F287F0D384C74A53DFE1F91ACC63C7C92039A43AC6E97',
+        n = new r.RSAKeyPair(&quot;10001&quot;, &quot;&quot;, pubKey),
+        s = r.encryptedString(n, pwd);
+
+    return s
+}
+
+console.log(getPwdEncrypt('asdadasdzc'))
+
+</code></pre>
+<p>这里在<code>305</code>中可以很明显看到对其它模块的调用，因此一并将其复制进来（如果运行中报错缺少，同理将其对应的复制进来即可），并对外提供一个<code>webpack</code>的变量便于后续调用</p>
+<p>尝试运行，发现卡住了，迟迟没有结果，这是不正常的，再回到网页代码上<br>
+<img src="https://sz134055.github.io//post-images/1672226956974.png" alt="" loading="lazy"><br>
+发现这段代码被先运行，抱着试试看的态度，跳转至代码处尝试扣下来，结果发现就是上面的<code>228</code>，于是最终代码：</p>
+<pre><code class="language-js">//前面webpack的内容省略，参考前面的代码
+
+function getPwdEncrypt(pwd) {
+    webpack(228).setMaxDigits(129);
+    var r = webpack(305),
+        pubKey = 'BC087C7C00848CE8A349C9072C3229E0D595F817EDDE9ABF6FC72B41942A759E97956CE9CB7D1F2E99399EADBACC0531F16EAE8EFCB68553DE0E125B2231ED955ADBF5208E65DC804237C93EB23C83E7ECDA0B586ECF31839038EE6B640E0EEC5FF17D219FDEA33E730F287F0D384C74A53DFE1F91ACC63C7C92039A43AC6E97',
+        n = new r.RSAKeyPair(&quot;10001&quot;, &quot;&quot;, pubKey),
+        s = r.encryptedString(n, pwd);
+    
+    return s
+}
+
+console.log(getPwdEncrypt(&quot;asdadadadad&quot;))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">b1413c4d46483e93234a5ab062ff31277224e1a028cc1efa0b88f9f5f448a8dfd1daa9747f81ba4970740d06fc76e59b0af6cf96d420b7889aceb67eb71ef7051c89e886b4420ef0ff75c1f8b0eb7f23a7451cc6b8e80c0ba04cb49106dd4c67a7572c7147d815d64d90b31f2a083bbc7f8fab188c6f6226f6b756f7b727a7cc
+</code></pre>
+<p><img src="https://sz134055.github.io//post-images/1672227476144.png" alt="" loading="lazy"><br>
+对比结果一致，逆向成功</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[非对称加密-RSA算法学习及案例]]></title>
+        <id>https://sz134055.github.io/post/fei-dui-cheng-jia-mi-rsa-suan-fa-xue-xi-ji-fang-tian-xia-ni-xiang/</id>
+        <link href="https://sz134055.github.io/post/fei-dui-cheng-jia-mi-rsa-suan-fa-xue-xi-ji-fang-tian-xia-ni-xiang/">
+        </link>
+        <updated>2022-12-20T18:32:07.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="介绍">介绍</h2>
+<blockquote>
+<p>来自百度百科：<br>
+与对称加密算法不同，非对称加密算法需要两个密钥：公开密钥（publickey）和私有密钥（privatekey）。公开密钥与私有密钥是一对，如果用公开密钥对数据进行加密，只有用对应的私有密钥才能解密；如果用私有密钥对数据进行加密，那么只有用对应的公开密钥才能解密。因为加密和解密使用的是两个不同的密钥，所以这种算法叫作非对称加密算法。</p>
+</blockquote>
+<p>常见的非对称加密算法：</p>
+<ul>
+<li>RSA</li>
+<li>DSA</li>
+</ul>
+<p>非对称加密特点：</p>
+<ul>
+<li>加密算法私钥由数据方持有，不会在网络上传递，保证了密钥的安全性</li>
+<li>非对称加密算法通常比对称算法计算复杂，性能耗费高</li>
+<li>非对称加密算法可用于数字签名</li>
+<li>即使明文一致，密文也可能不一致</li>
+</ul>
+<p>常见JS调试调用特点：</p>
+<ul>
+<li>关键词
+<ul>
+<li><code>new JSEncrypt()</code></li>
+<li><code>JSEncrypt</code></li>
+<li><code>setPublickKey</code></li>
+<li><code>setKey</code></li>
+<li><code>setPrivateKey</code></li>
+<li><code>getPublicKey</code></li>
+</ul>
+</li>
+<li>长度（私钥-公钥-明文-密文）
+<ul>
+<li>428-128-1~53-88</li>
+<li>812-216-1~117-172</li>
+<li>1588-391-1~245-344</li>
+</ul>
+</li>
+</ul>
+<h2 id="js-rsa加密实现">JS RSA加密实现</h2>
+<p>Node.Js环境，需要<code>node-rsa</code>包</p>
+<pre><code class="language-js">let nodeRsa = require('node-rsa')
+
+/**
+ * 这里仅模拟网站登录表单加密情况
+ * 登录时表单中某项加密（如密码password）
+ * 数据传递到服务器后
+ * 服务器根据保存的私钥解密，保证密码不被泄露
+ * 因此这里的两个主要函数为 公钥加密和私钥解密
+ */
+
+//使用公钥加密
+function rsaEncrypt(pub,msg){
+    const pubKey = new nodeRsa(pub,'pkcs8-public')
+    return pubKey.encrypt(msg,'base64')
+}
+
+//使用私钥解密
+function rsaDecrypt(pri,msg){
+    const priKey = new nodeRsa(pri,'pkcs8-private')
+    return priKey.decrypt(msg,'utf8')
+}
+
+//生成密钥
+const key = new nodeRsa({b:1024})
+//导出公钥
+const publicKey = key.exportKey('pkcs8-public')
+//导出密钥
+const privateKey = key.exportKey('pkcs8-private')
+//待加密明文
+let text = 'Hello World'
+//加密明文
+let enText = rsaEncrypt(publicKey,text)
+//解密密文
+let deText = rsaDecrypt(privateKey,enText)
+
+console.log('公钥：'+publicKey)
+console.log('私钥：'+privateKey)
+console.log('密文：'+enText)
+console.log('明文：'+deText)
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">公钥：-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2me8YQsT0nxqIv/4rxK/uL+6a
+rPAOpVn8xj4YhoGTLXc85cRq6JY3FxyfwiJR2kRoQesNCLyqxNklXLMQ+tJLKymp
+UBZJhyoeLE6vDovm7C+zp8q4IP6veF14/HyZ1kdLoapepudCDOxmwijVJ//lhlZa
+1IZja8l3wYqCogYLWQIDAQAB
+-----END PUBLIC KEY-----
+私钥：-----BEGIN PRIVATE KEY-----
+MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALaZ7xhCxPSfGoi/
+/ivEr+4v7pqs8A6lWfzGPhiGgZMtdzzlxGroljcXHJ/CIlHaRGhB6w0IvKrE2SVc
+sxD60ksrKalQFkmHKh4sTq8Oi+bsL7Onyrgg/q94XXj8fJnWR0uhql6m50IM7GbC
+KNUn/+WGVlrUhmNryXfBioKiBgtZAgMBAAECgYEAkBZTxq8ZP3Y0t+fYJq1jre4A
+t+jy3Hu50G6WHUA2Cu77ggBEx5+UuQ/xtFa6QiCbjjFFytk0FwSR3JuTaTiiqvtT
+QMtUl9y4R3e+A/dW1HvvZoybw/idz8fK2brIt9DyQhc74YiUhcvwSvagTVt9213O
+4ejfIc0Rt0IBeG2AH6ECQQDs+N/ttQrlf6WR9U1VlZKcczRuIUzya3k6YPCrdtbs
+nTARIqMdTPlqdSUhOG3HAeLed4LHaD+sgMRbQunOIFdtAkEAxUNtzQCl/0uVL5Vk
+CFTZ76lRLW7YBHV9APS7sUs2Dvg35Il4pY/MEBrPV2aoIT8A7L9uQ7RbtFYYPRRj
+jsI0HQJAGEbe2gFkHmLXWX6h75SlMnXy9x1ePq+X+c0YmthP6GmqFPdRcp0CKE/b
+/+1CAdNFpLjlovwhGdEPTLIsNbvGeQJAAIFzvprJ0iW3dC/F2d+dz2d3tc4a76f9
+cgsuj/3JXbB1NDjF/man90KaVXcF50/qCLFU7wd/VK8D0OREfREyYQJBAMaoEvoo
+p7XaPzNNmlkywUF8r3APeaC7UeQoDrvZtWSZwnrer2uC0AmMxMHSgerJho2lYeJO
+wwMXXLkAuxQIAsI=
+-----END PRIVATE KEY-----
+密文：LgTwiTwZSbsTvZAVlVKD3qCysddajwDf1gDuPqSfE5WP+prKrRRtiqA41ollcTsWtr86foxuxr1YxvGJC35sH8ieTUU1SI5bHgQFVHxOS/b3FwmROtPkfA66XfDZ9WoUj7Kh728Z0ueX19h8EIAMfONS8/y/ty4boc83x5sZzgk=
+明文：Hello World
+</code></pre>
+<h2 id="实战-房天下登录表单逆向">实战-房天下登录表单逆向</h2>
+<h3 id="逆向">逆向</h3>
+<p>在登录表单中，<code>pwd</code>被加密<br>
+<img src="https://sz134055.github.io//post-images/1671563212303.png" alt="" loading="lazy"></p>
+<p>老规矩，XHR断点或者查看发起程序，很快找到以下代码片段：<br>
+<img src="https://sz134055.github.io//post-images/1671563335418.png" alt="" loading="lazy"></p>
+<p>跳转至加密代码处，发现整个js文件才400行，且看上去全跟RSA加密相关，简单粗暴全扒到本地<br>
+<img src="https://sz134055.github.io//post-images/1671563521545.png" alt="" loading="lazy"></p>
+<p>加密函数基本搞定，现在来找<code>key_to_encode</code>，既然非混淆，直接全局搜索，定位到此处：<br>
+<img src="https://sz134055.github.io//post-images/1671563639592.png" alt="" loading="lazy"></p>
+<p>全盘复制，而<code>RSAKeyPair()</code>恰好就来自上面复制的400行代码之中</p>
+<p>现在全部准备完毕，开始跑一下：<br>
+<img src="https://sz134055.github.io//post-images/1671563847047.png" alt="" loading="lazy"><br>
+看着像那么回事</p>
+<h2 id="实战-苏宁易购登录表单">实战-苏宁易购登录表单</h2>
+<h3 id="逆向-2">逆向</h3>
+<p>注意这里仅仅针对表单项中的<code>password</code><br>
+<a href="https://passport.suning.com/ids/login">https://passport.suning.com/ids/login</a><br>
+登录表单中<code>password</code>项加密，不知道是不是调试工具BUG，在瞟一眼响应后，在发起程序那点什么代码跳的都是响应结果...<br>
+无奈XHR断点，很轻松找到此处：<br>
+<img src="https://sz134055.github.io//post-images/1671564924158.png" alt="" loading="lazy"><br>
+关键找<code>pw2</code>而<code>pw2</code>的定义就在上面<br>
+<img src="https://sz134055.github.io//post-images/1671564994879.png" alt="" loading="lazy"></p>
+<p>下断点，取消XHR断点重新登录一次，发现<code>pwd</code>其实就是输入的密码明文，而<code>pwd2</code>就是对应的密文<br>
+而<code>loginPBK</code>就是公钥了（不放心全局搜索一下看看定义），其值为：</p>
+<pre><code class="language-js">'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQComqoAyvbCqO1EGsADwfNTWFQIUbm8CLdeb9TgjGLcz95mAo204SqTYdSEUxFsOnPfROOTxhkhfjbRxBV4/xjS06Y+kkUdiMGFtABIxRQHQIh0LrVvEZQs4NrixxcPI+b1bpE0gO/GAFSNWm9ejhZGj7UnqiHphnSJAVQNz2lgowIDAQAB'
+</code></pre>
+<p>加密代码片段：</p>
+<pre><code class="language-js">var encrypt = new JSEncrypt();
+encrypt.setPublicKey(loginPBK);
+var pwd2 = encrypt.encrypt(pwd);
+</code></pre>
+<p>现在来关注加密函数<code>encrypt.encrypt()</code>，看上面定义估计也是个第三方库，但是这次选择复制一次，跳转到代码处<br>
+<img src="https://sz134055.github.io//post-images/1671565390844.png" alt="" loading="lazy"></p>
+<p>注意复制的选择，后面都涉及到DOM操作了，又是<code>login</code>之类的，根本不需要，直接复制到<code>JSEncrypt</code>的定义处截至即可，前面同理</p>
+<p>运行发现需要补一下环境，这里直接给出写好的：</p>
+<pre><code class="language-js">var navigator = {
+    appName:'Netscape'
+}
+var window = global
+</code></pre>
+<p>最终运行结果：<br>
+<img src="https://sz134055.github.io//post-images/1671565887894.png" alt="" loading="lazy"></p>
+<h3 id="使用第三方库改善">使用第三方库改善</h3>
+<p>前面说到涉及到的加密代码段：</p>
+<pre><code class="language-js">var encrypt = new JSEncrypt();
+encrypt.setPublicKey(loginPBK);
+var pwd2 = encrypt.encrypt(pwd);
+</code></pre>
+<p>其实是使用了<code>jsencrypt</code>这个库。在<code>Node.js</code>上想直接跑可以安装以下库：</p>
+<pre><code class="language-shell">npm install node-jsencrypt -S
+</code></pre>
+<p>使用<code>node-jsencrypt</code>库后改写的代码：</p>
+<pre><code class="language-js">let JSEncrypt = require('node-jsencrypt')
+
+var loginPBK = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQComqoAyvbCqO1EGsADwfNTWFQIUbm8CLdeb9TgjGLcz95mAo204SqTYdSEUxFsOnPfROOTxhkhfjbRxBV4/xjS06Y+kkUdiMGFtABIxRQHQIh0LrVvEZQs4NrixxcPI+b1bpE0gO/GAFSNWm9ejhZGj7UnqiHphnSJAVQNz2lgowIDAQAB'
+function getPwdEncrypt(pwd){
+    var encrypt = new JSEncrypt();
+    encrypt.setPublicKey(loginPBK);
+    var pwd2 = encrypt.encrypt(pwd);
+    return pwd2
+}
+console.log(getPwdEncrypt('xzdahzxkchzxkhcjka'))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">XbBHj8i0/g1UfcHdaxQ80zZ4zvo2GT007AsJpnFhh8vn0A+TmJfjXCks7UPjmDcxEsm64iwwIKzO3FAXL//pH3KDCC71JJ400ER6Gcw4ewbgujD+/utQgZpkpbeZqSpwjGJdPpuNou8iLDRLLwktJZsQgrbPOgUUT/xkmcKrqbU=
+</code></pre>
+<h2 id="实战-百度">实战-百度</h2>
+<h3 id="逆向-3">逆向</h3>
+<p>与上苏宁易购一样，只针对登录表单中的<code>password</code>加密项</p>
+<p>百度登录的逆向不能用XHR断点方式，只能走搜索了，搜索以下关键字进行查找一番：</p>
+<ul>
+<li><code>RSA</code></li>
+<li><code>encrypt(</code></li>
+</ul>
+<p>首先找到一处疑似处：<br>
+<img src="https://sz134055.github.io//post-images/1671697433747.png" alt="" loading="lazy"></p>
+<p>下断点调试，发现<code>s</code>最终值就是输入的密码，那么后面一大串不用管，直接无视<br>
+跟着代码走，关注一下这个<code>i.password</code>，最终发现提交的密码便是它（可以与抓包里表单对比）<br>
+<img src="https://sz134055.github.io//post-images/1671697929708.png" alt="" loading="lazy"></p>
+<p>而<code>s</code>又赋值给<code>o</code>，那么<code>e.RSA.encrypt(o)</code>就是加密代码。<br>
+首先<code>e.RSA</code>和跳转到<code>e.RSA.encrypt()</code>处观察，发现了与前苏宁一样的导包方式，将其全部塞进本地代码（注意删除不必要的代码）：</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[对称加密-AES学习笔记及优师云登录加密参数逆向]]></title>
+        <id>https://sz134055.github.io/post/dui-cheng-jia-mi-aes-xue-xi-bi-ji/</id>
+        <link href="https://sz134055.github.io/post/dui-cheng-jia-mi-aes-xue-xi-bi-ji/">
+        </link>
+        <updated>2022-12-20T08:41:37.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="介绍">介绍</h2>
+<p>和前面DES加密学习一样，只学习用法及实现以供爬虫逆向所用，不深入原理</p>
+<p>AES加密算法是用来取代DES的，同样有一个密钥，用来加密或解密，同时支持以下：</p>
+<ul>
+<li>mode
+<ul>
+<li>CBC</li>
+<li>CFB</li>
+<li>CTR</li>
+<li>CTRGladman</li>
+<li>ECB（唯一无<code>iv</code>向量模式）</li>
+<li>OFB</li>
+</ul>
+</li>
+<li>padding
+<ul>
+<li>ZeroPadding</li>
+<li>NoPadding</li>
+<li>AnsiX923</li>
+<li>Iso10126</li>
+<li>Iso97971</li>
+<li>Pkcs7<br>
+(以上列表不完全列出)</li>
+</ul>
+</li>
+</ul>
+<p>AES加密密钥长度为AES128、AES192、AES256，即128位、192位、256位，某些库会在长度不够时自动填充</p>
+<h2 id="js实现">JS实现</h2>
+<p>同样使用<code>Crypto-Js</code>库实现，代码与前DES基本一致：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+function aesEncrypt(aesMsg,aesKey,aesIv){
+    let key = crypto.enc.Utf8.parse(aesKey),
+        iv = crypto.enc.Utf8.parse(aesIv),
+        msg = crypto.enc.Utf8.parse(aesMsg),
+        encrypted = crypto.AES.encrypt(msg,key,{
+            iv:iv,
+            mode:crypto.mode.CBC,
+            padding:crypto.pad.Pkcs7
+        })
+    return encrypted.toString()
+}
+
+console.log(aesEncrypt('HELLO WORLD','0123456789abcdef','0123456789abcdef'))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">u9CkJDGEw0frLa/SQ51GOg==
+</code></pre>
+<p>解密与之差不多，但要注意小细节</p>
+<pre><code class="language-js">function aesDecrypt(aesMsg,aesKey,aesIv){
+    let key = crypto.enc.Utf8.parse(aesKey),
+        iv = crypto.enc.Utf8.parse(aesIv),
+        encrypted = crypto.AES.decrypt(aesMsg,key,{
+            iv:iv,
+            mode:crypto.mode.CBC,
+            padding:crypto.pad.Pkcs7
+        })
+    return encrypted.toString(crypto.enc.Utf8)
+}
+console.log(aesDecrypt('u9CkJDGEw0frLa/SQ51GOg==','0123456789abcdef','0123456789abcdef'))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">HELLO WORLD
+</code></pre>
+<h2 id="实战-优师云">实战-优师云</h2>
+<p><a href="https://www.youshiyun.com.cn/login/index">优师云-登录</a></p>
+<p><img src="https://sz134055.github.io//post-images/1671528047354.png" alt="data" loading="lazy"><br>
+请求表单<code>password</code>加密</p>
+<p>可以走发起程序或者XHR断点，这里选择XHR断点<br>
+找寻到这里比较直观的调用，但是<code>password</code>已是密文<br>
+<img src="https://sz134055.github.io//post-images/1671529151784.png" alt="调用" loading="lazy"></p>
+<p>继续寻找<br>
+<img src="https://sz134055.github.io//post-images/1671529621022.png" alt="FIND IT" loading="lazy"></p>
+<p>这里<code>/Android|webOS|iPhone|iPod|iPad|BlackBerry|MicroMessenger/i.test(navigator.userAgent)</code>为<code>false</code>，那么可以视代码如下：</p>
+<pre><code class="language-js"> return false || (a = Object(_[&quot;g&quot;])({
+    data: e,
+    key: &quot;password.yunjy.y&quot;,
+    param: [&quot;password&quot;]
+}))
+</code></pre>
+<p>猜测这块就是加密函数，可以直接复制进控制台调用以下看看：<br>
+<img src="https://sz134055.github.io//post-images/1671529917710.png" alt="" loading="lazy"></p>
+<p>现在来研究这个函数，跳转至源码：</p>
+<pre><code class="language-js">var u = function(t) {
+    var e = t.data
+      , n = t.type
+      , a = t.param
+      , r = t.key
+      , o = JSON.parse(JSON.stringify(e));
+    return &quot;Base64&quot; === n ? a.forEach((function(t) {
+        o[t] = btoa(o[t])
+    }
+    )) : a.forEach((function(t) {
+        var e = o[t];
+        r = i.a.enc.Latin1.parse(r);
+        var n = r
+          , a = i.a.AES.encrypt(e, r, {
+            iv: n,
+            mode: i.a.mode.CBC,
+            padding: i.a.pad.ZeroPadding
+        });
+        o[t] = a.toString()
+    }
+    )),
+    o
+}
+
+</code></pre>
+<p>注意以下被传入的参数：</p>
+<pre><code class="language-js">{
+    &quot;data&quot;: {
+        &quot;username&quot;: &quot;15312341234&quot;,
+        &quot;password&quot;: &quot;asda1348315135153&quot;,
+        &quot;redomStr&quot;: &quot;&quot;
+    },
+    &quot;key&quot;: &quot;password.yunjy.y&quot;,
+    &quot;param&quot;: [
+        &quot;password&quot;
+    ]
+}
+</code></pre>
+<p>这里出现了<code>i.a.AES.encrypt()</code>，老办法，先在在控制台输出看看<code>i.a</code>，果然是包含了很多加密方法，直接用<code>crypto-js</code>平替，最终本地代码为：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+
+function getData(t) {
+    var e = t.data
+      , n = t.type
+      , a = t.param
+      , r = t.key
+      , o = JSON.parse(JSON.stringify(e));
+    return &quot;Base64&quot; === n ? a.forEach((function(t) {
+        o[t] = btoa(o[t])
+    }
+    )) : a.forEach((function(t) {
+        var e = o[t];
+        r = crypto.enc.Latin1.parse(r);
+        var n = r
+          , a = crypto.AES.encrypt(e, r, {
+            iv: n,
+            mode: crypto.mode.CBC,
+            padding: crypto.pad.ZeroPadding
+        });
+        o[t] = a.toString()
+    }
+    )),
+    o
+}
+
+var t = {
+    &quot;data&quot;: {
+        &quot;username&quot;: &quot;15312341234&quot;,
+        &quot;password&quot;: &quot;asda1348315135153&quot;,
+        &quot;redomStr&quot;: &quot;&quot;
+    },
+    &quot;key&quot;: &quot;password.yunjy.y&quot;,
+    &quot;param&quot;: [
+        &quot;password&quot;
+    ]
+}
+
+console.log(getData(t))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-js">{
+  username: '15312341234',
+  password: '2JcH1czr87e1kCAbqlXtyw2b8OGpkw44Sfhhfhbz3Nw=',
+  redomStr: ''
+}
+</code></pre>
+<p>与表单重结果一致，逆向完毕</p>
+<p>最后优化下代码：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+
+function __getData(t) {
+    var e = t.data
+      , n = t.type
+      , a = t.param
+      , r = t.key
+      , o = JSON.parse(JSON.stringify(e));
+    return &quot;Base64&quot; === n ? a.forEach((function(t) {
+        o[t] = btoa(o[t])
+    }
+    )) : a.forEach((function(t) {
+        var e = o[t];
+        r = crypto.enc.Latin1.parse(r);
+        var n = r
+          , a = crypto.AES.encrypt(e, r, {
+            iv: n,
+            mode: crypto.mode.CBC,
+            padding: crypto.pad.ZeroPadding
+        });
+        o[t] = a.toString()
+    }
+    )),
+    o
+}
+
+function getData(account,pswd,redomStr){
+    return __getData({
+        &quot;data&quot;: {
+        &quot;username&quot;: account,
+        &quot;password&quot;: pswd,
+        &quot;redomStr&quot;: redomStr
+        },
+        &quot;key&quot;: &quot;password.yunjy.y&quot;,
+        &quot;param&quot;: [
+            &quot;password&quot;
+        ]
+    })
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[艺恩票房API逆向]]></title>
+        <id>https://sz134055.github.io/post/yi-en-piao-fa-api-ni-xiang/</id>
+        <link href="https://sz134055.github.io/post/yi-en-piao-fa-api-ni-xiang/">
+        </link>
+        <updated>2022-12-20T07:20:15.000Z</updated>
+        <content type="html"><![CDATA[<p>这里以单月票房为例：<br>
+<a href="https://www.endata.com.cn/BoxOffice/BO/Month/oneMonth.html">https://www.endata.com.cn/BoxOffice/BO/Month/oneMonth.html</a></p>
+<h2 id="逆向">逆向</h2>
+<p>先观察响应：<br>
+<img src="https://sz134055.github.io//post-images/1671521136546.png" alt="响应结果" loading="lazy"><br>
+其请求表单或是请求头都无加密参数，响应结果为乱码，看着像十六进制数据，因此本次目标就是找寻解密这串数据的办法</p>
+<p>可以通过XHR断点来找到对应代码位置，但是通过API发起程序去找更快，因为要做的是处理返回的结果，因此可以往下找，发现此处：<br>
+<img src="https://sz134055.github.io//post-images/1671521382951.png" alt="入口" loading="lazy"></p>
+<p>e便是响应的结果</p>
+<pre><code class="language-js">1 == (e = &quot;{&quot; == e[0] ? JSON.parse(e) : JSON.parse(webInstace.shell(e))).Status || 200 == e.Code ? r(e.Data) : 200 == e.code ? r(e.data) : a(e.Msg)
+</code></pre>
+<p>这里得要盘一盘逻辑，但是不妨大胆一点，既然是解析拿到的数据，<code>e</code>是原始响应结果，肯定得先处理才能<code>JSON.parse()</code>，这里有两个函数调用有嫌疑：<code>r(e.Data)</code>以及<code>webInstace.shell(e)</code>，<code>webInstace.shell(e)</code>肯定先于<code>r(e.Data)</code>执行</p>
+<p>并且注意前面三元表达式<code>e = &quot;{&quot; == e[0] ? JSON.parse(e) : JSON.parse(webInstace.shell(e))</code>，<code>e</code>作为一个十六进制数据，自然没有<code>{</code>，因此此处三元表达式结果即为：<code>e = JSON.parse(webInstace.shell(e))</code></p>
+<p>这就很合理了，先格式化后才能有<code>e.Data</code>等操作，因此<code>webInstace.shell(e)</code>便是我们要找寻的解密函数</p>
+<p>同时在该处下断点，待运行后，可手动在控制台输出验证：<br>
+<img src="https://sz134055.github.io//post-images/1671522480438.png" alt="注意e的值以及调用后的结果" loading="lazy"></p>
+<p>跳转至<code>webInstace.shell(e)</code>处<br>
+<img src="https://sz134055.github.io//post-images/1671523001231.png" alt="webDES" loading="lazy"></p>
+<p>发现其实没必要单独扣代码， 偷懒直接全部复制<br>
+但是问题来了，不存在<code>webInstace.shell()</code>这个方法，这很正常，毕竟都是混效果，上图的<code>_0x2246('0x257', 'nArV')</code>其结果很明显就是<code>shell</code>，因此要么手动改掉上面的为<code>shell</code>，要么调用时就采用<code>webInstace[_0x2246('0x257', 'nArV')]()</code>形式</p>
+<p>注意，这样直接全复制的代码可能需要补环境，先直接运行看看：<br>
+<img src="https://sz134055.github.io//post-images/1671523879061.png" alt="缺少环境" loading="lazy"></p>
+<p>报错，恰好<code>_0x2246('0x26d', '0I#o')</code>就是 <code>'userAgent'</code>，而<code>!navigator || !navigator[_0x2246('0x26d', '0I#o')]</code>运行结果为<code>false</code>，此时要么直接覆盖填写<code>false</code>，或者将<code>navigator['userAgent']</code>补上，这里选择补上，再运行：<br>
+<img src="https://sz134055.github.io//post-images/1671524101062.png" alt="success" loading="lazy"></p>
+<p>成功拿到结果，简单粗暴的一次逆向就此完成...</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[对称加密-DES学习笔记及天翼云逆向]]></title>
+        <id>https://sz134055.github.io/post/dui-cheng-jia-mi-xue-xi-bi-ji/</id>
+        <link href="https://sz134055.github.io/post/dui-cheng-jia-mi-xue-xi-bi-ji/">
+        </link>
+        <updated>2022-12-19T10:47:06.000Z</updated>
+        <content type="html"><![CDATA[<p>仅仅学习其实现、用法，以做逆向知识储备，不深入其原理</p>
+<h2 id="常见算法归纳">常见算法归纳</h2>
+<ul>
+<li>DES</li>
+<li>AES</li>
+</ul>
+<h2 id="des">DES</h2>
+<p>DES算法的入口参数有三个：<code>Key</code>、<code>Data</code>、<code>Mode</code>。</p>
+<ul>
+<li><code>Key</code>为8个字节共64位，是DES算法的工作密钥；</li>
+<li><code>Data</code>也为8个字节64位，是要被加密或被解密的数据；</li>
+<li><code>Mode</code>为DES的工作方式，有两种：<strong>加密</strong>或<strong>解密</strong>。</li>
+</ul>
+<p>其中<code>Mode</code>支持以下工作模式：</p>
+<ul>
+<li>ECB 电子密码本模式（最常用之一）</li>
+<li>CBC 密文分组链接模式（最常用之一）</li>
+<li>CFB 密文反馈模式</li>
+<li>OFB 输出反馈模式</li>
+<li>CTR 计数器模式</li>
+</ul>
+<p>对不不满足宽度的数据，会进行填充，即<code>padding</code>，支持以下：</p>
+<ul>
+<li>ZeroPadding</li>
+<li>NoPadding</li>
+<li>AnsiX923</li>
+<li>Iso10126</li>
+<li>Iso97971</li>
+<li>Pkcs7（最常用）</li>
+</ul>
+<h3 id="ecb模式">ECB模式</h3>
+<h4 id="介绍">介绍</h4>
+<p><em>引自<a href="https://www.cnblogs.com/yanzi-meng/p/9640578.html#:~:text=DES%20ECB%EF%BC%88%E7%94%B5%E5%AD%90%E5%AF%86%E6%9C%AC%E6%96%B9%E5%BC%8F%EF%BC%89%E5%85%B6%E5%AE%9E%E9%9D%9E%E5%B8%B8%E7%AE%80%E5%8D%95%EF%BC%8C%E5%B0%B1%E6%98%AF%E5%B0%86%E6%95%B0%E6%8D%AE%E6%8C%89%E7%85%A78%E4%B8%AA%E5%AD%97%E8%8A%82%E4%B8%80%E6%AE%B5%E8%BF%9B%E8%A1%8CDES%E5%8A%A0%E5%AF%86%E6%88%96%E8%A7%A3%E5%AF%86%E5%BE%97%E5%88%B0%E4%B8%80%E6%AE%B58%E4%B8%AA%E5%AD%97%E8%8A%82%E7%9A%84%E5%AF%86%E6%96%87%E6%88%96%E8%80%85%E6%98%8E%E6%96%87%EF%BC%8C%E6%9C%80%E5%90%8E%E4%B8%80%E6%AE%B5%E4%B8%8D%E8%B6%B38%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%8C%E6%8C%89%E7%85%A7%E9%9C%80%E6%B1%82%E8%A1%A5%E8%B6%B38%E4%B8%AA%E5%AD%97%E8%8A%82%E8%BF%9B%E8%A1%8C%E8%AE%A1%E7%AE%97%EF%BC%8C%E4%B9%8B%E5%90%8E%E6%8C%89%E7%85%A7%E9%A1%BA%E5%BA%8F%E5%B0%86%E8%AE%A1%E7%AE%97%E6%89%80%E5%BE%97%E7%9A%84%E6%95%B0%E6%8D%AE%E8%BF%9E%E5%9C%A8%E4%B8%80%E8%B5%B7%E5%8D%B3%E5%8F%AF%EF%BC%8C%E5%90%84%E6%AE%B5%E6%95%B0%E6%8D%AE%E4%B9%8B%E9%97%B4%E4%BA%92%E4%B8%8D%E5%BD%B1%E5%93%8D%E3%80%82,DES%20CBC%EF%BC%88%E5%AF%86%E6%96%87%E5%88%86%E7%BB%84%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F%EF%BC%89%E6%9C%89%E7%82%B9%E9%BA%BB%E7%83%A6%EF%BC%8C%E5%AE%83%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6%E4%BD%BF%E5%8A%A0%E5%AF%86%E7%9A%84%E5%90%84%E6%AE%B5%E6%95%B0%E6%8D%AE%E4%B9%8B%E9%97%B4%E6%9C%89%E4%BA%86%E8%81%94%E7%B3%BB%E3%80%82">分组加密的四种模式 (ECB、CBC、CFB、OFB) - yanzi_meng </a></em></p>
+<p>DES ECB（电子密本方式）其实非常简单，就是将数据按照8个字节一段进行DES加密或解密得到一段8个字节的密文或者明文，最后一段不足8个字节，按照需求补足8个字节进行计算，之后按照顺序将计算所得的数据连在一起即可，各段数据之间互不影响。</p>
+<p>特点：</p>
+<ul>
+<li>简单，有利于并行计算，误差不会被传送；</li>
+<li>对于相同的明文块，会生成相同的密文块</li>
+<li>可能对明文进行主动攻击：加密消息块相互独立成为被攻击的弱点</li>
+</ul>
+<h4 id="js实现">JS实现</h4>
+<p>与下CBC类似，不再演示，转而用实战演示：<br>
+<a href="https://bqcm0.cavip1.com/">某小网站</a>（注意不要相信任何赌博等非法内容，这里仅用于技术学习）</p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1671449084282.png" alt="LOGIN" loading="lazy"></figure>
+<p>登录表单被加密，通过XHR断点找到登录的js代码处：<br>
+<img src="https://sz134055.github.io//post-images/1671450071301.png" alt="login js" loading="lazy"></p>
+<p>涉及到表单加密的代码：</p>
+<pre><code class="language-js">utils.desEncrypt(JSON.stringify(a), i)
+</code></pre>
+<p>跳转至<code>utils.desEncrypt()</code>源码，为：</p>
+<pre><code class="language-js">desEncrypt: function(e, t) {
+        var n = CryptoJS.enc.Utf8.parse(t);
+        return CryptoJS.DES.encrypt(e, n, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        }).toString()
+    }
+</code></pre>
+<p>其中<code>a</code>在控制台输出结果为：</p>
+<pre><code class="language-js">{
+    &quot;username&quot;: &quot;asda551313&quot;,
+    &quot;password&quot;: &quot;assd45646&quot;,
+    &quot;captcha&quot;: &quot;&quot;
+}
+</code></pre>
+<p><code>i</code>为：</p>
+<pre><code class="language-js">'PSfqxlZRUXMuiX7R'
+</code></pre>
+<p>对应源码为：</p>
+<pre><code class="language-js">var i = utils.rndString();
+
+//rndString()源码：
+function rndString() {
+    for (var e = &quot;0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz&quot;, t = &quot;&quot;, n = 0; n &lt; 16; n++) {
+        var a = Math.floor(Math.random() * e.length);
+        t += e.substring(a, a + 1)
+    }
+    return t
+}
+
+</code></pre>
+<p>可以发现其为随机值且与时间戳无关，因此基本可以将其写死</p>
+<p>我们分别拿到<code>desEncrypt()</code>和<code>rndString()</code>的源码进行扣代码处理<br>
+最终结果：</p>
+<pre><code class="language-js">let CryptoJS = require('crypto-js')
+
+function rndString() {
+    for (var e = &quot;0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz&quot;, t = &quot;&quot;, n = 0; n &lt; 16; n++) {
+        var a = Math.floor(Math.random() * e.length);
+        t += e.substring(a, a + 1)
+    }
+    return t
+}
+function desEncrypt(e, t) {
+    var n = CryptoJS.enc.Utf8.parse(t);
+    return CryptoJS.DES.encrypt(e, n, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    }).toString()
+}
+
+const login_data = {
+    &quot;username&quot;: &quot;asda551313&quot;,
+    &quot;password&quot;: &quot;assd45646&quot;,
+    &quot;captcha&quot;: &quot;&quot;
+}
+
+console.log(desEncrypt(JSON.stringify(login_data),rndString()))
+
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">sVkZh+drU7OD3GcrLn25d5KP+jc2igSM7BgcTxaMT2vhyZTFHXM58+0a2sHYMICCIoYm7IS/efeUyzsZ51Y27w==
+</code></pre>
+<p>逆向完毕</p>
+<h3 id="cbc模式">CBC模式</h3>
+<h4 id="介绍-2">介绍</h4>
+<p>CBC模式会多出一个初始化向量<code>iv</code>，会在每个明文块加密前做异或处理<br>
+<img src="https://img-blog.csdn.net/20180324202411225?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2pkaGVsbGZpcmU=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" alt="https://blog.csdn.net/jdhellfire/article/details/79680456-加密算法学习总结---DES-CBC加密算法" loading="lazy"></p>
+<p>这样的操作是防止相同明文生成相同密文的情况，减少被破解几率</p>
+<h4 id="js实现-2">JS实现</h4>
+<p><em>Node环境，需要crypto-js模块</em><br>
+源码如下：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+function desEncrypt(desKey,desIv,desMsg){
+    let key = crypto.enc.Utf8.parse(desKey),
+        iv = crypto.enc.Utf8.parse(desIv),
+        msg = crypto.enc.Utf8.parse(desMsg),
+        encrypted = crypto.DES.encrypt(msg,key,{
+            iv:iv,
+            mode:crypto.mode.CBC,
+            padding:crypto.pad.Pkcs7
+        });
+    return encrypted.toString()
+}
+
+console.log(desEncrypt('asd4a5d7adz','zxjgcjahsgbdhj','Hello World!'))
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">MG3fwFspzdTydWuP4chAKA==
+</code></pre>
+<p>逆向完毕</p>
+<p>因此对于逆向来说，我们至少要找到明文，密钥以及初始向量，即上面的<code>msg</code>、<code>key</code>和<code>iv</code>（如果没有初始向量则不需要）</p>
+<h4 id="实战示例">实战示例</h4>
+<p><a href="http://www.91118.com/Passport/Account/Login">某教育网站</a><br>
+同样步骤：<br>
+<img src="https://sz134055.github.io//post-images/1671451886538.png" alt="login" loading="lazy"></p>
+<p>通过XHR找到对应代码：<br>
+<img src="https://sz134055.github.io//post-images/1671452046766.png" alt="js" loading="lazy"></p>
+<p>这里关注<code>pass</code>表单项</p>
+<pre><code class="language-js">pass: encryptByDES(s)
+</code></pre>
+<p><code>s</code>为输入的密码，跳转到<code>encryptByDes()</code>源码处：<br>
+<img src="https://sz134055.github.io//post-images/1671452247620.png" alt="encry" loading="lazy"></p>
+<p>可以看到很标准的一套CBC加密流程，这里不再重复写代码，逆向结束。</p>
+<h2 id="天翼云实战">天翼云实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>这里以<a href="https://m.ctyun.cn/wap/main/auth/login">天翼云</a>为例：<br>
+<img src="https://sz134055.github.io//post-images/1671453504173.png" alt="tyy" loading="lazy"></p>
+<p>我们主要关注表单项里的<code>password</code>项，通过XHR断点，层层观察，发现在此处涉及到了表单项<br>
+<img src="https://sz134055.github.io//post-images/1671453597466.png" alt="js-1" loading="lazy"></p>
+<p>并且是被传入（这不废话？），追溯到上一调用处，发现传入的是<code>s</code>，而<code>s</code>的定义赫然就摆在了上面：<br>
+<img src="https://sz134055.github.io//post-images/1671453731680.png" alt="js-2" loading="lazy"></p>
+<p>现在来进行一个扣代码：<br>
+首先通过之前的表单发现，<code>userName</code>即我们输入的账号，并为进行任何处理，因此我们用账号替换掉<code>Object(v[&quot;g&quot;])(o.value)</code>，</p>
+<pre><code class="language-js">const account = 'asdasdadss@163.com'
+
+const s = {
+    userName: account,
+    password: encodeURI(Object(v[&quot;c&quot;])(a.value, Object(v[&quot;f&quot;])(account)))
+}
+</code></pre>
+<p>再通过控制台输出，发现<code>a.value</code>的值就是我们输入的密码，替换之：</p>
+<pre><code class="language-js">let account = 'asdasdadss@163.com'
+let pswd = 'asd445zx48zs4as3d5'
+
+const s = {
+    userName: account,
+    password: encodeURI(Object(v[&quot;c&quot;])(pswd, Object(v[&quot;f&quot;])(account)))
+}
+</code></pre>
+<p>再来解决<code>Object(v[&quot;f&quot;])(account)</code>，通过观察其输出值发现为：</p>
+<pre><code>'asdasdadss@163.com000000'
+</code></pre>
+<p>在控制台多次调用并输出其它结果对比发现，其输出值长度固定为24，如果不满足则在结尾加<code>0</code>致使其补足长度至24，结合其源码在本地复现：</p>
+<pre><code class="language-js">function vf(e){
+    let a = 24,
+        t = &quot;0&quot;;
+    if (e.length &lt; a)
+        for (let r = e.length; r &lt; a; r++)
+            e += t;
+    else
+        e = e.substring(0, a);
+    return e
+}
+</code></pre>
+<p>再来跳转至<code>Object(v[&quot;c&quot;])</code>的源码处，源码片段为：</p>
+<pre><code class="language-js">T = function(e) {
+    var n = arguments.length &gt; 1 &amp;&amp; void 0 !== arguments[1] ? arguments[1] : &quot;&quot;
+      , t = arguments.length &gt; 2 &amp;&amp; void 0 !== arguments[2] ? arguments[2] : {}
+      , a = t.enc
+      , r = void 0 === a ? &quot;Utf8&quot; : a
+      , i = t.mode
+      , c = void 0 === i ? &quot;ECB&quot; : i
+      , o = t.padding
+      , u = void 0 === o ? &quot;Pkcs7&quot; : o
+      , d = p.a.enc[r].parse(n)
+      , l = {
+        mode: p.a.mode[c],
+        padding: p.a.pad[u]
+    }, s = p.a.TripleDES.encrypt(e, d, l);
+    return s.toString()
+}
+</code></pre>
+<p>可以发现其参数只有一个，即原始输入的密码值，因此<code>vf(account)</code>完全可以删除，<br>
+尝试观察<code>p.a</code>的值<br>
+<img src="https://sz134055.github.io//post-images/1671463459210.png" alt="pa" loading="lazy"></p>
+<p>发现涵盖了多种加密算法，基本可以断定其为第三方加密库，而<code>crypto-js</code>更是恰好包含了这个<code>TripleDES</code>的加密方式，因此暂时使用<code>crypto-js</code>平替，待最终对比结果</p>
+<p>搜索<code>crypto-js</code>中关于<code>TripleDES</code>的用法<br>
+<em><a href="https://www.cnblogs.com/winyh/p/12442535.html">前端加解密库 CryptoJS 使用(Triple DES 对称加密)</a></em></p>
+<pre><code class="language-js">const key  = CryptoJS.enc.Utf8.parse(&quot;4c43c365a4ac05b91eb5fa95&quot;); // key
+const iv = CryptoJS.enc.Utf8.parse(&quot;4c43c365&quot;); // iv
+
+
+// 直接使用 key 是不对的,需要像上面那样处理
+// const key  = &quot;4c43c365a4ac05b91eb5fa95&quot;; // key
+// const iv = key.substr(0, 8); // iv
+
+function encrypted(){
+　　const encrypted = CryptoJS.TripleDES.encrypt(params, key, { 
+        iv: iv, 
+        mode: CryptoJS.mode.CBC,  
+        padding: CryptoJS.pad.Pkcs7  
+    });
+
+    return encrypted.toString(); // 返回加密后的字符串
+}
+</code></pre>
+<p>对比之下就非常明了了，<code>p.a.TripleDES.encrypt(e, d, l)</code>中<code>e</code>为原始密码，<code>l</code>为加密模式相关，其值基本固定为下：</p>
+<ul>
+<li>mode: ECB</li>
+<li>padding: Pkcs7</li>
+</ul>
+<p>而<code>d</code>的值为Key，与下面代码片段相关：</p>
+<pre><code class="language-js">d = p.a.enc[r].parse(n)
+
+//p.a.enc[r].parse()
+parse: function(t) {
+    return s.parse(unescape(encodeURIComponent(t)))
+}
+//s.parse
+parse: function(t) {
+        for (var e = t.length, n = [], r = 0; r &lt; e; r++)
+            n[r &gt;&gt;&gt; 2] |= (255 &amp; t.charCodeAt(r)) &lt;&lt; 24 - r % 4 * 8;
+        return new a.init(n,e)
+    }
+</code></pre>
+<p>其中<code>p.a.enc[r].parse(n)</code>中的<code>n</code>观察其值发现即为<code>vf(account)</code>，再次观察<code>d</code>的值，并结合源码，<code>return new a.init(n,e)</code>处我们可直接改为<code>return n</code>，要的就是生成的长度为6的数组，但是在填入加密函数时，<code>l</code>实际为对象，例如：</p>
+<pre><code class="language-js">l = {
+    sigBytes:24,
+    words:[]
+}
+</code></pre>
+<p>其中<code>sigBytes</code>为固定值，<code>words</code>数组便是上面函数生成后的长度6的数组<code>n</code>，因此这里可以直接返回<code>n</code>然后再自行处理，或者干脆直接返回上列格式的对象</p>
+<p>最终在本地复现生成<code>d</code>数组的代码为：</p>
+<pre><code class="language-js">function parse(t) {
+    const Sparse = function(t) {
+        for (var e = t.length, n = [], r = 0; r &lt; e; r++)
+            n[r &gt;&gt;&gt; 2] |= (255 &amp; t.charCodeAt(r)) &lt;&lt; 24 - r % 4 * 8;
+        return n
+    }
+    return Sparse(unescape(encodeURIComponent(t)))
+}
+</code></pre>
+<p>最终本地代码为：</p>
+<pre><code class="language-js">
+let crypto = require('crypto-js')
+
+function parse(t) {
+    const Sparse = function(t) {
+        for (var e = t.length, n = [], r = 0; r &lt; e; r++)
+            n[r &gt;&gt;&gt; 2] |= (255 &amp; t.charCodeAt(r)) &lt;&lt; 24 - r % 4 * 8;
+        return n
+    }
+    return Sparse(unescape(encodeURIComponent(t)))
+}
+
+function vf(e){
+    let a = 24,
+        t = &quot;0&quot;;
+    if (e.length &lt; a)
+        for (let r = e.length; r &lt; a; r++)
+            e += t;
+    else
+        e = e.substring(0, a);
+    return e
+}
+
+function getD(account){
+    return {
+        sigBytes:24,
+        words:parse(vf(account))
+    }
+    
+}
+
+function desEntrypt(desMsg,desKey){
+        const encrypted = crypto.TripleDES.encrypt(desMsg,desKey,{
+            mode:crypto.mode.ECB,
+            padding:crypto.pad.Pkcs7
+        });
+    return encrypted.toString()
+}
+
+let account = 'asdasdadss@163.com'
+let pswd = 'abc123456789'
+
+const s = {
+    userName: account,
+    password:encodeURI(desEntrypt(pswd,getD(account)))
+}
+
+console.log(s)
+</code></pre>
+<p>生成结果：</p>
+<pre><code class="language-shell">{userName: 'asdasdadss@163.com', password: 'M4rpUkzQiMGE0YP6YR26aQ=='}
+</code></pre>
+<p>与请求对比<br>
+<img src="https://sz134055.github.io//post-images/1671465356137.png" alt="请求表单" loading="lazy"></p>
+<p>结果一致</p>
+<h3 id="模拟返回">模拟返回</h3>
+<p>根据编辑重放<br>
+<img src="https://sz134055.github.io//post-images/1671465701520.png" alt="编辑重放" loading="lazy"></p>
+<p>发现仅需图上四个参数即可正常返回，除账号密码外其余均为固定值，因此可很快写出脚本</p>
+<p>为了Python的便捷调用，给上面的js代码新增以下函数：</p>
+<pre><code class="language-js">function getPswd(account,pswd){
+    return encodeURI(desEntrypt(pswd,getD(account)))
+}
+</code></pre>
+<p>Python代码如下：</p>
+<pre><code class="language-python">import os
+import execjs
+import requests
+
+
+os.environ[&quot;NODE_PATH&quot;] = os.getcwd()+&quot;/node_modules&quot;
+
+def get_encrypt(account,pswd):
+    with open('tyy.js') as f:
+        js_code = f.read()
+
+    js = execjs.compile(js_code)
+    return js.call('getPswd', account,pswd)
+
+
+def main(account,pswd):
+    header = {
+        &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;,
+        &quot;Accept-Encoding&quot;: &quot;gzip, deflate, br&quot;,
+        &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,ja;q=0.5&quot;,
+        &quot;User-Agent&quot;: &quot;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/108.0.0.0&quot;
+    }
+    res = requests.get(url='https://m.ctyun.cn/account/login',headers=header,params={
+        'userName':account,
+        'password':get_encrypt(account,pswd),
+        'referrer':'wap',
+        'mainVersion':'300031500'
+    })
+    if res.status_code == 200:
+        res_json = res.json()
+        return res_json
+    else:
+        return res.text
+
+if __name__ == '__main__':
+    print(main('abc123456@163.com','ashdakozxbces'))
+</code></pre>
+<p>响应结果：</p>
+<pre><code class="language-json">{'resultCode': '-1', 'resultMsg': '账户或密码不正确', 'data': None, 'extendObj': None, 'code': '', 'success': False}
+</code></pre>
+<p>逆向及模拟返回成功</p>
+]]></content>
+    </entry>
+</feed>

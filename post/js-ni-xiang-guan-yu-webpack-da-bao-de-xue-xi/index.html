@@ -1,0 +1,740 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>JS逆向关于Webpack的学习 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    JS逆向关于Webpack的学习
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-12-23 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="webpack打包介绍">Webpack打包介绍</h2>
+<blockquote>
+<p>——<a href="https://www.runoob.com/w3cnote/webpack-tutorial.html">RUNOOB-Webpack入门教程</a><br>
+Webpack 是一个前端资源加载/打包工具。它将根据模块的依赖关系进行静态分析，然后将这些模块按照指定的规则生成对应的静态资源。</p>
+</blockquote>
+<blockquote>
+<p>——<a href="https://zhuanlan.zhihu.com/p/65574428">知乎-什么是webpack</a><br>
+webpack是一个打包器（bundler），它能将多个js文件打包成一个文件（其实不止能打包js文件，也能打包其他类型的文件，比如css文件，json文件等）。<br>
+可以查看官方文档，官方文档也明确表明webpack是一个打包器：<br>
+<img src="https://pic2.zhimg.com/80/v2-4e86d81c8e73f8d121a14bb7662113f5_720w.webp" alt="" loading="lazy"><br>
+但是webpack不是一个翻译器，它只能理解诸如&quot;imort&quot;、&quot;from&quot;等模块导入语句，其他的JS语句等它是不能够识别理解的。</p>
+</blockquote>
+<p><img src="https://sz134055.github.io//post-images/1671788176491.png" alt="" loading="lazy"><br>
+如上所示，打包后会呈现一个自执行函数，结构如下：</p>
+<pre><code class="language-js">!function(形参){加载器;}([模块])
+//OR
+!function(形参){加载器;}({模块})
+</code></pre>
+<p>模块以数组形式储存，每个元素都是函数</p>
+<p>特征：</p>
+<ul>
+<li>加载器代码几乎一致</li>
+<li>开头便是自执行函数</li>
+<li>结构如上</li>
+<li>关键字：
+<ul>
+<li><code>exports</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="逆向实战">逆向实战</h2>
+<p><a href="https://agent.leju.com/ucenter/passportlogin/">目标</a><br>
+注意使用旧版登录，新版登录有账号检测，未注册账号不能触发登录<br>
+登录表单中的加密参数</p>
+<p>XHR断点或者发起程序找到如下：<br>
+<img src="https://sz134055.github.io//post-images/1672225079123.png" alt="" loading="lazy"></p>
+<p>可以看到加密参数<code>s</code>的定义代码：</p>
+<pre><code class="language-js">(0,r.encryptedString)(n, i)
+</code></pre>
+<p>这里采用了<a href="https://blog.csdn.net/Winne_Shen/article/details/102684878"><code>(0,function)</code></a>的形式，可以直接看作：<br>
+<code>r.encryptedString(n, i)</code><br>
+这里<code>n</code>已在上面定义，<code>i</code>为输入的密码，因此本地代码为：</p>
+<pre><code class="language-js">function getPwdEncrypt(pwd){
+    var n = new r.RSAKeyPair(&quot;10001&quot;,&quot;&quot;,$(&quot;#pubkey&quot;).val()),
+        s = r.encryptedString(n, pwd);
+    return s
+}
+</code></pre>
+<p><code>$(&quot;#pubkey&quot;).val()</code>从HTML文档中取值，可以新开一个网页查看原始文档中是否就已经存在：<br>
+<img src="https://sz134055.github.io//post-images/1672225706895.png" alt="" loading="lazy"></p>
+<p>将其复制进本地代码：</p>
+<pre><code class="language-js">function getPwdEncrypt(pwd){
+    var pubKey = 'BC087C7C00848CE8A349C9072C3229E0D595F817EDDE9ABF6FC72B41942A759E97956CE9CB7D1F2E99399EADBACC0531F16EAE8EFCB68553DE0E125B2231ED955ADBF5208E65DC804237C93EB23C83E7ECDA0B586ECF31839038EE6B640E0EEC5FF17D219FDEA33E730F287F0D384C74A53DFE1F91ACC63C7C92039A43AC6E97',
+        n = new r.RSAKeyPair(&quot;10001&quot;,&quot;&quot;,pubKey),
+        s = r.encryptedString(n, pwd);
+    return s
+}
+</code></pre>
+<p>现在就是来解决两个函数的时候，先跳转到第一个：<br>
+<img src="https://sz134055.github.io//post-images/1672225941819.png" alt="" loading="lazy"><br>
+一眼Webpack，并且第二个函数也在其中。<br>
+以往都是直接无脑全复制，这次优雅一点，先只将跳转到的代码复制到本地（别忘了Webpack格式及加载器）</p>
+<p>代码：</p>
+<pre><code class="language-js">var webpack;
+
+!function (t) {
+    var e = {};
+    function i(n) {
+        if (e[n])
+            return e[n].exports;
+        var s = e[n] = {
+            i: n,
+            l: !1,
+            exports: {}
+        };
+        return t[n].call(s.exports, s, s.exports, i),
+            s.l = !0,
+            s.exports
+    }
+    i.m = t,
+        i.c = e,
+        i.d = function (t, e, n) {
+            i.o(t, e) || Object.defineProperty(t, e, {
+                enumerable: !0,
+                get: n
+            })
+        }
+        ,
+        i.r = function (t) {
+            &quot;undefined&quot; != typeof Symbol &amp;&amp; Symbol.toStringTag &amp;&amp; Object.defineProperty(t, Symbol.toStringTag, {
+                value: &quot;Module&quot;
+            }),
+                Object.defineProperty(t, &quot;__esModule&quot;, {
+                    value: !0
+                })
+        }
+        ,
+        i.t = function (t, e) {
+            if (1 &amp; e &amp;&amp; (t = i(t)),
+                8 &amp; e)
+                return t;
+            if (4 &amp; e &amp;&amp; &quot;object&quot; == typeof t &amp;&amp; t &amp;&amp; t.__esModule)
+                return t;
+            var n = Object.create(null);
+            if (i.r(n),
+                Object.defineProperty(n, &quot;default&quot;, {
+                    enumerable: !0,
+                    value: t
+                }),
+                2 &amp; e &amp;&amp; &quot;string&quot; != typeof t)
+                for (var s in t)
+                    i.d(n, s, function (e) {
+                        return t[e]
+                    }
+                        .bind(null, s));
+            return n
+        }
+        ,
+        i.n = function (t) {
+            var e = t &amp;&amp; t.__esModule ? function () {
+                return t.default
+            }
+                : function () {
+                    return t
+                }
+                ;
+            return i.d(e, &quot;a&quot;, e),
+                e
+        }
+        ,
+        i.o = function (t, e) {
+            return Object.prototype.hasOwnProperty.call(t, e)
+        }
+        ,
+        i.p = &quot;//esfres.leju.com/agent_www_new/dist/&quot;,
+        //这里将其注释掉，否则会报缺少参数错误
+        //i(i.s = 301),
+        webpack = i
+}(
+    {
+        228: function (t, e, i) {
+            &quot;use strict&quot;;
+            Object.defineProperty(e, &quot;__esModule&quot;, {
+                value: !0
+            });
+            var n, s;
+            function o(t) {
+                n = new Array(t);
+                for (var e = 0; e &lt; n.length; e++)
+                    n[e] = 0;
+                new a,
+                    (s = new a).digits[0] = 1
+            }
+            o(20);
+            l(1e15);
+            function a(t) {
+                this.digits = &quot;boolean&quot; == typeof t &amp;&amp; 1 == t ? null : n.slice(0),
+                    this.isNeg = !1
+            }
+            function r(t) {
+                var e = new a(!0);
+                return e.digits = t.digits.slice(0),
+                    e.isNeg = t.isNeg,
+                    e
+            }
+            function l(t) {
+                var e = new a;
+                e.isNeg = t &lt; 0,
+                    t = Math.abs(t);
+                for (var i = 0; t &gt; 0;)
+                    e.digits[i++] = 65535 &amp; t,
+                        t &gt;&gt;= 16;
+                return e
+            }
+            function c(t) {
+                for (var e = &quot;&quot;, i = t.length - 1; i &gt; -1; --i)
+                    e += t.charAt(i);
+                return e
+            }
+            new Array(&quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;f&quot;, &quot;g&quot;, &quot;h&quot;, &quot;i&quot;, &quot;j&quot;, &quot;k&quot;, &quot;l&quot;, &quot;m&quot;, &quot;n&quot;, &quot;o&quot;, &quot;p&quot;, &quot;q&quot;, &quot;r&quot;, &quot;s&quot;, &quot;t&quot;, &quot;u&quot;, &quot;v&quot;, &quot;w&quot;, &quot;x&quot;, &quot;y&quot;, &quot;z&quot;);
+            var u = new Array(&quot;0&quot;, &quot;1&quot;, &quot;2&quot;, &quot;3&quot;, &quot;4&quot;, &quot;5&quot;, &quot;6&quot;, &quot;7&quot;, &quot;8&quot;, &quot;9&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;, &quot;f&quot;);
+            function d(t) {
+                for (var e = &quot;&quot;, i = 0; i &lt; 4; ++i)
+                    e += u[15 &amp; t],
+                        t &gt;&gt;&gt;= 4;
+                return c(e)
+            }
+            function p(t) {
+                return t &gt;= 48 &amp;&amp; t &lt;= 57 ? t - 48 : t &gt;= 65 &amp;&amp; t &lt;= 90 ? 10 + t - 65 : t &gt;= 97 &amp;&amp; t &lt;= 122 ? 10 + t - 97 : 0
+            }
+            function h(t) {
+                for (var e = 0, i = Math.min(t.length, 4), n = 0; n &lt; i; ++n)
+                    e &lt;&lt;= 4,
+                        e |= p(t.charCodeAt(n));
+                return e
+            }
+            function f(t, e) {
+                var i;
+                if (t.isNeg != e.isNeg)
+                    e.isNeg = !e.isNeg,
+                        i = g(t, e),
+                        e.isNeg = !e.isNeg;
+                else {
+                    i = new a;
+                    for (var n, s = 0, o = 0; o &lt; t.digits.length; ++o)
+                        n = t.digits[o] + e.digits[o] + s,
+                            i.digits[o] = 65535 &amp; n,
+                            s = Number(n &gt;= 65536);
+                    i.isNeg = t.isNeg
+                }
+                return i
+            }
+            function g(t, e) {
+                var i;
+                if (t.isNeg != e.isNeg)
+                    e.isNeg = !e.isNeg,
+                        i = f(t, e),
+                        e.isNeg = !e.isNeg;
+                else {
+                    var n, s;
+                    i = new a,
+                        s = 0;
+                    for (var o = 0; o &lt; t.digits.length; ++o)
+                        n = t.digits[o] - e.digits[o] + s,
+                            i.digits[o] = 65535 &amp; n,
+                            i.digits[o] &lt; 0 &amp;&amp; (i.digits[o] += 65536),
+                            s = 0 - Number(n &lt; 0);
+                    if (-1 == s) {
+                        s = 0;
+                        for (o = 0; o &lt; t.digits.length; ++o)
+                            n = 0 - i.digits[o] + s,
+                                i.digits[o] = 65535 &amp; n,
+                                i.digits[o] &lt; 0 &amp;&amp; (i.digits[o] += 65536),
+                                s = 0 - Number(n &lt; 0);
+                        i.isNeg = !t.isNeg
+                    } else
+                        i.isNeg = t.isNeg
+                }
+                return i
+            }
+            function m(t) {
+                for (var e = t.digits.length - 1; e &gt; 0 &amp;&amp; 0 == t.digits[e];)
+                    --e;
+                return e
+            }
+            function y(t) {
+                var e, i = m(t), n = t.digits[i], s = 16 * (i + 1);
+                for (e = s; e &gt; s - 16 &amp;&amp; 0 == (32768 &amp; n); --e)
+                    n &lt;&lt;= 1;
+                return e
+            }
+            function v(t, e) {
+                for (var i, n, s, o = new a, r = m(t), l = m(e), c = 0; c &lt;= l; ++c) {
+                    i = 0,
+                        s = c;
+                    for (var u = 0; u &lt;= r; ++u,
+                        ++s)
+                        n = o.digits[s] + t.digits[u] * e.digits[c] + i,
+                            o.digits[s] = 65535 &amp; n,
+                            i = n &gt;&gt;&gt; 16;
+                    o.digits[c + r + 1] = i
+                }
+                return o.isNeg = t.isNeg != e.isNeg,
+                    o
+            }
+            function b(t, e) {
+                var i, n, s, o = new a;
+                i = m(t),
+                    n = 0;
+                for (var r = 0; r &lt;= i; ++r)
+                    s = o.digits[r] + t.digits[r] * e + n,
+                        o.digits[r] = 65535 &amp; s,
+                        n = s &gt;&gt;&gt; 16;
+                return o.digits[1 + i] = n,
+                    o
+            }
+            function w(t, e, i, n, s) {
+                for (var o = Math.min(e + s, t.length), a = e, r = n; a &lt; o; ++a,
+                    ++r)
+                    i[r] = t[a]
+            }
+            var k = new Array(0, 32768, 49152, 57344, 61440, 63488, 64512, 65024, 65280, 65408, 65472, 65504, 65520, 65528, 65532, 65534, 65535);
+            function C(t, e) {
+                var i = Math.floor(e / 16)
+                    , n = new a;
+                w(t.digits, 0, n.digits, i, n.digits.length - i);
+                for (var s = e % 16, o = 16 - s, r = n.digits.length - 1, l = r - 1; r &gt; 0; --r,
+                    --l)
+                    n.digits[r] = n.digits[r] &lt;&lt; s &amp; 65535 | (n.digits[l] &amp; k[s]) &gt;&gt;&gt; o;
+                return n.digits[0] = n.digits[r] &lt;&lt; s &amp; 65535,
+                    n.isNeg = t.isNeg,
+                    n
+            }
+            var x = new Array(0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535);
+            function _(t, e) {
+                var i = Math.floor(e / 16)
+                    , n = new a;
+                w(t.digits, i, n.digits, 0, t.digits.length - i);
+                for (var s = e % 16, o = 16 - s, r = 0, l = r + 1; r &lt; n.digits.length - 1; ++r,
+                    ++l)
+                    n.digits[r] = n.digits[r] &gt;&gt;&gt; s | (n.digits[l] &amp; x[s]) &lt;&lt; o;
+                return n.digits[n.digits.length - 1] &gt;&gt;&gt;= s,
+                    n.isNeg = t.isNeg,
+                    n
+            }
+            function $(t, e) {
+                var i = new a;
+                return w(t.digits, 0, i.digits, e, i.digits.length - e),
+                    i
+            }
+            function S(t, e) {
+                if (t.isNeg != e.isNeg)
+                    return 1 - 2 * Number(t.isNeg);
+                for (var i = t.digits.length - 1; i &gt;= 0; --i)
+                    if (t.digits[i] != e.digits[i])
+                        return t.isNeg ? 1 - 2 * Number(t.digits[i] &gt; e.digits[i]) : 1 - 2 * Number(t.digits[i] &lt; e.digits[i]);
+                return 0
+            }
+            function j(t, e) {
+                var i, n, o = y(t), l = y(e), c = e.isNeg;
+                if (o &lt; l)
+                    return t.isNeg ? ((i = r(s)).isNeg = !e.isNeg,
+                        t.isNeg = !1,
+                        e.isNeg = !1,
+                        n = g(e, t),
+                        t.isNeg = !0,
+                        e.isNeg = c) : (i = new a,
+                            n = r(t)),
+                        new Array(i, n);
+                i = new a,
+                    n = t;
+                for (var u = Math.ceil(l / 16) - 1, d = 0; e.digits[u] &lt; 32768;)
+                    e = C(e, 1),
+                        ++d,
+                        ++l,
+                        u = Math.ceil(l / 16) - 1;
+                n = C(n, d),
+                    o += d;
+                for (var p = Math.ceil(o / 16) - 1, h = $(e, p - u); -1 != S(n, h);)
+                    ++i.digits[p - u],
+                        n = g(n, h);
+                for (var v = p; v &gt; u; --v) {
+                    var w = v &gt;= n.digits.length ? 0 : n.digits[v]
+                        , k = v - 1 &gt;= n.digits.length ? 0 : n.digits[v - 1]
+                        , x = v - 2 &gt;= n.digits.length ? 0 : n.digits[v - 2]
+                        , j = u &gt;= e.digits.length ? 0 : e.digits[u]
+                        , A = u - 1 &gt;= e.digits.length ? 0 : e.digits[u - 1];
+                    i.digits[v - u - 1] = w == j ? 65535 : Math.floor((65536 * w + k) / j);
+                    for (var T = i.digits[v - u - 1] * (65536 * j + A), q = 4294967296 * w + (65536 * k + x); T &gt; q;)
+                        --i.digits[v - u - 1],
+                            T = i.digits[v - u - 1] * (65536 * j | A),
+                            q = 65536 * w * 65536 + (65536 * k + x);
+                    (n = g(n, b(h = $(e, v - u - 1), i.digits[v - u - 1]))).isNeg &amp;&amp; (n = f(n, h),
+                        --i.digits[v - u - 1])
+                }
+                return n = _(n, d),
+                    i.isNeg = t.isNeg != c,
+                    t.isNeg &amp;&amp; (i = c ? f(i, s) : g(i, s),
+                        n = g(e = _(e, d), n)),
+                    0 == n.digits[0] &amp;&amp; 0 == m(n) &amp;&amp; (n.isNeg = !1),
+                    new Array(i, n)
+            }
+            e.setMaxDigits = o,
+                e.biFromHex = function (t) {
+                    for (var e = new a, i = t.length, n = 0; i &gt; 0; i -= 4,
+                        ++n)
+                        e.digits[n] = h(t.substr(Math.max(i - 4, 0), Math.min(i, 4)));
+                    return e
+                }
+                ,
+                e.biHighIndex = m,
+                e.biCopy = r,
+                e.BigInt = a,
+                e.biDivide = function (t, e) {
+                    return j(t, e)[0]
+                }
+                ,
+                e.biMultiply = v,
+                e.biDivideByRadixPower = function (t, e) {
+                    var i = new a;
+                    return w(t.digits, e, i.digits, 0, i.digits.length - e),
+                        i
+                }
+                ,
+                e.biModuloByRadixPower = function (t, e) {
+                    var i = new a;
+                    return w(t.digits, 0, i.digits, 0, e),
+                        i
+                }
+                ,
+                e.biSubtract = g,
+                e.biCompare = S,
+                e.biShiftRight = _,
+                e.biToHex = function (t) {
+                    for (var e = &quot;&quot;, i = (m(t),
+                        m(t)); i &gt; -1; --i)
+                        e += d(t.digits[i]);
+                    return e
+                }
+        },
+        306: function(t, e, i) {
+            &quot;use strict&quot;;
+            Object.defineProperty(e, &quot;__esModule&quot;, {
+                value: !0
+            }),
+            e.BarrettMu_powMod = e.BarrettMu_multiplyMod = e.BarrettMu_modulo = e.BarrettMu = void 0;
+            var n = i(228);
+            function s(t) {
+                var e = (0,
+                n.biDivideByRadixPower)(t, this.k - 1)
+                  , i = (0,
+                n.biMultiply)(e, this.mu)
+                  , s = (0,
+                n.biDivideByRadixPower)(i, this.k + 1)
+                  , o = (0,
+                n.biModuloByRadixPower)(t, this.k + 1)
+                  , a = (0,
+                n.biMultiply)(s, this.modulus)
+                  , r = (0,
+                n.biModuloByRadixPower)(a, this.k + 1)
+                  , l = (0,
+                n.biSubtract)(o, r);
+                l.isNeg &amp;&amp; (l = biAdd(l, this.bkplus1));
+                for (var c = (0,
+                n.biCompare)(l, this.modulus) &gt;= 0; c; )
+                    l = (0,
+                    n.biSubtract)(l, this.modulus),
+                    c = (0,
+                    n.biCompare)(l, this.modulus) &gt;= 0;
+                return l
+            }
+            function o(t, e) {
+                var i = (0,
+                n.biMultiply)(t, e);
+                return this.modulo(i)
+            }
+            function a(t, e) {
+                var i = new n.BigInt;
+                i.digits[0] = 1;
+                for (var s = t, o = e; 0 != (1 &amp; o.digits[0]) &amp;&amp; (i = this.multiplyMod(i, s)),
+                0 != (o = (0,
+                n.biShiftRight)(o, 1)).digits[0] || 0 != (0,
+                n.biHighIndex)(o); )
+                    s = this.multiplyMod(s, s);
+                return i
+            }
+            e.BarrettMu = function(t) {
+                this.modulus = (0,
+                n.biCopy)(t),
+                this.k = (0,
+                n.biHighIndex)(this.modulus) + 1;
+                var e = new n.BigInt;
+                e.digits[2 * this.k] = 1,
+                this.mu = (0,
+                n.biDivide)(e, this.modulus),
+                this.bkplus1 = new n.BigInt,
+                this.bkplus1.digits[this.k + 1] = 1,
+                this.modulo = s,
+                this.multiplyMod = o,
+                this.powMod = a
+            }
+            ,
+            e.BarrettMu_modulo = s,
+            e.BarrettMu_multiplyMod = o,
+            e.BarrettMu_powMod = a
+        },
+        305: function (t, e, i) {
+            &quot;use strict&quot;;
+            Object.defineProperty(e, &quot;__esModule&quot;, {
+                value: !0
+            }),
+                e.encryptedString = e.RSAKeyPair = void 0;
+            var n = i(228)
+                , s = i(306)
+                , o = {};
+            o.NoPadding = &quot;NoPadding&quot;,
+                o.PKCS1Padding = &quot;PKCS1Padding&quot;,
+                o.RawEncoding = &quot;RawEncoding&quot;,
+                o.NumericEncoding = &quot;NumericEncoding&quot;,
+                e.RSAKeyPair = function (t, e, i, o) {
+                    this.e = (0,
+                        n.biFromHex)(t),
+                        this.d = (0,
+                            n.biFromHex)(e),
+                        this.m = (0,
+                            n.biFromHex)(i),
+                        this.chunkSize = &quot;number&quot; != typeof o ? 2 * (0,
+                            n.biHighIndex)(this.m) : o / 8,
+                        this.radix = 16,
+                        this.barrett = new s.BarrettMu(this.m)
+                }
+                ,
+                e.encryptedString = function (t, e, i, s) {
+                    var a, r, l, c, u, d, p, h, f, g = new Array, m = e.length, y = &quot;&quot;;
+                    for (c = &quot;string&quot; == typeof i ? i == o.NoPadding ? 1 : i == o.PKCS1Padding ? 2 : 0 : 0,
+                        u = &quot;string&quot; == typeof s &amp;&amp; s == o.RawEncoding ? 1 : 0,
+                        1 == c ? m &gt; t.chunkSize &amp;&amp; (m = t.chunkSize) : 2 == c &amp;&amp; m &gt; t.chunkSize - 11 &amp;&amp; (m = t.chunkSize - 11),
+                        a = 0,
+                        r = 2 == c ? m - 1 : t.chunkSize - 1; a &lt; m;)
+                        c ? g[r] = e.charCodeAt(a) : g[a] = e.charCodeAt(a),
+                            a++,
+                            r--;
+                    for (1 == c &amp;&amp; (a = 0),
+                        r = t.chunkSize - m % t.chunkSize; r &gt; 0;) {
+                        if (2 == c) {
+                            for (d = Math.floor(256 * Math.random()); !d;)
+                                d = Math.floor(256 * Math.random());
+                            g[a] = d
+                        } else
+                            g[a] = 0;
+                        a++,
+                            r--
+                    }
+                    for (2 == c &amp;&amp; (g[m] = 0,
+                        g[t.chunkSize - 2] = 2,
+                        g[t.chunkSize - 1] = 0),
+                        p = g.length,
+                        a = 0; a &lt; p; a += t.chunkSize) {
+                        for (h = new n.BigInt,
+                            r = 0,
+                            l = a; l &lt; a + t.chunkSize; ++r)
+                            h.digits[r] = g[l++],
+                                h.digits[r] += g[l++] &lt;&lt; 8;
+                        f = t.barrett.powMod(h, t.e),
+                            y += 1 == u ? biToBytes(f) : 16 == t.radix ? (0,
+                                n.biToHex)(f) : biToString(f, t.radix)
+                    }
+                    return y
+                }
+        }
+    })
+
+
+
+
+function getPwdEncrypt(pwd) {
+    var r = webpack(305),
+        pubKey = 'BC087C7C00848CE8A349C9072C3229E0D595F817EDDE9ABF6FC72B41942A759E97956CE9CB7D1F2E99399EADBACC0531F16EAE8EFCB68553DE0E125B2231ED955ADBF5208E65DC804237C93EB23C83E7ECDA0B586ECF31839038EE6B640E0EEC5FF17D219FDEA33E730F287F0D384C74A53DFE1F91ACC63C7C92039A43AC6E97',
+        n = new r.RSAKeyPair(&quot;10001&quot;, &quot;&quot;, pubKey),
+        s = r.encryptedString(n, pwd);
+
+    return s
+}
+
+console.log(getPwdEncrypt('asdadasdzc'))
+
+</code></pre>
+<p>这里在<code>305</code>中可以很明显看到对其它模块的调用，因此一并将其复制进来（如果运行中报错缺少，同理将其对应的复制进来即可），并对外提供一个<code>webpack</code>的变量便于后续调用</p>
+<p>尝试运行，发现卡住了，迟迟没有结果，这是不正常的，再回到网页代码上<br>
+<img src="https://sz134055.github.io//post-images/1672226956974.png" alt="" loading="lazy"><br>
+发现这段代码被先运行，抱着试试看的态度，跳转至代码处尝试扣下来，结果发现就是上面的<code>228</code>，于是最终代码：</p>
+<pre><code class="language-js">//前面webpack的内容省略，参考前面的代码
+
+function getPwdEncrypt(pwd) {
+    webpack(228).setMaxDigits(129);
+    var r = webpack(305),
+        pubKey = 'BC087C7C00848CE8A349C9072C3229E0D595F817EDDE9ABF6FC72B41942A759E97956CE9CB7D1F2E99399EADBACC0531F16EAE8EFCB68553DE0E125B2231ED955ADBF5208E65DC804237C93EB23C83E7ECDA0B586ECF31839038EE6B640E0EEC5FF17D219FDEA33E730F287F0D384C74A53DFE1F91ACC63C7C92039A43AC6E97',
+        n = new r.RSAKeyPair(&quot;10001&quot;, &quot;&quot;, pubKey),
+        s = r.encryptedString(n, pwd);
+    
+    return s
+}
+
+console.log(getPwdEncrypt(&quot;asdadadadad&quot;))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">b1413c4d46483e93234a5ab062ff31277224e1a028cc1efa0b88f9f5f448a8dfd1daa9747f81ba4970740d06fc76e59b0af6cf96d420b7889aceb67eb71ef7051c89e886b4420ef0ff75c1f8b0eb7f23a7451cc6b8e80c0ba04cb49106dd4c67a7572c7147d815d64d90b31f2a083bbc7f8fab188c6f6226f6b756f7b727a7cc
+</code></pre>
+<p><img src="https://sz134055.github.io//post-images/1672227476144.png" alt="" loading="lazy"><br>
+对比结果一致，逆向成功</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/fei-dui-cheng-jia-mi-rsa-suan-fa-xue-xi-ji-fang-tian-xia-ni-xiang/" class="post-title gt-a-link">
+                    非对称加密-RSA算法学习及案例
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

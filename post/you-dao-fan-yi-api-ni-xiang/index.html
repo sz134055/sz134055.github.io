@@ -1,0 +1,334 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>有道翻译API逆向 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    有道翻译API逆向
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-11-24 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>此次逆向涉及到MD5加密</p>
+<h2 id="初步准备">初步准备</h2>
+<p>首先随意输入文字，请求翻译的结果：<br>
+<img src="https://sz134055.github.io//post-images/1669298433485.png" alt="翻译1" loading="lazy"></p>
+<p>得到接口：<br>
+<code>https://fanyi.youdao.com/translate_o</code></p>
+<p>观察传递的表单及参数<br>
+<img src="https://sz134055.github.io//post-images/1669298453264.png" alt="表单" loading="lazy"></p>
+<p>再输入任意文字，对比表单和参数<br>
+<img src="https://sz134055.github.io//post-images/1669298537971.png" alt="表单2" loading="lazy"></p>
+<p>可以观察到需要关注的表单项目为：</p>
+<ul>
+<li>salt</li>
+<li>lts</li>
+<li>sign</li>
+<li>bv</li>
+</ul>
+<p>这里初步估计<code>salt</code>和<code>lts</code>均为时间戳相关，而<code>sign</code>和<code>bv</code>都是32位，初步估计为MD5加密</p>
+<h2 id="通过md5寻找加密处">通过MD5寻找加密处</h2>
+<p>猜测加密方式为MD5加密，我们可尝试直接搜索<code>md5</code>关键字，有一处匹配，但未能发现和接口相关的代码。<br>
+<img src="https://sz134055.github.io//post-images/1669299109490.png" alt="搜索MD5关键字" loading="lazy"></p>
+<p>尝试在该js文件内继续搜索关键字，仅发现一个可能相关处：<br>
+<img src="https://sz134055.github.io//post-images/1669299638905.png" alt="可能相关" loading="lazy"></p>
+<p>可以在此处代码下断点对比观察，如果恰好相关则省时省力</p>
+<h2 id="通过搜寻参数">通过搜寻参数</h2>
+<p>同上，不再赘述</p>
+<h2 id="通过xhr断点">通过XHR断点</h2>
+<p>如果都不能很好确定，使用XHR断点最为直接。</p>
+<p>这里下<code>translate_o</code>的XHR断点，观察堆栈<br>
+<img src="https://sz134055.github.io//post-images/1669300123682.png" alt="堆栈" loading="lazy"></p>
+<p>可以看到下图是传送请求起始，表单来源为<code>e</code><br>
+<img src="https://sz134055.github.io//post-images/1669341273516.png" alt="起始" loading="lazy"></p>
+<p>根据下一堆栈对其函数调用，发现<code>e</code>即为下列对象：<br>
+<img src="https://sz134055.github.io//post-images/1669300352371.png" alt="e" loading="lazy"></p>
+<p>到目前为止，可以考虑开始“扣代码”</p>
+<h2 id="扣代码">扣代码</h2>
+<p>关心的四个参数代码：</p>
+<pre><code class="language-js">salt: r.salt,
+sign: r.sign,
+lts: r.ts,
+bv: r.bv,
+</code></pre>
+<p>都与<code>r</code>相关，而其声明恰好在函数内：<br>
+<img src="https://sz134055.github.io//post-images/1669300764682.png" alt="r" loading="lazy"></p>
+<p>将相关代码“扣”下来：</p>
+<pre><code class="language-js">let n = w.val()
+, r = v.generateSaltSign(n)
+, i = n.length;
+
+let salt = r.salt,
+sign = r.sign,
+lts = r.ts,
+bv = r.bv
+</code></pre>
+<p>这里可以直接发现<code>n</code>即我们输入的文字，因此免去“扣”<code>w.val()</code>，将其先设置为任意文字</p>
+<p>将涉及到的其它函数源码“扣”下来，例如<code> v.generateSaltSign(n)</code>，其对应代码如下：</p>
+<pre><code class="language-js">var r = function(e) {
+    var t = n.md5(navigator.appVersion)
+        , r = &quot;&quot; + (new Date).getTime()
+        , i = r + parseInt(10 * Math.random(), 10);
+    return {
+        ts: r,
+        bv: t,
+        salt: i,
+        sign: n.md5(&quot;fanyideskweb&quot; + e + i + &quot;Ygy_4c=r#e#4EX^NUGUc5&quot;)
+    }
+};
+</code></pre>
+<p>将其稍微修改加入本地代码：</p>
+<pre><code class="language-js">let generateSaltSign = function(e) {
+    var t = n.md5(navigator.appVersion)
+      , r = &quot;&quot; + (new Date).getTime()
+      , i = r + parseInt(10 * Math.random(), 10);
+    return {
+        ts: r,
+        bv: t,
+        salt: i,
+        sign: n.md5(&quot;fanyideskweb&quot; + e + i + &quot;Ygy_4c=r#e#4EX^NUGUc5&quot;)
+    }
+};
+</code></pre>
+<p>这里<code>navigator.appVersion</code>可直接进行替换，而<code>n.md5()</code>可以尝试使用CryptoJS MD5替代，观察对比：<br>
+<img src="https://sz134055.github.io//post-images/1669302460394.png" alt="md5加密对比" loading="lazy"><br>
+值一致</p>
+<blockquote>
+<p>其实这里的目的是查看网站加密的是否为标准的MD5加密算法，如果是，则可以使用现成的MD5加密库生成，因此可以使用现成的在线工具加密然后对比即可，推荐：<a href="https://the-x.cn/zh-cn/hash/MessageDigestAlgorithm.aspx">the-x 常规MD5 / 文件MD5 在线哈希工具</a></p>
+</blockquote>
+<p>进行补全后：</p>
+<pre><code class="language-js">const cryptojs = require('crypto-js')
+
+let generateSaltSign = function(e) {
+    const navigator = {
+        appVersion:'5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.56'
+    }
+
+    let t = cryptojs.MD5(navigator.appVersion).toString()
+      , r = &quot;&quot; + (new Date).getTime()
+      , i = r + parseInt(10 * Math.random(), 10);
+    return {
+        ts: r,
+        bv: t,
+        salt: i,
+        sign: cryptojs.MD5(&quot;fanyideskweb&quot; + e + i + &quot;Ygy_4c=r#e#4EX^NUGUc5&quot;).toString()
+    }
+};
+
+
+let n = '测试'
+, r =generateSaltSign(n)
+, i = n.length;
+
+let need = {
+    salt : r.salt,
+    sign : r.sign,
+    lts :r.ts,
+    bv :r.bv
+}
+
+console.log(need)
+
+</code></pre>
+<p>将其封装一下，最终代码：</p>
+<pre><code class="language-js">const cryptojs = require('crypto-js')
+
+let generateSaltSign = function(e) {
+    const navigator = {
+        appVersion:'5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.56'
+    }
+
+    let t = cryptojs.MD5(navigator.appVersion).toString()
+      , r = &quot;&quot; + (new Date).getTime()
+      , i = r + parseInt(10 * Math.random(), 10);
+    return {
+        ts: r,
+        bv: t,
+        salt: i,
+        sign: cryptojs.MD5(&quot;fanyideskweb&quot; + e + i + &quot;Ygy_4c=r#e#4EX^NUGUc5&quot;).toString()
+    }
+};
+
+function getIt(text){
+    let n = text
+    , r =generateSaltSign(n)
+    , i = n.length;
+
+    let need = {
+        salt : r.salt,
+        sign : r.sign,
+        lts :r.ts,
+        bv :r.bv
+    }
+    
+    return need
+}
+
+module.exports = {get:getIt}
+
+</code></pre>
+<h2 id="补充">补充</h2>
+<p>实际测试中发现，此API还需要Cookie，通过参数搜索，定位到以下代码：<br>
+<img src="https://sz134055.github.io//post-images/1669345919644.png" alt="COOKIE" loading="lazy"></p>
+<p>可以暂时将除<code>___rl__test__cookies</code>作为定值使用，而<code>___rl__test__cookies</code>则为时间戳</p>
+<h2 id="验证">验证</h2>
+<p><a href="/post/shi-yong-pyexecjs-wei-python-pa-chong-ti-gong-jia-mi-can-shu">使用PyExecJS为Python爬虫提供加密参数</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/shi-yong-express-gei-python-ti-gong-api/" class="post-title gt-a-link">
+                    使用Express给Python提供API
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

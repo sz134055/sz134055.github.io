@@ -1,0 +1,357 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>非对称加密-RSA算法学习及案例 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    非对称加密-RSA算法学习及案例
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-12-21 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="介绍">介绍</h2>
+<blockquote>
+<p>来自百度百科：<br>
+与对称加密算法不同，非对称加密算法需要两个密钥：公开密钥（publickey）和私有密钥（privatekey）。公开密钥与私有密钥是一对，如果用公开密钥对数据进行加密，只有用对应的私有密钥才能解密；如果用私有密钥对数据进行加密，那么只有用对应的公开密钥才能解密。因为加密和解密使用的是两个不同的密钥，所以这种算法叫作非对称加密算法。</p>
+</blockquote>
+<p>常见的非对称加密算法：</p>
+<ul>
+<li>RSA</li>
+<li>DSA</li>
+</ul>
+<p>非对称加密特点：</p>
+<ul>
+<li>加密算法私钥由数据方持有，不会在网络上传递，保证了密钥的安全性</li>
+<li>非对称加密算法通常比对称算法计算复杂，性能耗费高</li>
+<li>非对称加密算法可用于数字签名</li>
+<li>即使明文一致，密文也可能不一致</li>
+</ul>
+<p>常见JS调试调用特点：</p>
+<ul>
+<li>关键词
+<ul>
+<li><code>new JSEncrypt()</code></li>
+<li><code>JSEncrypt</code></li>
+<li><code>setPublickKey</code></li>
+<li><code>setKey</code></li>
+<li><code>setPrivateKey</code></li>
+<li><code>getPublicKey</code></li>
+</ul>
+</li>
+<li>长度（私钥-公钥-明文-密文）
+<ul>
+<li>428-128-1~53-88</li>
+<li>812-216-1~117-172</li>
+<li>1588-391-1~245-344</li>
+</ul>
+</li>
+</ul>
+<h2 id="js-rsa加密实现">JS RSA加密实现</h2>
+<p>Node.Js环境，需要<code>node-rsa</code>包</p>
+<pre><code class="language-js">let nodeRsa = require('node-rsa')
+
+/**
+ * 这里仅模拟网站登录表单加密情况
+ * 登录时表单中某项加密（如密码password）
+ * 数据传递到服务器后
+ * 服务器根据保存的私钥解密，保证密码不被泄露
+ * 因此这里的两个主要函数为 公钥加密和私钥解密
+ */
+
+//使用公钥加密
+function rsaEncrypt(pub,msg){
+    const pubKey = new nodeRsa(pub,'pkcs8-public')
+    return pubKey.encrypt(msg,'base64')
+}
+
+//使用私钥解密
+function rsaDecrypt(pri,msg){
+    const priKey = new nodeRsa(pri,'pkcs8-private')
+    return priKey.decrypt(msg,'utf8')
+}
+
+//生成密钥
+const key = new nodeRsa({b:1024})
+//导出公钥
+const publicKey = key.exportKey('pkcs8-public')
+//导出密钥
+const privateKey = key.exportKey('pkcs8-private')
+//待加密明文
+let text = 'Hello World'
+//加密明文
+let enText = rsaEncrypt(publicKey,text)
+//解密密文
+let deText = rsaDecrypt(privateKey,enText)
+
+console.log('公钥：'+publicKey)
+console.log('私钥：'+privateKey)
+console.log('密文：'+enText)
+console.log('明文：'+deText)
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">公钥：-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC2me8YQsT0nxqIv/4rxK/uL+6a
+rPAOpVn8xj4YhoGTLXc85cRq6JY3FxyfwiJR2kRoQesNCLyqxNklXLMQ+tJLKymp
+UBZJhyoeLE6vDovm7C+zp8q4IP6veF14/HyZ1kdLoapepudCDOxmwijVJ//lhlZa
+1IZja8l3wYqCogYLWQIDAQAB
+-----END PUBLIC KEY-----
+私钥：-----BEGIN PRIVATE KEY-----
+MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALaZ7xhCxPSfGoi/
+/ivEr+4v7pqs8A6lWfzGPhiGgZMtdzzlxGroljcXHJ/CIlHaRGhB6w0IvKrE2SVc
+sxD60ksrKalQFkmHKh4sTq8Oi+bsL7Onyrgg/q94XXj8fJnWR0uhql6m50IM7GbC
+KNUn/+WGVlrUhmNryXfBioKiBgtZAgMBAAECgYEAkBZTxq8ZP3Y0t+fYJq1jre4A
+t+jy3Hu50G6WHUA2Cu77ggBEx5+UuQ/xtFa6QiCbjjFFytk0FwSR3JuTaTiiqvtT
+QMtUl9y4R3e+A/dW1HvvZoybw/idz8fK2brIt9DyQhc74YiUhcvwSvagTVt9213O
+4ejfIc0Rt0IBeG2AH6ECQQDs+N/ttQrlf6WR9U1VlZKcczRuIUzya3k6YPCrdtbs
+nTARIqMdTPlqdSUhOG3HAeLed4LHaD+sgMRbQunOIFdtAkEAxUNtzQCl/0uVL5Vk
+CFTZ76lRLW7YBHV9APS7sUs2Dvg35Il4pY/MEBrPV2aoIT8A7L9uQ7RbtFYYPRRj
+jsI0HQJAGEbe2gFkHmLXWX6h75SlMnXy9x1ePq+X+c0YmthP6GmqFPdRcp0CKE/b
+/+1CAdNFpLjlovwhGdEPTLIsNbvGeQJAAIFzvprJ0iW3dC/F2d+dz2d3tc4a76f9
+cgsuj/3JXbB1NDjF/man90KaVXcF50/qCLFU7wd/VK8D0OREfREyYQJBAMaoEvoo
+p7XaPzNNmlkywUF8r3APeaC7UeQoDrvZtWSZwnrer2uC0AmMxMHSgerJho2lYeJO
+wwMXXLkAuxQIAsI=
+-----END PRIVATE KEY-----
+密文：LgTwiTwZSbsTvZAVlVKD3qCysddajwDf1gDuPqSfE5WP+prKrRRtiqA41ollcTsWtr86foxuxr1YxvGJC35sH8ieTUU1SI5bHgQFVHxOS/b3FwmROtPkfA66XfDZ9WoUj7Kh728Z0ueX19h8EIAMfONS8/y/ty4boc83x5sZzgk=
+明文：Hello World
+</code></pre>
+<h2 id="实战-房天下登录表单逆向">实战-房天下登录表单逆向</h2>
+<h3 id="逆向">逆向</h3>
+<p>在登录表单中，<code>pwd</code>被加密<br>
+<img src="https://sz134055.github.io//post-images/1671563212303.png" alt="" loading="lazy"></p>
+<p>老规矩，XHR断点或者查看发起程序，很快找到以下代码片段：<br>
+<img src="https://sz134055.github.io//post-images/1671563335418.png" alt="" loading="lazy"></p>
+<p>跳转至加密代码处，发现整个js文件才400行，且看上去全跟RSA加密相关，简单粗暴全扒到本地<br>
+<img src="https://sz134055.github.io//post-images/1671563521545.png" alt="" loading="lazy"></p>
+<p>加密函数基本搞定，现在来找<code>key_to_encode</code>，既然非混淆，直接全局搜索，定位到此处：<br>
+<img src="https://sz134055.github.io//post-images/1671563639592.png" alt="" loading="lazy"></p>
+<p>全盘复制，而<code>RSAKeyPair()</code>恰好就来自上面复制的400行代码之中</p>
+<p>现在全部准备完毕，开始跑一下：<br>
+<img src="https://sz134055.github.io//post-images/1671563847047.png" alt="" loading="lazy"><br>
+看着像那么回事</p>
+<h2 id="实战-苏宁易购登录表单">实战-苏宁易购登录表单</h2>
+<h3 id="逆向-2">逆向</h3>
+<p>注意这里仅仅针对表单项中的<code>password</code><br>
+<a href="https://passport.suning.com/ids/login">https://passport.suning.com/ids/login</a><br>
+登录表单中<code>password</code>项加密，不知道是不是调试工具BUG，在瞟一眼响应后，在发起程序那点什么代码跳的都是响应结果...<br>
+无奈XHR断点，很轻松找到此处：<br>
+<img src="https://sz134055.github.io//post-images/1671564924158.png" alt="" loading="lazy"><br>
+关键找<code>pw2</code>而<code>pw2</code>的定义就在上面<br>
+<img src="https://sz134055.github.io//post-images/1671564994879.png" alt="" loading="lazy"></p>
+<p>下断点，取消XHR断点重新登录一次，发现<code>pwd</code>其实就是输入的密码明文，而<code>pwd2</code>就是对应的密文<br>
+而<code>loginPBK</code>就是公钥了（不放心全局搜索一下看看定义），其值为：</p>
+<pre><code class="language-js">'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQComqoAyvbCqO1EGsADwfNTWFQIUbm8CLdeb9TgjGLcz95mAo204SqTYdSEUxFsOnPfROOTxhkhfjbRxBV4/xjS06Y+kkUdiMGFtABIxRQHQIh0LrVvEZQs4NrixxcPI+b1bpE0gO/GAFSNWm9ejhZGj7UnqiHphnSJAVQNz2lgowIDAQAB'
+</code></pre>
+<p>加密代码片段：</p>
+<pre><code class="language-js">var encrypt = new JSEncrypt();
+encrypt.setPublicKey(loginPBK);
+var pwd2 = encrypt.encrypt(pwd);
+</code></pre>
+<p>现在来关注加密函数<code>encrypt.encrypt()</code>，看上面定义估计也是个第三方库，但是这次选择复制一次，跳转到代码处<br>
+<img src="https://sz134055.github.io//post-images/1671565390844.png" alt="" loading="lazy"></p>
+<p>注意复制的选择，后面都涉及到DOM操作了，又是<code>login</code>之类的，根本不需要，直接复制到<code>JSEncrypt</code>的定义处截至即可，前面同理</p>
+<p>运行发现需要补一下环境，这里直接给出写好的：</p>
+<pre><code class="language-js">var navigator = {
+    appName:'Netscape'
+}
+var window = global
+</code></pre>
+<p>最终运行结果：<br>
+<img src="https://sz134055.github.io//post-images/1671565887894.png" alt="" loading="lazy"></p>
+<h3 id="使用第三方库改善">使用第三方库改善</h3>
+<p>前面说到涉及到的加密代码段：</p>
+<pre><code class="language-js">var encrypt = new JSEncrypt();
+encrypt.setPublicKey(loginPBK);
+var pwd2 = encrypt.encrypt(pwd);
+</code></pre>
+<p>其实是使用了<code>jsencrypt</code>这个库。在<code>Node.js</code>上想直接跑可以安装以下库：</p>
+<pre><code class="language-shell">npm install node-jsencrypt -S
+</code></pre>
+<p>使用<code>node-jsencrypt</code>库后改写的代码：</p>
+<pre><code class="language-js">let JSEncrypt = require('node-jsencrypt')
+
+var loginPBK = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQComqoAyvbCqO1EGsADwfNTWFQIUbm8CLdeb9TgjGLcz95mAo204SqTYdSEUxFsOnPfROOTxhkhfjbRxBV4/xjS06Y+kkUdiMGFtABIxRQHQIh0LrVvEZQs4NrixxcPI+b1bpE0gO/GAFSNWm9ejhZGj7UnqiHphnSJAVQNz2lgowIDAQAB'
+function getPwdEncrypt(pwd){
+    var encrypt = new JSEncrypt();
+    encrypt.setPublicKey(loginPBK);
+    var pwd2 = encrypt.encrypt(pwd);
+    return pwd2
+}
+console.log(getPwdEncrypt('xzdahzxkchzxkhcjka'))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">XbBHj8i0/g1UfcHdaxQ80zZ4zvo2GT007AsJpnFhh8vn0A+TmJfjXCks7UPjmDcxEsm64iwwIKzO3FAXL//pH3KDCC71JJ400ER6Gcw4ewbgujD+/utQgZpkpbeZqSpwjGJdPpuNou8iLDRLLwktJZsQgrbPOgUUT/xkmcKrqbU=
+</code></pre>
+<h2 id="实战-百度">实战-百度</h2>
+<h3 id="逆向-3">逆向</h3>
+<p>与上苏宁易购一样，只针对登录表单中的<code>password</code>加密项</p>
+<p>百度登录的逆向不能用XHR断点方式，只能走搜索了，搜索以下关键字进行查找一番：</p>
+<ul>
+<li><code>RSA</code></li>
+<li><code>encrypt(</code></li>
+</ul>
+<p>首先找到一处疑似处：<br>
+<img src="https://sz134055.github.io//post-images/1671697433747.png" alt="" loading="lazy"></p>
+<p>下断点调试，发现<code>s</code>最终值就是输入的密码，那么后面一大串不用管，直接无视<br>
+跟着代码走，关注一下这个<code>i.password</code>，最终发现提交的密码便是它（可以与抓包里表单对比）<br>
+<img src="https://sz134055.github.io//post-images/1671697929708.png" alt="" loading="lazy"></p>
+<p>而<code>s</code>又赋值给<code>o</code>，那么<code>e.RSA.encrypt(o)</code>就是加密代码。<br>
+首先<code>e.RSA</code>和跳转到<code>e.RSA.encrypt()</code>处观察，发现了与前苏宁一样的导包方式，将其全部塞进本地代码（注意删除不必要的代码）：</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/dui-cheng-jia-mi-aes-xue-xi-bi-ji/" class="post-title gt-a-link">
+                    对称加密-AES学习笔记及优师云登录加密参数逆向
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

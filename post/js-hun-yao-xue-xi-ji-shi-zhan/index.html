@@ -1,0 +1,342 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>JS混淆学习及实战 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    JS混淆学习及实战
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2023-01-06 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/python/" class="post-tags">
+                            # python
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="简介">简介</h2>
+<blockquote>
+<p>JavaScript 压缩即去除 JavaScript 代码中的不必要的空格、换行等内容或者把一些可能公用的代码进行处理实现共享，最后输出的结果都被压缩为几行内容，代码可读性变得很差，同时也能提高网站加载速度。</p>
+</blockquote>
+<blockquote>
+<p>如果仅仅是去除空格换行这样的压缩方式，其实几乎是没有任何防护作用的，因为这种压缩方式仅仅是降低了代码的直接可读性。如果我们有一些格式化工具可以轻松将 JavaScript 代码变得易读，比如利用 IDE、在线工具或 Chrome 浏览器都能还原格式化的代码。</p>
+</blockquote>
+<blockquote>
+<p>目前主流的前端开发技术大多都会利用 Webpack 进行打包，Webpack 会对源代码进行编译和压缩，输出几个打包好的 JavaScript 文件，其中我们可以看到输出的 JavaScript 文件名带有一些不规则字符串，同时文件内容可能只有几行内容，变量名都是一些简单字母表示。这其中就包含 JavaScript 压缩技术，比如一些公共的库输出成 bundle 文件，一些调用逻辑压缩和转义成几行代码，这些都属于 JavaScript 压缩。另外其中也包含了一些很基础的 JavaScript 混淆技术，比如把变量名、方法名替换成一些简单字符，降低代码可读性。<br>
+JavaScript 加密基本思路是将一些核心逻辑使用诸如 C/C++ 语言来编写，并通过 JavaScript 调用执行，从而起到防护作用。</p>
+<p>其加密的方式现在有 Emscripten 和 WebAssembly 等，其中后者越来越成为主流。</p>
+<p>Emscripten： Emscripten编译器可以将 C/C++ 代码编译成 asm.js 的 JavaScript 变体，再由 JavaScript 调用执行。因此某些 JavaScript 的核心功能可以使用 C/C++ 语言实现，这可以算是一种前端加密技术。</p>
+<p>WebAssembly： WebAssembly 的技术也能将 C/C++ 转成 JavaScript 引擎可以运行的代码，但转出来的代码是二进制字节码，而asm.js 是文本，</p>
+<p>因此运行速度更快、体积更小。得到的字节码具有和 JavaScript 相同的功能，在语法上完全脱离 JavaScript，同时具有沙盒化的执行环境。</p>
+<p>利用 WebAssembly 技术，我们可以将一些核心的功能利用 C/C++ 语言实现，形成浏览器字节码的形式。然后在 JavaScript 中通过类似如下的方式调用：</p>
+<pre><code class="language-js">WebAssembly.compile(new Uint8Array(`
+  00 61 73 6d  01 00 00 00  01 0c 02 60  02 7f 7f 01
+  7f 60 01 7f  01 7f 03 03  02 00 01 07  10 02 03 61
+  64 64 00 00  06 73 71 75  61 72 65 00  01 0a 13 02
+  08 00 20 00  20 01 6a 0f  0b 08 00 20  00 20 00 6c
+  0f 0b`.trim().split(/[\s\r\n]+/g).map(str =&gt; parseInt(str, 16))
+)).then(module =&gt; {
+  const instance = new WebAssembly.Instance(module)
+  const { add, square } = instance.exports
+  console.log('2 + 4 =', add(2, 4))
+  console.log('3^2 =', square(3))
+  console.log('(2 + 5)^2 =', square(add(2 + 5)))
+})
+</code></pre>
+<p>这种加密方式更加安全，想要逆向或破解那得需要逆向 WebAssembly，难度极大。</p>
+<p>但整体来说，JavaScript 压缩技术只能在很小的程度上起到防护作用，要想真正提高防护效果还得依靠 JavaScript 混淆和加密技术。<a href="https://blog.csdn.net/as604049322/article/details/114159252">原文链接「小小明-代码实体」</a></p>
+</blockquote>
+<blockquote>
+<p>混淆主要涉及两种思路：<br>
+a.通过正则替换实现的混淆器；<br>
+b.通过语法树替换实现的混淆器。<br>
+第一种实现成本低，但是效果也一般，适合对混淆要求不高的场景。第二种实现成本较高，但是更灵活，而且更安全，更适合对抗场景。<br>
+<a href="https://zhuanlan.zhihu.com/p/88300966">JS混淆简单参考：几个实用的JS混淆工具。</a></p>
+</blockquote>
+<p>主要混淆技术：</p>
+<ul>
+<li>
+<p>变量混淆<br>
+将带有含意的变量名、方法名、常量名随机变为无意义的类乱码字符串，降低代码可读性，如转成单个字符或十六进制字符串。</p>
+</li>
+<li>
+<p>字符串混淆<br>
+将字符串阵列化集中放置、并可进行 <code>MD5</code> 或 <code>Base64</code> 加密存储，使代码中不出现明文字符串，这样可以避免使用全局搜索字符串的方式定位到入口点。</p>
+</li>
+<li>
+<p>属性加密<br>
+针对 JavaScript 对象的属性进行加密转化，隐藏代码之间的调用关系。</p>
+</li>
+<li>
+<p>控制流平坦化<br>
+打乱函数原有代码执行流程及函数调用关系，使代码逻变得混乱无序。</p>
+</li>
+<li>
+<p>僵尸代码<br>
+随机在代码中插入无用的僵尸代码、僵尸函数，进一步使代码混乱。</p>
+</li>
+<li>
+<p>调试保护<br>
+基于调试器特性，对当前运行环境进行检验，加入一些强制调试 <code>debugger</code> 语句，使其在调试模式下难以顺利执行 JavaScript 代码。</p>
+</li>
+<li>
+<p>多态变异<br>
+使 JavaScript 代码每次被调用时，将代码自身即立刻自动发生变异，变化为与之前完全不同的代码，即功能完全不变，只是代码形式变异，以此杜绝代码被动态分析调试。</p>
+</li>
+<li>
+<p>锁定域名<br>
+使 JavaScript 代码只能在指定域名下执行。</p>
+</li>
+<li>
+<p>反格式化<br>
+如果对 JavaScript 代码进行格式化，则无法执行，导致浏览器假死。</p>
+</li>
+<li>
+<p>特殊编码<br>
+将 JavaScript 完全编码为人不可读的代码，如表情符号、特殊表示内容等等。</p>
+</li>
+</ul>
+<p>总之，以上方案都是 JavaScript 混淆的实现方式，可以在不同程度上保护 JavaScript 代码。</p>
+<p>混淆工具有UglifyJS，JScrambler，jsbeautifier，JSDetox，obfuscator等</p>
+<p>此次介绍OB混淆，即obfuscator</p>
+<h2 id="ob混淆">OB混淆</h2>
+<h3 id="介绍">介绍</h3>
+<p>OB混淆官网：<a href="https://obfuscator.io/">JavaScript Obfuscator Tool</a><br>
+来自官方的混淆示例：</p>
+<pre><code class="language-js">// Paste your JavaScript code here
+function hi() {
+  console.log(&quot;Hello World!&quot;);
+}
+hi();
+</code></pre>
+<p>混淆后（已格式化）：</p>
+<pre><code class="language-js">(function (_0x5e3669, _0x797fa0) { 
+    var _0x4222ee = _0x4119, _0x40a199 = _0x5e3669();
+    while (!![]) {
+        try {
+            var _0xf23fb6 = parseInt(_0x4222ee(0xd9)) / 0x1 + parseInt(_0x4222ee(0xdc)) / 0x2 + parseInt(_0x4222ee(0xd3)) / 0x3 + -parseInt(_0x4222ee(0xda)) / 0x4 + parseInt(_0x4222ee(0xd7)) / 0x5 + parseInt(_0x4222ee(0xd6)) / 0x6 * (-parseInt(_0x4222ee(0xd8)) / 0x7) + -parseInt(_0x4222ee(0xd5)) / 0x8;
+            if (_0xf23fb6 === _0x797fa0) break;
+            else _0x40a199['push'](_0x40a199['shift']()); 
+        } catch (_0x2d2067) {
+            _0x40a199['push'](_0x40a199['shift']()); 
+        } 
+    } 
+}(_0x5ac2, 0xa50c3));
+function hi() { 
+    var _0x543b06 = _0x4119; 
+    console[_0x543b06(0xdb)](_0x543b06(0xd4)); 
+} 
+function _0x4119(_0x13dc26, _0xc31dd5) {
+    var _0x5ac260 = _0x5ac2(); 
+    return _0x4119 = function (_0x4119c2, _0xbffe6d) { 
+        _0x4119c2 = _0x4119c2 - 0xd3; 
+        var _0x42ea54 = _0x5ac260[_0x4119c2]; 
+        return _0x42ea54; 
+    },
+    _0x4119(_0x13dc26, _0xc31dd5); 
+} 
+hi(); 
+function _0x5ac2() { 
+    var _0x3de06f = ['Hello\x20World!', '3046168LiXzXu', '6JNGVAy', '4550545CwPJCt', '5231807GgAdWc', '847568YVXvAQ', '2733296cTWkBb', 'log', '879906prswui', '869703bTiBZl']; 
+    _0x5ac2 = function () { 
+        return _0x3de06f; 
+    }; 
+    return _0x5ac2(); 
+}
+</code></pre>
+<p>OB 混淆特点</p>
+<ul>
+<li>一般由一个大数组或者含有大数组的函数、自执行函数、解密函数和加密后函数四部分组成</li>
+<li>函数名和变量名通常以<code>_0x</code>或者<code>0x</code>开头，后接1~6位数字或字母组合</li>
+<li>自执行函数进行移位操作有明显的<code>push</code>、<code>shift</code>关键字</li>
+</ul>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>目标：<a href="https://bz.zzzmh.cn/index">极简壁纸</a><br>
+该网站有无限debugger，在首页加载完毕后，可以用将以下代码保存到片段里并运行来绕过（或直接在控制台运行）：</p>
+<pre><code class="language-js">Function.prototype.constructor_ = Function.prototype.constructor;
+Function.prototype.constructor = function (a) {
+    if (a == 'debugger') {
+        return function () {};
+    }
+    return Function.prototype.constructor_(a);
+}
+</code></pre>
+<p>同时本网站有滑块（并不是每次请求都有），滑块不在讨论范围，因此以没有进行滑块验证后的请求作为研究目标<br>
+可以看到表单中无加密（请求头中也无）<br>
+<img src="https://sz134055.github.io//post-images/1673020019446.png" alt="" loading="lazy"></p>
+<p>而响应结果加密：<br>
+<img src="https://sz134055.github.io//post-images/1673020033975.png" alt="" loading="lazy"></p>
+<p>通过XHR断点或者发起程序开找，找到以下疑似处（可以多下断点广撒网）<br>
+<img src="https://sz134055.github.io//post-images/1673020954012.png" alt="" loading="lazy"></p>
+<p>可以发现基本就是这了<br>
+<img src="https://sz134055.github.io//post-images/1673021045976.png" alt="" loading="lazy"></p>
+<p>以下代码便是解密代码：</p>
+<pre><code class="language-js">_0xa60097['a']['decipher'](_0x3bb7ad[_0x430ddf(0x1f7, 'JJcn')]['result'])
+</code></pre>
+<p>而<code>_0x3bb7ad[_0x430ddf(0x1f7, 'JJcn')]['result']</code>便是响应结果中的<code>result</code>，因此只需要扣<code>_0xa60097['a']['decipher']</code>即可<br>
+跳转代码如下（已封装至本地）：</p>
+<pre><code class="language-js">function get_data(result){
+    return _0x1372a9(_0x230351(_0x43f8fa(result)));
+}
+</code></pre>
+<p>开始慢扣三个函数，发现运行无结果，于是在已扣出<code>_0x1372a9</code>、<code>_0x230351</code>和<code>_0x43f8fa</code>的情况下（因为这三个函数包含在一个对象中，有点像webpack），直接全盘复制，不过要注意去掉涉及到无限<code>debugger</code>的代码（不要和老夫说什么半扣优雅，老夫上来就是一个全扣，省时省力），运行，结果正常，这样就拿到了图片的ID（但是想获取图片还需要逆向对应的API，这里点到为止），逆向结束<br>
+<img src="https://sz134055.github.io//post-images/1673023202919.png" alt="" loading="lazy"></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/guo-mi-smxi-lie-ni-xiang-xue-xi/" class="post-title gt-a-link">
+                    国密（SM）系列逆向学习及实战
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

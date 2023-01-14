@@ -1,0 +1,625 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>使用Express给Python提供API | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    使用Express给Python提供API
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-11-23 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/python/" class="post-tags">
+                            # python
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/nodejs/" class="post-tags">
+                            # Node.js
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="express-初步认识">Express 初步认识</h2>
+<p><a href="http://expressjs.com/">Express</a>是一个简洁而灵活的 Node.js Web应用框架, 提供了一系列强大特性帮助你创建各种 Web 应用，和丰富的 HTTP 工具。使用 Express 可以快速地搭建一个完整功能的网站。</p>
+<p><a href="http://expressjs.com/en/starter/hello-world.html">Express 官方文档</a><br>
+教程参考：<a href="https://www.runoob.com/nodejs/nodejs-express-framework.html">Node.js Express 框架</a></p>
+<h3 id="安装express">安装Express</h3>
+<p>在<strong>项目目录中</strong>使用指令：<br>
+<code>npm install express --save</code><br>
+来安装（<code>--save</code>和<code>-S</code>等效）</p>
+<h3 id="demo">DEMO</h3>
+<pre><code class="language-js">//index.js
+var express = require('express');
+var app = express();
+ 
+app.get('/', function (req, res) {
+   res.send('Hello World');
+})
+ 
+var server = app.listen(8081, function () {
+ 
+  var host = server.address().address
+  var port = server.address().port
+ 
+  console.log(&quot;应用实例，访问地址为 http://%s:%s&quot;, host, port)
+ 
+})
+</code></pre>
+<p>启动</p>
+<pre><code class="language-bash">$ node index.js
+应用实例，访问地址为 http://0.0.0.0:8081
+</code></pre>
+<p>在浏览器中访问<code>localhost:8001</code>会看到喜闻乐见的<code>Hello World</code></p>
+<h2 id="express在爬虫中的应用">Express在爬虫中的应用</h2>
+<p>当我们遇到一些JS加密函数时候，我们可以不用去尝试完全用Python改写，而是可以直接利用它，因为我们仅仅需要加密后的结果，因此如何让JS源码运行然后得到结果给Python才是我们关心的，除了使用Python的第三方库，我们还可以使用Express这个基于Node.js环境下的服务器去跑JS函数然后提供API给Python调用</p>
+<h3 id="简易的python调用api示例">简易的Python调用API示例</h3>
+<pre><code class="language-js">//index.js
+var express = require('express');
+var app = express();
+ 
+function target_func() {
+    //加密函数
+    return 'I AM SECRET';
+}
+
+app.get('/', function (req, res) {
+   let data = taget_func();
+   res.send(data);
+})
+ 
+var server = app.listen(8081, function () {
+ 
+  var host = server.address().address
+  var port = server.address().port
+ 
+  console.log(&quot;应用实例，访问地址为 http://%s:%s&quot;, host, port)
+
+})
+
+</code></pre>
+<p>此时便可以用Python获取</p>
+<pre><code class="language-python">import requests
+
+res = requests.get('http://0.0.0.0:8001/')
+print(res.text)
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-bash">I AM SECRET
+</code></pre>
+<h3 id="参数传递">参数传递</h3>
+<p>继续之前例子，新增以下函数：</p>
+<pre><code class="language-js">app.get('/params',function(req,res){
+    let data = req.query;   //返回Object
+    res.send(data);
+})
+
+</code></pre>
+<p>尝试访问：<code>localhost:8001/params?name=EXAMPLE</code><br>
+响应结果：</p>
+<pre><code class="language-json">{&quot;name&quot;:&quot;EXAMPLE&quot;}
+</code></pre>
+<h3 id="表单传递">表单传递</h3>
+<p>注意，表单传递需要安装<code>body-parser</code>才能使用<code>.body()</code><br>
+<code>npm install body-parser -S</code></p>
+<p>完整代码如下：</p>
+<pre><code class="language-js">var express = require('express')
+var bodyParser = require('body-parser')
+var app = express();
+app.use(bodyParser.urlencoded({extended:false}))
+app.use(bodyParser.json())
+
+app.post('/form',function(req,res){
+    let data = req.body;   //返回Object
+    res.send(data);
+})
+</code></pre>
+<p>而对于Python这边，如果需要传递JSON数据，则需要在请求头加入<code>content-type</code>一般为<code>application/json</code>，并且需要使用<code>json.dumps()</code>处理字典然后传递表单。完整Python代码如下：</p>
+<pre><code class="language-python">import requests
+import json
+
+form = {
+    &quot;name&quot;: &quot;example&quot;
+}
+
+res = requests.post(url='http://localhost:8081/getIt',data=json.dumps(form),headers={&quot;content-type&quot;: &quot;application/json&quot;})
+print(res.content)
+</code></pre>
+<p>响应结果：</p>
+<pre><code>{&quot;name&quot;:&quot;example&quot;}
+</code></pre>
+<h2 id="例子七麦数据榜单">例子：七麦数据榜单</h2>
+<p>七麦数据榜单API有一个JS生成的加密参数<code>analysis</code>，参考此篇文章：<a href="/post/qi-mai-shu-ju-bang-dan-api-pa-qu">七麦数据榜单API加密参数逆向</a></p>
+<h3 id="express-提供加密参数生成-api">Express 提供加密参数生成 API</h3>
+<p>在逆向文章中，收尾部分提到了名为<code>params</code>的信息很关键：</p>
+<pre><code class="language-js">  &quot;params&quot;: {
+        &quot;brand&quot;: &quot;free&quot;,
+        &quot;device&quot;: &quot;iphone&quot;,
+        &quot;country&quot;: &quot;cn&quot;,
+        &quot;genre&quot;: &quot;36&quot;,
+        &quot;date&quot;: &quot;2022-11-20&quot;,
+        &quot;page&quot;: 2,
+        &quot;is_rank_index&quot;: 1,
+        &quot;snapshot&quot;: &quot;19:42:05&quot;
+ }
+</code></pre>
+<p>它直接反应了请求的榜单关键信息，因此我会要求Python脚本提供这些参数，而对于其它基本不会变动的信息则由<code>express</code>中脚本负责（拼接、传递），所以JS代码会是如下：</p>
+<p>负责生成参数的js文件中追加：</p>
+<pre><code class="language-js">module.exports = {get:get_analysis}
+</code></pre>
+<p>EXPRESS脚本：</p>
+<pre><code class="language-js">const analysis = require('./qm')
+const express = require('express')
+const bodyParser = require('body-parser')
+
+const app = express()
+app.use(bodyParser.urlencoded({extended:false}))
+app.use(bodyParser.json())
+
+const get_analysis = analysis.get
+
+app.post('/getIt', function (req, res) {
+    const data = req.body
+    console.log(data)
+    let t = {
+        &quot;url&quot;: &quot;/rank/index&quot;,
+        &quot;method&quot;: &quot;get&quot;,
+        &quot;headers&quot;: {
+            &quot;common&quot;: {
+                &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;
+            },
+            &quot;delete&quot;: {},
+            &quot;get&quot;: {},
+            &quot;head&quot;: {},
+            &quot;post&quot;: {
+                &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+            },
+            &quot;put&quot;: {
+                &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+            },
+            &quot;patch&quot;: {
+                &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+            }
+        },
+        &quot;params&quot;: {
+            &quot;brand&quot;: &quot;&quot;,
+            &quot;device&quot;: &quot;&quot;,
+            &quot;country&quot;: &quot;&quot;,
+            &quot;genre&quot;: &quot;&quot;,
+            &quot;date&quot;: &quot;&quot;,
+            &quot;page&quot;: 1,
+            &quot;is_rank_index&quot;: 1,
+            &quot;snapshot&quot;: &quot;&quot;
+        },
+        &quot;baseURL&quot;: &quot;https://api.qimai.cn&quot;,
+        &quot;transformRequest&quot;: [
+            null
+        ],
+        &quot;transformResponse&quot;: [
+            null
+        ],
+        &quot;timeout&quot;: 15000,
+        &quot;withCredentials&quot;: true,
+        &quot;xsrfCookieName&quot;: &quot;XSRF-TOKEN&quot;,
+        &quot;xsrfHeaderName&quot;: &quot;X-XSRF-TOKEN&quot;,
+        &quot;maxContentLength&quot;: -1,
+        &quot;maxBodyLength&quot;: -1
+    }
+    t[&quot;params&quot;] = data
+
+    let result = {
+        &quot;msg&quot;:&quot;DONE&quot;,
+        &quot;analysis&quot;:get_analysis(t)
+    }
+
+    res.send(result)
+ })
+
+
+const server = app.listen(8081, function () {
+
+    const host = server.address().address
+    const port = server.address().port
+
+    console.log(&quot;应用实例，访问地址为 http://%s:%s&quot;, host, port)
+
+})
+</code></pre>
+<p>脚本会监听<code>localhost:8081</code>，向<code>localhost:8081/getIt</code>发送类似于以下表单：</p>
+<pre><code class="language-json">{
+    &quot;brand&quot;: &quot;free&quot;,
+    &quot;device&quot;: &quot;iphone&quot;,
+    &quot;country&quot;: &quot;cn&quot;,
+    &quot;genre&quot;: &quot;36&quot;,
+    &quot;date&quot;: &quot;2022-11-20&quot;,
+    &quot;page&quot;: 2,
+    &quot;is_rank_index&quot;: 1,
+    &quot;snapshot&quot;: &quot;19:42:05&quot;
+}
+</code></pre>
+<p>响应结果：</p>
+<pre><code class="language-json">{&quot;msg&quot;:&quot;DONE&quot;,&quot;analysis&quot;:&quot;ezUnVisSKAN6W3ZSKQtwQSwIKhA1LT9BfF0iHi9UeBQ4DS4UIy1ZRlYkXRRjZ1xfI0dXCxtbWhgKCgVcTiFBVF1OS0gFAwNaViEaBQ==&quot;}
+</code></pre>
+<h3 id="python请求api">Python请求API</h3>
+<p>Python简单DEMO：</p>
+<pre><code class="language-python">import requests
+import json
+
+form = {
+    &quot;brand&quot;: &quot;free&quot;,
+    &quot;device&quot;: &quot;iphone&quot;,
+    &quot;country&quot;: &quot;cn&quot;,
+    &quot;genre&quot;: &quot;36&quot;,
+    &quot;date&quot;: &quot;2022-11-20&quot;,
+    &quot;page&quot;: 2,
+    &quot;is_rank_index&quot;: 1,
+    &quot;snapshot&quot;: &quot;19:42:05&quot;
+}
+
+
+req = requests.post(url='http://localhost:8081/getIt',data=json.dumps(form),headers={&quot;content-type&quot;: &quot;application/json&quot;})
+res_json = res.json()
+print(res_json['analysis'])
+</code></pre>
+<p>结果：</p>
+<pre><code class="language-shell">ezUnVisSKAN6W3ZSKQtwQSwIKhA1LT9BfF0iHi9UeBQ4DS4UIy1ZRlYkXRRjZ1xfI0dXCxtbWhgKCgVcTiFBVF1OS0kMAgBVUiEaBQ==
+</code></pre>
+<h3 id="至于params">至于params</h3>
+<p>上面Python传递的<code>params</code>：</p>
+<pre><code class="language-json">{
+    &quot;brand&quot;: &quot;free&quot;,
+    &quot;device&quot;: &quot;iphone&quot;,
+    &quot;country&quot;: &quot;cn&quot;,
+    &quot;genre&quot;: &quot;36&quot;,
+    &quot;date&quot;: &quot;2022-11-20&quot;,
+    &quot;page&quot;: 2,
+    &quot;is_rank_index&quot;: 1,
+    &quot;snapshot&quot;: &quot;19:42:05&quot;
+}
+</code></pre>
+<p><code>brand</code>对应的是 免费榜单 类型，<code>device</code> 对应的是获取的是iOS商店的榜单，<code>country</code>对应的是商店分区，<code>genre</code>暂时不明，写死即可，<code>is_rank_index</code>同理，这些参数基本不用变化，或者在爬取前根据需求手动改写以下即可，而对于<code>date</code>、<code>page</code>、<code>snapshot</code>这三个需要在爬取时动态更新的参数，下面给出解决办法：</p>
+<p>首先可以直接获取<code>https://api.qimai.cn/rank/index</code>，请求参数如下（JSON格式展示，下同）：</p>
+<pre><code class="language-json">{
+    &quot;analysis&quot;: &quot;exs4CQYVIwNvZmETByZRQAMPNlk4WlVHUFkISwhXUgQaI0dPQEwGCQVXVlAJdkJR&quot;,
+    &quot;brand&quot;: &quot;free&quot;,
+    &quot;device&quot;: &quot;iphone&quot;,
+    &quot;country&quot;: &quot;cn&quot;,
+    &quot;genre&quot;: &quot;36&quot;
+}
+</code></pre>
+<p>只根据四个参数尝试生成<code>analysis</code>（利用上面EXPRESS脚本API）：</p>
+<pre><code class="language-http">POST http://0.0.0.0:8081/getIt
+content-type: application/json
+
+{
+    &quot;brand&quot;: &quot;free&quot;,
+    &quot;device&quot;: &quot;iphone&quot;,
+    &quot;country&quot;: &quot;cn&quot;,
+    &quot;genre&quot;: &quot;36&quot;
+}
+</code></pre>
+<p>生成结果：</p>
+<pre><code class="language-json">{
+  &quot;msg&quot;: &quot;DONE&quot;,
+  &quot;analysis&quot;: &quot;exs4CQYVIwNvZmETByZRQAMPNlk4WlVHUFkISwhXUgQaI0dPQEwAAgRWVlUJdkJR&quot;
+}
+</code></pre>
+<p>可以看到，生成结果一致</p>
+<p>请求响应结果：</p>
+<pre><code class="language-json">{
+    &quot;code&quot;: 10000,
+    &quot;msg&quot;: &quot;\u6210\u529f&quot;,
+    &quot;downloadVip&quot;: false,
+    &quot;maxPage&quot;: 4,
+    &quot;rankInfo&quot;: [...],
+    &quot;snapshot&quot;: &quot;14:54:04&quot;,
+    &quot;tag&quot;: 0,
+    &quot;is_logout&quot;: 0
+}
+</code></pre>
+<p>其中<code>rankInfo</code>是返回的榜单数据（即第一页数据），此处省略。<br>
+该返回数据包含了两个较为有用的信息。首先是<code>snapshot</code>的值，对应的是网页上<code>14:54~至今</code>，而<code>maxPage</code>则是指明该分区下最大的数据页。<br>
+<img src="https://sz134055.github.io//post-images/1669189018802.png" alt="BANNER" loading="lazy"></p>
+<p>如果需要获取其它时间分区下的数据，如上图的<code>01:31</code>，可以请求以下<code>https://api.qimai.cn/rank/indexSnapshot</code>，参数如下：</p>
+<pre><code class="language-json">{
+    &quot;analysis&quot;: &quot;ezUnGik8MAN5ZXIbKDVwTCwYOQ4aFCBMa2A1FAJ XhcADjFFOVkaQ1YND05QWAUHGzcWGApGWVgXJEIOD1dRW1ZMQE4FcRRQ&quot;,
+    &quot;brand&quot;: &quot;free&quot;,
+    &quot;device&quot;: &quot;iphone&quot;,
+    &quot;country&quot;: &quot;cn&quot;,
+    &quot;genre&quot;: &quot;36&quot;,
+    &quot;date&quot;: &quot;2022-11-23&quot;,
+    &quot;page&quot;: &quot;1&quot;,
+    &quot;is_rank_index&quot;: &quot;1&quot;
+}
+</code></pre>
+<p>这里省略生成<code>analysis</code>测试，参考上面</p>
+<p>响应结果：</p>
+<pre><code class="language-json">{
+    &quot;code&quot;: 10000,
+    &quot;msg&quot;: &quot;\u6210\u529f&quot;,
+    &quot;timeData&quot;: [
+        {
+            &quot;id&quot;: &quot;5839748&quot;,
+            &quot;btn&quot;: &quot;01:31&quot;,
+            &quot;up_num&quot;: &quot;24&quot;,
+            &quot;down_num&quot;: &quot;0&quot;,
+            &quot;new_num&quot;: &quot;1&quot;,
+            &quot;out_num&quot;: &quot;1&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;01:31:03&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5839758&quot;,
+            &quot;btn&quot;: &quot;01:46&quot;,
+            &quot;up_num&quot;: &quot;0&quot;,
+            &quot;down_num&quot;: &quot;19&quot;,
+            &quot;new_num&quot;: &quot;1&quot;,
+            &quot;out_num&quot;: &quot;1&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;01:46:04&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5839770&quot;,
+            &quot;btn&quot;: &quot;02:49&quot;,
+            &quot;up_num&quot;: &quot;67&quot;,
+            &quot;down_num&quot;: &quot;87&quot;,
+            &quot;new_num&quot;: &quot;2&quot;,
+            &quot;out_num&quot;: &quot;2&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;02:49:04&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5839899&quot;,
+            &quot;btn&quot;: &quot;04:46&quot;,
+            &quot;up_num&quot;: &quot;0&quot;,
+            &quot;down_num&quot;: &quot;127&quot;,
+            &quot;new_num&quot;: &quot;2&quot;,
+            &quot;out_num&quot;: &quot;2&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;04:46:04&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5839954&quot;,
+            &quot;btn&quot;: &quot;05:47&quot;,
+            &quot;up_num&quot;: &quot;53&quot;,
+            &quot;down_num&quot;: &quot;68&quot;,
+            &quot;new_num&quot;: &quot;1&quot;,
+            &quot;out_num&quot;: &quot;1&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;05:47:03&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5840022&quot;,
+            &quot;btn&quot;: &quot;07:50&quot;,
+            &quot;up_num&quot;: &quot;0&quot;,
+            &quot;down_num&quot;: &quot;81&quot;,
+            &quot;new_num&quot;: &quot;4&quot;,
+            &quot;out_num&quot;: &quot;4&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;07:50:03&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5840038&quot;,
+            &quot;btn&quot;: &quot;08:48&quot;,
+            &quot;up_num&quot;: &quot;88&quot;,
+            &quot;down_num&quot;: &quot;61&quot;,
+            &quot;new_num&quot;: &quot;1&quot;,
+            &quot;out_num&quot;: &quot;1&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;08:48:04&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5840159&quot;,
+            &quot;btn&quot;: &quot;09:35&quot;,
+            &quot;up_num&quot;: &quot;91&quot;,
+            &quot;down_num&quot;: &quot;91&quot;,
+            &quot;new_num&quot;: &quot;3&quot;,
+            &quot;out_num&quot;: &quot;3&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;09:35:03&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5840246&quot;,
+            &quot;btn&quot;: &quot;11:50&quot;,
+            &quot;up_num&quot;: &quot;91&quot;,
+            &quot;down_num&quot;: &quot;72&quot;,
+            &quot;new_num&quot;: &quot;5&quot;,
+            &quot;out_num&quot;: &quot;5&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;11:50:04&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        },
+        {
+            &quot;id&quot;: &quot;5840388&quot;,
+            &quot;btn&quot;: &quot;14:54&quot;,
+            &quot;up_num&quot;: &quot;90&quot;,
+            &quot;down_num&quot;: &quot;72&quot;,
+            &quot;new_num&quot;: &quot;4&quot;,
+            &quot;out_num&quot;: &quot;4&quot;,
+            &quot;date&quot;: &quot;2022-11-23&quot;,
+            &quot;param&quot;: &quot;14:54:04&quot;,
+            &quot;clear&quot;: &quot;&quot;
+        }
+    ],
+    &quot;is_logout&quot;: 0
+}
+</code></pre>
+<p>可以看到已经获取到其对应值了：</p>
+<pre><code class="language-json">   {
+        &quot;id&quot;: &quot;5839748&quot;,
+        &quot;btn&quot;: &quot;01:31&quot;,
+        &quot;up_num&quot;: &quot;24&quot;,
+        &quot;down_num&quot;: &quot;0&quot;,
+        &quot;new_num&quot;: &quot;1&quot;,
+        &quot;out_num&quot;: &quot;1&quot;,
+        &quot;date&quot;: &quot;2022-11-23&quot;,
+        &quot;param&quot;: &quot;01:31:03&quot;,
+        &quot;clear&quot;: &quot;&quot;
+}
+</code></pre>
+<p>即<code>01:31:03</code>，将其加入<code>params</code>即可</p>
+<p>现在三个参数获取途径均已知晓，通过代码获取拼接即可。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/qi-mai-shu-ju-bang-dan-api-pa-qu/" class="post-title gt-a-link">
+                    七麦数据榜单API加密参数逆向
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

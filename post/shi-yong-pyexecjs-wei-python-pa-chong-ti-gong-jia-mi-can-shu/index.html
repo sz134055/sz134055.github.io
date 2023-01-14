@@ -1,0 +1,283 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>使用PyExecJS为Python爬虫提供加密参数 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    使用PyExecJS为Python爬虫提供加密参数
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-11-25 ·
+                    </time>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="初识pyexecjs">初识PyExecJS</h2>
+<p>基于已成功逆向后的JS代码，可以直接生成对应的加密参数，而PyExecJS则是可以在Python脚本中执行对应JS脚本并返回结果。</p>
+<p>PyExecJS可以指定不同的解析环境，这里推荐使用<code>Node.js</code></p>
+<h2 id="安装-配置pyexecjs">安装、配置PyExecJS</h2>
+<h3 id="安装">安装</h3>
+<pre><code class="language-shell">pip install pyexecjs
+</code></pre>
+<h3 id="指定解释环境">指定解释环境</h3>
+<pre><code class="language-py">os.environ[&quot;NODE_PATH&quot;] = os.getcwd()+&quot;/node_modules&quot;
+</code></pre>
+<p>将解释环境绑定为本地NODE包</p>
+<pre><code class="language-py">print(execjs.get().name)
+</code></pre>
+<p>验证是否为Node，结果：</p>
+<pre><code>Node.js (V8)
+</code></pre>
+<h3 id="调用demo">调用DEMO</h3>
+<pre><code class="language-python">import execjs
+import os
+
+os.environ[&quot;NODE_PATH&quot;] = os.getcwd() + &quot;/node_modules&quot;
+
+
+def get_it(text: str) -&gt; dict:
+    with open('./yd.js') as f:
+        js_code = f.read()
+
+    js = execjs.compile(js_code)  # 这里同样可以使用cwd参数指定解释环境
+    return js.call('getIt', text)
+
+
+print(get_it('你好'))
+
+</code></pre>
+<h2 id="实际应用">实际应用</h2>
+<p>根据之前文章：<a href="/post/you-dao-fan-yi-api-ni-xiang">有道翻译API逆向</a></p>
+<p>代码如下：</p>
+<pre><code class="language-python">import execjs
+import os
+import requests
+
+os.environ[&quot;NODE_PATH&quot;] = os.getcwd() + &quot;/node_modules&quot;
+
+
+def get_it(text: str) -&gt; dict:
+    with open('./yd.js') as f:
+        js_code = f.read()
+
+    js = execjs.compile(js_code)  # 这里同样可以使用cwd参数指定解释环境
+    return js.call('getIt', text)
+
+
+def translate(text: str) -&gt; str:
+    api = 'https://fanyi.youdao.com/translate_o?smartresult=dict&amp;smartresult=rule'
+
+    header = {
+        &quot;Accept&quot;: &quot;application/json, text/javascript, */*; q=0.01&quot;,
+        &quot;Accept-Encoding&quot;: &quot;gzip, deflate, br&quot;,
+        &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,ja;q=0.5&quot;,
+        &quot;Cache-Control&quot;: &quot;no-cache&quot;,
+        &quot;Connection&quot;: &quot;keep-alive&quot;,
+        &quot;Content-Length&quot;: &quot;252&quot;,
+        &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded; charset=UTF-8&quot;,
+        &quot;Cookie&quot;: &quot;OUTFOX_SEARCH_USER_ID=-1592407075@10.112.57.88; OUTFOX_SEARCH_USER_ID_NCOO=2043557013.325027;&quot;,
+        &quot;Host&quot;: &quot;fanyi.youdao.com&quot;,
+        &quot;Origin&quot;: &quot;https://fanyi.youdao.com&quot;,
+        &quot;Pragma&quot;: &quot;no-cache&quot;,
+        &quot;Referer&quot;: &quot;https://fanyi.youdao.com/&quot;,
+        &quot;sec-ch-ua&quot;: &quot;\&quot;Microsoft Edge\&quot;;v=\&quot;107\&quot;, \&quot;Chromium\&quot;;v=\&quot;107\&quot;, \&quot;Not=A?Brand\&quot;;v=\&quot;24\&quot;&quot;,
+        &quot;sec-ch-ua-mobile&quot;: &quot;?0&quot;,
+        &quot;sec-ch-ua-platform&quot;: &quot;\&quot;Windows\&quot;&quot;,
+        &quot;Sec-Fetch-Dest&quot;: &quot;empty&quot;,
+        &quot;Sec-Fetch-Mode&quot;: &quot;cors&quot;,
+        &quot;Sec-Fetch-Site&quot;: &quot;same-origin&quot;,
+        &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.56&quot;,
+        &quot;X-Requested-With&quot;: &quot;XMLHttpRequest&quot;
+    }
+
+    form = {
+        &quot;i&quot;: text,
+        &quot;from&quot;: &quot;AUTO&quot;,
+        &quot;to&quot;: &quot;AUTO&quot;,
+        &quot;smartresult&quot;: &quot;dict&quot;,
+        &quot;client&quot;: &quot;fanyideskweb&quot;,
+        &quot;doctype&quot;: &quot;json&quot;,
+        &quot;version&quot;: &quot;2.1&quot;,
+        &quot;keyfrom&quot;: &quot;fanyi.web&quot;,
+        &quot;action&quot;: &quot;FY_BY_REALTlME&quot;
+    }
+    result = get_it(text)
+    header['Cookie'] += f'___rl__test__cookies={result[&quot;lts&quot;]}'
+    form.update(result)
+
+    res = requests.post(url=api, data=form, headers=header)
+    res_json = res.json()
+    try:
+        return res_json['translateResult'][0][0]['tgt']
+    except KeyError:
+        return res_json
+
+
+if __name__ == '__main__':
+    print(translate('你好'))
+
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">hello
+</code></pre>
+<h2 id="可能出现的问题">可能出现的问题</h2>
+<h3 id="出现unicodeencodeerror-gbk-codec问题">出现<code>UnicodeEncodeError: 'gbk' codec...</code>问题</h3>
+<p>在Python安装目录中<code>Lib</code>下找到<code>subprocess.py</code>文件然后通过搜索<code>encoding</code>方式找到类<code>Popen</code>，修改其<code>__init__</code>方法的<code>encoding</code>参数默认值为<code>utf-8</code>（原默认为<code>None</code>）即可。</p>
+<pre><code class="language-python">    def __init__(self, args, bufsize=-1, executable=None,
+                 stdin=None, stdout=None, stderr=None,
+                 preexec_fn=None, close_fds=True,
+                 shell=False, cwd=None, env=None, universal_newlines=None,
+                 startupinfo=None, creationflags=0,
+                 restore_signals=True, start_new_session=False,
+                 pass_fds=(), *, user=None, group=None, extra_groups=None,
+                 encoding='utf-8', errors=None, text=None, umask=-1, pipesize=-1):
+        &quot;&quot;&quot;Create new Popen instance.&quot;&quot;&quot;
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/you-dao-fan-yi-api-ni-xiang/" class="post-title gt-a-link">
+                    有道翻译API逆向
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

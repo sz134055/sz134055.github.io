@@ -1,0 +1,231 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>octet-stream及实战 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    octet-stream及实战
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2023-01-07 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="简介">简介</h2>
+<blockquote>
+<p>当浏览器在请求资源时，会通过<code>http</code>返回头中的<code>content-type</code>决定如何显示/处理将要加载的数据，如果这个类型浏览器能够支持阅览，浏览器就会直接展示该资源，比如<code>png</code>、<code>jpeg</code>、<code>video</code>等格式。在某些下载文件的场景中，服务端可能会返回文件流，并在返回头中带上<code>Content-Type: application/octet-stream</code>，告知浏览器这是一个字节流，浏览器处理字节流的默认方式就是下载。</p>
+<p><code>application/octet-stream</code>是应用程序文件的默认值。意思是未知的应用程序文件 ，浏览器一般不会自动执行或询问执行。浏览器会像对待，设置了<code>HTTP</code>头<code>Content-Disposition</code>值为 <code>attachment</code> 的文件一样来对待这类文件，即浏览器会触发下载行为。</p>
+<p>说人话就是，浏览器并不认得这是什么类型，也不知道应该如何展示，只知道这是一种二进制文件，因此遇到<code>content-type</code>为<code>application/octet-stream</code>的文件时，浏览器会直接把它下载下来。这个类型一般会配合另一个响应头<code>Content-Disposition</code>，该响应头指示回复的内容该以何种形式展示，是以内联的形式（即网页或者页面的一部分），还是以附件的形式下载并保存到本地。<br>
+——<a href="https://juejin.cn/post/6979224810681270309">没有Peter你就是个d</a></p>
+</blockquote>
+<p>简而言之就是<code>octet-stream</code>指任意类型的二进制流数据</p>
+<p>下面直接以实战来学习</p>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>目标：<a href="http://zhengce.2b.cn/">中国产业政策大数据平台</a>（域名多少有点逆天）<br>
+关键词搜索</p>
+<p>此网站同样有无限debugger，参照上篇文章解决，</p>
+<p>搜索<code>python</code>，可以看到API上参数乱码，<code>Content-Type</code>为<code>application/octet-stream</code><br>
+<img src="https://sz134055.github.io//post-images/1673076522112.png" alt="" loading="lazy"></p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1673076525694.png" alt="" loading="lazy"></figure>
+<p>响应结果未加密：<br>
+<img src="https://sz134055.github.io//post-images/1673076540989.png" alt="" loading="lazy"></p>
+<p>因此本次难点在于表单构造</p>
+<p>通过XHR断点或发起程序寻找可疑处<br>
+同时加密处理可能在拦截器中完成，两个拦截器基本都会写在一起，因此可以通过寻找到其中一个来找到另一个</p>
+<p>可以找到以下代码：<br>
+<img src="https://sz134055.github.io//post-images/1673077489044.png" alt="" loading="lazy"><br>
+这里可能就是发送请求的起点，<br>
+而<code>posh</code>：<br>
+<img src="https://sz134055.github.io//post-images/1673077588661.png" alt="" loading="lazy"><br>
+其中一段代码可以看成以下：</p>
+<pre><code class="language-js">ExpirationTime[&quot;wrapRequest&quot;](axiosInstance[&quot;post&quot;], e, t, n);
+</code></pre>
+<p>其中<code>e</code>为api,<code>t</code>为表单，<code>n</code>为<code>false</code><br>
+通过一顿搜索，猜测这个<code>ExpirationTime</code>是某框架用来管理调度的？</p>
+<blockquote>
+<p><a href="https://blog.csdn.net/jingshui1234/article/details/116481959">04.ExpirationTime计算</a></p>
+</blockquote>
+<p>现在关注点放在后面，猜测后面基本等同于调用了<code>axiosInstance[&quot;post&quot;]</code>并给它安排了<code>e</code>和<code>t</code>，手动追踪到<code>axiosInstance[&quot;post&quot;]</code>代码段<br>
+<img src="https://sz134055.github.io//post-images/1673078821933.png" alt="" loading="lazy"><br>
+不过好像仍然没有对表单进行加密</p>
+<p>那么现在只能去怀疑以下拦截器了，拦截器一般关键词<code>'interceptors'.request.use</code>或<code>'interceptors'.response.use</code>，不过这里直接搜不太现实，但是可以搜<code>axiosInstance</code>，进行广撒网，<br>
+最终找到此处（注意断好位置，图片里这样是断不住的）<br>
+<img src="https://sz134055.github.io//post-images/1673079712712.png" alt="" loading="lazy"></p>
+<p>慢慢排查，来到此处：<br>
+<img src="https://sz134055.github.io//post-images/1673080170604.png" alt="" loading="lazy"></p>
+<p>很明显是要对表单<code>data</code>值进行改变了，而后面的代码结果便是加密后的数据</p>
+<p>那么现在直接扣，等同于以下代码</p>
+<pre><code class="language-js">function enc_data(data){
+    return PolicyInfoSearchParam$encode(data)[&quot;finish&quot;]()[&quot;slice&quot;]()
+}
+</code></pre>
+<p>再跳转至<code>PolicyInfoSearchParam$encode</code><br>
+<img src="https://sz134055.github.io//post-images/1673080840031.png" alt="" loading="lazy"><br>
+复制<code>return</code>的函数尝试运行发现找不到<code>Writer</code>，此时可以下断点然后跳转，发现又回去了，且有点像Webpack，这时候伴以搜索形式找<code>Writer</code>，可以全扣或者半扣，不过全扣下来发现能搜到的关键字都在这一块<br>
+<img src="https://sz134055.github.io//post-images/1673081147458.png" alt="" loading="lazy"><br>
+那么可以试试半扣</p>
+<p>再尝试运行，发现缺少<code>commonjsGlobal</code>，直接使用<code>global</code>代替，同时记得在原有导出模块后，直接调用出<code>Writer</code><br>
+<img src="https://sz134055.github.io//post-images/1673081998592.png" alt="" loading="lazy"></p>
+<p>最后运行结果：<br>
+<img src="https://sz134055.github.io//post-images/1673082006960.png" alt="" loading="lazy"></p>
+<p>与之对比可以发现结果一致<br>
+<img src="https://sz134055.github.io//post-images/1673082163829.png" alt="" loading="lazy"></p>
+<p>逆向完毕</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/js-hun-yao-xue-xi-ji-shi-zhan/" class="post-title gt-a-link">
+                    JS混淆学习及实战
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

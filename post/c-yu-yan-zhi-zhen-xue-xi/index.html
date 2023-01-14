@@ -1,0 +1,319 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>C语言-指针 学习 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    C语言-指针 学习
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-11-18 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/c/" class="post-tags">
+                            # C
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="指针基本介绍">指针基本介绍</h2>
+<p>一个典型的计算机RAM，每一个字节会对应一个地址。现在我们在C语言中声明一个变量<code>a</code>，当程序执行时，计算机会为这个变量<code>a</code>分配空间（现代计算机系统中每一个进程都访问虚拟地址而非直接访问物理地址，这个不在讨论范围内），而分配的空间大小取决该变量的数据类型，例如<code>int</code>类型，会占用4个字节。同时还取决于编译器，因为不同的编译器对于数据类型空间的分配可能略微有差距。</p>
+<p><strong>指针是一个变量，它存放着另外一个变量的地址。</strong></p>
+<pre><code class="language-c">int a = 5;
+int *p;
+
+p = &amp;a;
+</code></pre>
+<p>现在假设，变量<code>a</code>的地址为<code>204</code>（即内存中的起始位置），指针<code>p</code>的位置为<code>64</code>，声明结束后，我们进行了一次赋值<code>p=&amp;a;</code>即将<code>a</code>的地址赋值给<code>p</code>，那么此时便有：</p>
+<pre><code>p -&gt; 204
+&amp;a -&gt; 204
+&amp;p -&gt; 64
+*p -&gt; 5
+</code></pre>
+<p>变量前<code>&amp;</code>为取当前变量的地址，<code>*</code>为取当前变量的值</p>
+<p>其中为了获取<code>a</code>的值而使用<code>*p</code>，被称为解引用</p>
+<p>对于指针的声明，存在以下两种方式</p>
+<pre><code class="language-c">int *p;
+int* p;
+</code></pre>
+<p>同时可以在声明的同时就赋值，因为指针就是存放地址的变量</p>
+<pre><code class="language-c">int *p = &amp;a;
+</code></pre>
+<h2 id="指针的算数运算与类型">指针的算数运算与类型</h2>
+<h3 id="指针的算数运算">指针的算数运算</h3>
+<p>看下面一段代码：</p>
+<pre><code class="language-C">int main(){
+    int a = 10;		//假设a的地址为2002
+    int *p = &amp;a;
+    
+    printf(&quot;%d\n&quot;,p);
+    printf(&quot;%d\n&quot;,p+1);
+}
+</code></pre>
+<p>结果输出：</p>
+<pre><code class="language-shell">2002
+2006
+</code></pre>
+<p>为什么第二次结果是<code>2006</code>，这是因为<code>a</code>为占用4字节的<code>Int</code>类型，因此当<code>p+1</code>时，会得到下一个<code>int</code>型地址（起始位置），即<code>2002+4=2006</code>。</p>
+<p>现在，我们在其中插入以下一段代码：</p>
+<pre><code class="language-C">printf(&quot;%d\n&quot;,*(p+1));
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">-858993460
+</code></pre>
+<p>这里显示的数字无意义，这是因为首先计算的是<code>p+1</code>，即获取到了下一个<code>int</code>类型地址，是一个未初始化的地址，此时使用<code>*</code>取其值自然是获得了无意义的数字。</p>
+<h3 id="指针类型">指针类型</h3>
+<p>指针是强类型的，这就意味着需要一个特定类型的指针变量来存储特定类型的变量地址，即与存储地址的对象变量类型保持一致。如<code>int</code>类型变量需要<code>int</code>类型的指针变量来存储它的地址。</p>
+<p>那么，为什么强类型？为什么不为所有指针指定一个通用类型呢？这是因为，指针不仅仅是存储着对象变量的地址，同时指针变量也解引用那些地址的内容。</p>
+<p>现在，假设我们有一个以下变量：</p>
+<pre><code class="language-C">int a = 1025;
+</code></pre>
+<p><code>int</code>类型占用4字节，一字节为8位（X86架构计算机），而<code>1025</code>换算成二进制数为<code>10000000001</code>，那么变量<code>a</code>在内存中的布局即可看成如下所示：</p>
+<pre><code> byte3    byte2    byte1    byte0
+00000000 00000000 00000100 00000001
+   203      202      201      200
+</code></pre>
+<p>其中我们假定<code>byte0~byte3</code>这四个字节的位置分别是<code>200~203</code>，那么此时我们声明一个指针并将<code>a</code>地址赋值给它，即<code>int *p = &amp;a</code>，那么<code>p</code>的值即为<code>a</code>的地址，即<code>200</code></p>
+<p>顺带一提，当整数在内存中表示时，最左边的比特，被称为符号位，用来指定整数的正负性，<code>0</code>表示正，<code>1</code>表时负，剩下的31位用来存储数字，因此不难推断出，<code>int</code>类型的取值范围为<code>-2^31~2^31-1</code>（<a href="https://blog.csdn.net/wangerxiao121223/article/details/105501006">惭愧！直到今天才真正明白为什么int型的取值范围是-2<sup>31~2</sup>31-1_WaiterXiaoYY的博客-CSDN博客</a>)</p>
+<p>现在再继续看以下代码：</p>
+<pre><code class="language-c">int a = 1025;	//假设其位置为200
+int *p = &amp;a;
+printf('%d\n',p);
+printf('%d\n',*p);
+
+char *n = (char*)p;		//强制类型转换
+printf('%d\n',n);
+printf('%d\n',*n);
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">200
+1025
+200
+1
+</code></pre>
+<p>可以看到，<code>n</code>同样存储<code>a</code>的地址，但是解引用后值却是<code>1</code>，我们回看<code>a</code>在内存中的布局即可明白，因为<code>char</code>类型只有一字节，因此当解引用<code>*n</code>时，计算机只会根据它<code>char</code>类型来寻找一字节的内容，因此只有<code>byte0</code>被解引用，<code>byte0</code>中存储的二进制数转换为十进制后值即为<code>1</code>。同理如下代码：</p>
+<pre><code class="language-c">printf('%d\n',n+1);
+printf('%d\n',*(n+1));
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">201
+4
+</code></pre>
+<p>结果并未出乎意料，因为<code>n</code>指向<code>byte0</code>，那么<code>n+1</code>自然便跳到下一个<code>char</code>位<code>201</code>，其中<code>201</code>存储的二进制数为转换为十进制后结果为<code>4</code>。</p>
+<h2 id="void类型指针">void类型指针</h2>
+<p>有一种无类型的指针，它不针对任何类型，这种指针被称为void类型指针。</p>
+<p>我们继续接上一代码片段再声明一个void类型指针：</p>
+<pre><code class="language-c">void *p0;
+p0 = p;
+printf(&quot;%d\n&quot;,p0);
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">200
+</code></pre>
+<p>我们在这里并没有进行解引用以及类似<code>p+1</code>的算数运算 操作，这是因为void类型指针没有映射到任何类型，因此不能解引用，同时也能进行算数运算操作，因为这些都必须基于一个特定的数据类型。</p>
+<p>同时也注意到，我们在将<code>p</code>赋值给<code>p0</code>时，并没有像上面赋值给<code>char</code>类型指针时进行类型转换，正是因为void类型指针无特定类型，因此它可以指向任何类型的数据，即 <strong>任何类型指针都可以直接赋值给void类型指针</strong></p>
+<p>但是，这不意味着void类型指针就可以直接赋值给任何类型指针，如果你尝试以下代码，便会引发错误：</p>
+<pre><code class="language-c">int *a;
+void *p;
+...
+a = p;	//这会引发错误
+</code></pre>
+<p>因此若要将void类型指针赋值给其它类型指针时，必须进行强制转换：</p>
+<pre><code class="language-c">a = (int*)p;
+</code></pre>
+<p>void类型指针作为一个无类型指针，可以指向任意类型，因此当我们声明一个函数时，其参数可以是任意类型指针时，都应该将其声明为<code>void*</code>，void类型指针可以看成一种通用类型指针。</p>
+<h2 id="指针的指针">指针的指针</h2>
+<p>如下所示：</p>
+<pre><code class="language-c">int a = 5;
+int *p = &amp;a;
+int **p0 = &amp;p;
+
+printf(&quot;%d\n&quot;,p);
+printf(&quot;%d\n&quot;,*p0);
+printf(&quot;%d\n&quot;,*(*p0));
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">200
+200
+5
+</code></pre>
+<p>其实不难理解<code>**p0</code>和<code>*p</code>的关系，同理甚至可以出现<code>***p1</code>这样的嵌套甚至一直嵌套下去。</p>
+<p>其中<code>*(*p0)</code>可以写成<code>**p0</code>，但仍建议写成<code>*(*p0)</code>，这是一个好习惯。</p>
+<h2 id="函数传值与传引用">函数传值与传引用</h2>
+<p>如下所示一段代码：</p>
+<pre><code class="language-c">void increment(int a){
+    printf('%d\n',&amp;a);
+}
+int main(){
+    int a = 5;
+    increment(a);
+    printf('%d\n',&amp;a);
+}
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">200
+300
+</code></pre>
+<p>可以看到两个<code>a</code>根本不是一个变量</p>
+<p>对于这样的函数需求，可以写成以下形式</p>
+<pre><code class="language-c">void increment(int *p){
+    *p = (*p) +1;
+}
+int main(){
+    int a = 5;
+    increment(a);
+    printf('%d\n',&amp;a);
+}
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">6
+</code></pre>
+<p>这样被称为传引用，可以很好地节约内存</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/zheng-ze-biao-da-shi/" class="post-title gt-a-link">
+                    正则表达式学习笔记
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

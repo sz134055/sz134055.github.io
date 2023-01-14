@@ -1,0 +1,454 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>国密（SM）系列逆向学习及实战 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    国密（SM）系列逆向学习及实战
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2023-01-04 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/python/" class="post-tags">
+                            # python
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="简介">简介</h2>
+<p>例如SM4：<a href="http://www.sca.gov.cn/sca/xwdt/2021-07/08/content_1060866.shtml">我国SM4分组密码算法正式成为ISO/IEC国际标准</a></p>
+<blockquote>
+<p>国密算法，即国家商用密码算法。是由国家密码管理局认定和公布的密码算法标准及其应用规范，其中部分密码算法已经成为国际标准。如SM系列密码，SM代表商密，即商业密码，是指用于商业的、不涉及国家秘密的密码技术。<br>
+——<a href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<figure data-type="image" tabindex="1"><img src="https://pic3.zhimg.com/v2-58c351513a73515fea7ccd48894f3196_r.jpg" alt="" loading="lazy"></figure>
+<p>这里常用的为<code>SM2</code>和<code>SM4</code>算法</p>
+<h2 id="sm2">SM2</h2>
+<h3 id="简介-2">简介</h3>
+<blockquote>
+<p>它是基于椭圆曲线密码的公钥密码算法标准，其秘钥长度256bit，包含数字签名、密钥交换和公钥加密，<strong>用于替换RSA/DH/ECDSA/ECDH等国际算法</strong>。可以满足电子认证服务系统等应用需求，由国家密码管理局于2010年12月17号发布。<br>
+SM2采用的是ECC 256位的一种，其安全强度比RSA 2048位高，且运算速度快于RSA。<br>
+——<a href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<h3 id="js实现">JS实现</h3>
+<p>JS已有较为成熟的实现库，这里推荐<a href="https://www.npmjs.com/package/sm-crypto"><code>sm-crypto</code></a>，可实现<code>SM2</code>、<code>SM3</code>和<code>SM4</code></p>
+<p>上面链接的NPM库间接已给出示例，这里直接照搬：<br>
+密钥对</p>
+<pre><code class="language-js">const sm2 = require('sm-crypto').sm2
+
+let keypair = sm2.generateKeyPairHex()
+
+publicKey = keypair.publicKey // 公钥
+privateKey = keypair.privateKey // 私钥
+
+// 默认生成公钥 130 位太长，可以压缩公钥到 66 位
+const compressedPublicKey = sm2.compressPublicKeyHex(publicKey) // compressedPublicKey 和 publicKey 等价
+sm2.comparePublicKeyHex(publicKey, compressedPublicKey) // 判断公钥是否等价
+
+// 自定义随机数，参数会直接透传给 jsbn 库的 BigInteger 构造器
+// 注意：开发者使用自定义随机数，需要自行确保传入的随机数符合密码学安全
+let keypair2 = sm2.generateKeyPairHex('123123123123123')
+let keypair3 = sm2.generateKeyPairHex(256, SecureRandom)
+
+let verifyResult = sm2.verifyPublicKey(publicKey) // 验证公钥
+verifyResult = sm2.verifyPublicKey(compressedPublicKey) // 验证公钥
+</code></pre>
+<p>加解密</p>
+<pre><code class="language-js">const cipherMode = 1 // 1 - C1C3C2，0 - C1C2C3，默认为1
+
+let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode) // 加密结果
+let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode) // 解密结果
+
+encryptData = sm2.doEncrypt(msgArray, publicKey, cipherMode) // 加密结果，输入数组
+decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode, {output: 'array'}) // 解密结果，输出数组
+</code></pre>
+<p>来测试一下：</p>
+<pre><code class="language-js">const sm2 = require('sm-crypto').sm2
+
+let keypair = sm2.generateKeyPairHex()
+
+publicKey = keypair.publicKey // 公钥
+privateKey = keypair.privateKey // 私钥
+
+// 默认生成公钥 130 位太长，可以压缩公钥到 66 位
+const compressedPublicKey = sm2.compressPublicKeyHex(publicKey) // compressedPublicKey 和 publicKey 等价
+sm2.comparePublicKeyHex(publicKey, compressedPublicKey) // 判断公钥是否等价
+
+// 自定义随机数，参数会直接透传给 jsbn 库的 BigInteger 构造器
+// 注意：开发者使用自定义随机数，需要自行确保传入的随机数符合密码学安全
+//let keypair2 = sm2.generateKeyPairHex('123123123123123')
+//let keypair3 = sm2.generateKeyPairHex(256, SecureRandom)
+
+let verifyResult = sm2.verifyPublicKey(publicKey) // 验证公钥
+verifyResult = sm2.verifyPublicKey(compressedPublicKey) // 验证公钥
+
+console.log(verifyResult)
+
+const cipherMode = 1 // 1 - C1C3C2，0 - C1C2C3，默认为1
+
+msgString = 'HELLO WORLD'
+
+let encryptData = sm2.doEncrypt(msgString, publicKey, cipherMode) // 加密结果
+let decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode) // 解密结果
+
+console.log(encryptData)
+console.log(decryptData)
+
+//encryptData = sm2.doEncrypt(msgArray, publicKey, cipherMode) // 加密结果，输入数组
+//decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode, {output: 'array'}) // 解密结果，输出数组
+
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">true
+f378b1ea6ee7d8d1729ee38fc5bbe8ccc2c2813f7fc07bcad877169d57fa5e2212d994cbf4c4dff78bd58acc82304373013e5d2e793c0ad2aafc90ab2c65083af6762f53b00324f091f67df9cac9d851a31baee07dfc19114bc0188dcb7aa37c9c9f9bfb43dec6a0712225
+HELLO WORLD
+</code></pre>
+<h2 id="sm4">SM4</h2>
+<blockquote>
+<p>是我国自主设计的分组对称密码算法，<strong>用于替代DES/AES等国际算法</strong>。SM4算法与AES算法具有相同的密钥长度、分组长度，都是128bit。于2012年3月21日发布，适用于密码应用中使用分组密码的需求。<br>
+——<a href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<p>SM4 NPM库中也给出了示例，同样照搬：<br>
+加密</p>
+<pre><code class="language-js">const sm4 = require('sm-crypto').sm4
+const msg = 'hello world! 我是 juneandgreen.' // 可以为 utf8 串或字节数组
+const key = '0123456789abcdeffedcba9876543210' // 可以为 16 进制串或字节数组，要求为 128 比特
+
+let encryptData = sm4.encrypt(msg, key) // 加密，默认输出 16 进制字符串，默认使用 pkcs#7 填充（传 pkcs#5 也会走 pkcs#7 填充）
+let encryptData = sm4.encrypt(msg, key, {padding: 'none'}) // 加密，不使用 padding
+let encryptData = sm4.encrypt(msg, key, {padding: 'none', output: 'array'}) // 加密，不使用 padding，输出为字节数组
+let encryptData = sm4.encrypt(msg, key, {mode: 'cbc', iv: 'fedcba98765432100123456789abcdef'}) // 加密，cbc 模式
+</code></pre>
+<p>解密</p>
+<pre><code class="language-js">const encryptData = '0e395deb10f6e8a17e17823e1fd9bd98a1bff1df508b5b8a1efb79ec633d1bb129432ac1b74972dbe97bab04f024e89c' // 可以为 16 进制串或字节数组
+const key = '0123456789abcdeffedcba9876543210' // 可以为 16 进制串或字节数组，要求为 128 比特
+
+let decryptData = sm4.decrypt(encryptData, key) // 解密，默认输出 utf8 字符串，默认使用 pkcs#7 填充（传 pkcs#5 也会走 pkcs#7 填充）
+let decryptData = sm4.decrypt(encryptData, key, {padding: 'none'}) // 解密，不使用 padding
+let decryptData = sm4.decrypt(encryptData, key, {padding: 'none', output: 'array'}) // 解密，不使用 padding，输出为字节数组
+let decryptData = sm4.decrypt(encryptData, key, {mode: 'cbc', iv: 'fedcba98765432100123456789abcdef'}) // 解密，cbc 模式
+</code></pre>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p><a href="https://fuwu.nhsa.gov.cn/nationalHallSt/#/search/medical">定点医疗机构查询-国家医保服务平台</a><br>
+<strong>注意：只做技术研究、交流！</strong></p>
+<p>可以看到需要逆向的参数有很多：<br>
+请求头：<br>
+<img src="https://sz134055.github.io//post-images/1672918755783.png" alt="" loading="lazy"><br>
+表单：<br>
+<img src="https://sz134055.github.io//post-images/1672918774847.png" alt="" loading="lazy"><br>
+响应结果：<br>
+<img src="https://sz134055.github.io//post-images/1672918785027.png" alt="" loading="lazy"></p>
+<p>一顿找（推荐搜索关键字）：<br>
+<img src="https://sz134055.github.io//post-images/1672918799438.png" alt="" loading="lazy"></p>
+<p>本来想半扣的，毕竟这里面比如那个<code>r</code>就是个标准的SHA256加密，可以直接用三方库，SM不就说了，当时在半扣的过程中，越扣越多，索性全扣得了</p>
+<p>同时需要一个参数<code>t</code>，直接在控制台输出<code>t</code>看看：</p>
+<pre><code class="language-js">vat t ={
+    &quot;transformRequest&quot;: {},
+    &quot;transformResponse&quot;: {},
+    &quot;timeout&quot;: 30000,
+    &quot;xsrfCookieName&quot;: &quot;XSRF-TOKEN&quot;,
+    &quot;xsrfHeaderName&quot;: &quot;X-XSRF-TOKEN&quot;,
+    &quot;maxContentLength&quot;: -1,
+    &quot;headers&quot;: {
+        &quot;common&quot;: {
+            &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;
+        },
+        &quot;delete&quot;: {},
+        &quot;get&quot;: {},
+        &quot;head&quot;: {},
+        &quot;post&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;put&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;patch&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;Accept&quot;: &quot;application/json&quot;,
+        &quot;Content-Type&quot;: &quot;application/json&quot;,
+        &quot;channel&quot;: &quot;web&quot;
+    },
+    &quot;withCredentials&quot;: false,
+    &quot;baseURL&quot;: &quot;/ebus/fuwu/api&quot;,
+    &quot;method&quot;: &quot;post&quot;,
+    &quot;url&quot;: &quot;/nthl/api/CommQuery/queryFixedHospital&quot;,
+    &quot;data&quot;: {
+        &quot;addr&quot;: &quot;&quot;,
+        &quot;regnCode&quot;: &quot;340600&quot;,
+        &quot;medinsName&quot;: &quot;&quot;,
+        &quot;medinsLvCode&quot;: &quot;&quot;,
+        &quot;medinsTypeCode&quot;: &quot;&quot;,
+        &quot;openElec&quot;: &quot;&quot;,
+        &quot;pageNum&quot;: 5,
+        &quot;pageSize&quot;: 10
+    }
+}
+</code></pre>
+<p><code>t</code>明显可直接写死，其中一些参数猜测可能为：</p>
+<ul>
+<li>regnCode：地区代码（打开此网站会检测你IP位置并在控制台输出）</li>
+<li>pageNum：翻页</li>
+<li>pageSize：一页内容量</li>
+</ul>
+<p>如下所示，打开网站在开发人员工具开启下重新刷新页面，会看到地区检测结果：<br>
+<img src="https://sz134055.github.io//post-images/1672925003815.png" alt="" loading="lazy"></p>
+<p>如果想要获取到其它位置，自行研究API了</p>
+<p>将其封装进代码，最终Webpack代码6W行，如果想将生成相关的代码自己扣下来的话（因为这段代码被包含在了Webpack中）同时还要注意去掉（仅自己封装用于生成表单和请求头的代码）<code>try-catch</code>语句，不然少了参数都不知道。</p>
+<p>因为生成加密参数的代码被包含在Webpack中<code>&quot;7d92&quot;</code>，所以可以试试不自己扣（因为上面所有的Webpack代码已经全扣了），那么要如何调用呢？</p>
+<p>可以知道代码在<code>&quot;7d92&quot;</code>，那么先输出一下<code>webpack(&quot;7d92&quot;)</code>（这里是自行导出了加载器，详见Webpack文章）</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;))
+</code></pre>
+<p>结果：</p>
+<pre><code class="language-shell">{ a: [Getter], b: [Getter] }
+</code></pre>
+<p>选择<code>a</code>再输出：</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;).a)
+</code></pre>
+<p>结果：</p>
+<pre><code class="language-shell">[Function: f]
+</code></pre>
+<p>可以看到<code>a</code>为一个函数，并且其名字似乎预示选对了<br>
+再调用一下函数：</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;).a())
+</code></pre>
+<p>结果（只截取片段）：</p>
+<pre><code class="language-shell"> return t.headers[&quot;x-tif-paasid&quot;] = l.paasId,
+</code></pre>
+<p>发现报错，很明显，这里便是我们要找的加密方法，把上面的找到的<code>t</code>塞进去看看结果：</p>
+<pre><code class="language-js">console.log(webpack(&quot;7d92&quot;).a(t))
+</code></pre>
+<p>结果：</p>
+<pre><code class="language-shell">{
+  transformRequest: {},
+  transformResponse: {},
+  timeout: 30000,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+  maxContentLength: -1,
+  headers: {
+    common: { Accept: 'application/json, text/plain, */*' },
+    delete: {},
+    get: {},
+    head: {},
+    post: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    put: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    patch: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    channel: 'web',
+    'x-tif-paasid': undefined,
+    'x-tif-signature': '092eeb43442f3633e5d22790695b39264f0f0834e14f60dfe99d514e95a2cf93',
+    'x-tif-timestamp': 1672929556,
+    'x-tif-nonce': 'Y4aUfjoK',
+    contentType: 'application/x-www-form-urlencoded'
+  },
+  withCredentials: false,
+  baseURL: '/ebus/fuwu/api',
+  method: 'post',
+  url: '/nthl/api/CommQuery/queryFixedHospital',
+  data: '{&quot;data&quot;:{&quot;data&quot;:{&quot;encData&quot;:&quot;3DFBCA4667B978F639BB23B95DCE4CC73F6F89D76EF932292FE8BA14BC87DB17CCD20943B4DAE96380B41164D761DE9742C84A985FE3BABC31CB352556BB87C9C1495DB24A29AB6BC3A85AB7FCA00F338EE714ACFC4C924F01CF575098AEF167B7A135B72DAC6C2F3CD510E411A3C63A7D334AF16D66C5F4C5E72412B915CB27&quot;},&quot;appCode&quot;:&quot;T98HPCGN5ZVVQBS8LZQNOAEXVI9GYHKQ&quot;,&quot;version&quot;:&quot;1.0.0&quot;,&quot;encType&quot;:&quot;SM4&quot;,&quot;signType&quot;:&quot;SM2&quot;,&quot;timestamp&quot;:1672929556,&quot;signData&quot;:&quot;2+IZoksuP1rgU4LhVryfmBs1icvANuGmjR3FNk95bJyTjyqm3TK66ts3oV7L1d3Aot5RXvB7GRCK9QjnypILxw==&quot;}}'
+}
+</code></pre>
+<p>成功拿到需要的数据！</p>
+<p>暂时放下，来看看结果如何处理。</p>
+<p>最终找到此处：<br>
+<img src="https://sz134055.github.io//post-images/1672919599116.png" alt="" loading="lazy"><br>
+此时<code>e.data</code>还是原始响应结果，并未解密：</p>
+<pre><code class="language-js">{
+    &quot;code&quot;: 0,
+    &quot;data&quot;: {
+        &quot;signData&quot;: &quot;+EJhLYxiMpbwjGCsEvK+wyXNoAyMKpkGnjb7tGZ3OoFNWqKzDjIeDfqE9ZSO0anEt3z4rNoFJ5lgHxeDuddVdg==&quot;,
+        &quot;encType&quot;: &quot;SM4&quot;,
+        &quot;data&quot;: {
+            &quot;encData&quot;: &quot;2DC8C08C5C251B04B9CCBA9436917607527A4CC8F48CC3C8D7C226EB9483D8FA03CECA79ABA4AC1CE5 ....篇幅有限，这里省略.....FCF4D05388AA6A2E4E171B6486547C2E9DB06B68A81A61409372E7E00A0D1691A2F222D7698DCAC&quot;
+        },
+        &quot;signType&quot;: &quot;SM2&quot;,
+        &quot;appCode&quot;: &quot;T98HPCGN5ZVVQBS8LZQNOAEXVI9GYHKQ&quot;,
+        &quot;version&quot;: &quot;1.0.0&quot;,
+        &quot;timestamp&quot;: &quot;1672919504404&quot;
+    },
+    &quot;message&quot;: &quot;成功&quot;,
+    &quot;timestamp&quot;: &quot;1672919504&quot;,
+    &quot;type&quot;: &quot;success&quot;
+}
+</code></pre>
+<p>复制到本地备后测试使用。</p>
+<p>同时这段代码也被包含在Webpack中，可以选择不扣，不过因为实际涉及解密的代码都集中在了一行上，这里选择半扣：</p>
+<pre><code class="language-js">function get_data(data){
+    const e = {data:data},
+        c = webpack(&quot;7d92&quot;);
+
+    return e.data.data.appCode &amp;&amp; (e.data.data = Object(c.b)(&quot;SM4&quot;, e.data)),e.data
+}
+</code></pre>
+<p>看到这里可以猜测，<code>webpack(&quot;7d92&quot;)</code>里<code>a</code>负责加密，<code>b</code>负责解密<br>
+将备好的数据放进去看运行结果：<br>
+<img src="https://sz134055.github.io//post-images/1672920513167.png" alt="" loading="lazy"><br>
+成功解密</p>
+<p>简单封装下代码，准备模拟请求</p>
+<h3 id="模拟请求">模拟请求</h3>
+<p>这里继续使用Python来模拟请求，只爬取一页数据<br>
+同时要注意，从js代码获取的值需要进行一些处理才能让<code>requests</code>得以正确传递，<br>
+同时如果遇到<code>UnicodeEncodeError: 'gbk' codec...</code>问题请参照此文章：<a href="https://sz134055.github.io/post/shi-yong-pyexecjs-wei-python-pa-chong-ti-gong-jia-mi-can-shu/#%E5%87%BA%E7%8E%B0unicodeencodeerror-gbk-codec%E9%97%AE%E9%A2%98">使用PyExecJS为Python爬虫提供加密参数</a><br>
+<img src="https://sz134055.github.io//post-images/1672931066558.png" alt="" loading="lazy"></p>
+<p>完整代码请见仓库 <a href="https://github.com/sz134055/learning-practice/tree/main/SM/gjyb">国家医疗保障服务平台-SM/gjyb</a></p>
+<p><strong>代码仅作学习交流之用，请勿用于非法用途！</strong></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/js-ni-xiang-guan-yu-webpack-da-bao-de-xue-xi/" class="post-title gt-a-link">
+                    JS逆向关于Webpack的学习
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

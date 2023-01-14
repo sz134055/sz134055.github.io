@@ -1,0 +1,294 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>Websocket逆向与B站直播间弹幕爬取实战 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Websocket逆向与B站直播间弹幕爬取实战
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2023-01-07 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/python/" class="post-tags">
+                            # python
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="介绍">介绍</h2>
+<ul>
+<li>WebSocket是HTML5下一种新的协议（websocket协议本质上是一个基于tcp的协议）</li>
+<li>它实现了浏览器与服务器全双工通信，能更好的节省服务器资源和带宽并达到实时通讯的目的</li>
+<li>Websocket是一个<strong>持久化</strong>的协议</li>
+<li>websocket约定了一个通信的规范，通过一个握手的机制，客户端和服务器之间能建立一个类似tcp的连接，从而方便它们之间的通信</li>
+<li>在websocket出现之前，web交互一般是基于http协议的短连接或者长连接</li>
+<li>websocket是一种全新的协议，不属于http无状态协议，协议名为&quot;ws&quot;</li>
+<li>和HTTP都是基于tcp的，都是可靠性传输协议，都是应用层协议</li>
+<li>WebSocket是双向通信协议，模拟Socket协议，可以双向发送或接受信息，但HTTP是单向的</li>
+<li>WebSocket是需要浏览器和服务器握手进行建立连接的，而http是浏览器发起向服务器的连接，服务器预先并不知道这个连接</li>
+</ul>
+<h2 id="js实现">JS实现</h2>
+<p>js websocket主要有以下几个方法：</p>
+<pre><code class="language-js">//连接发生错误的回调方法
+websocket.onerror = function () {
+    setMessageInnerHTML(&quot;WebSocket连接发生错误&quot;);
+};
+
+//连接成功建立的回调方法
+websocket.onopen = function () {
+    setMessageInnerHTML(&quot;WebSocket连接成功&quot;);
+}
+
+//接收到消息的回调方法  接服务器信息的方法
+websocket.onmessage = function (event) {
+    setMessageInnerHTML(event.data);
+}
+
+//连接关闭的回调方法
+websocket.onclose = function () {
+    setMessageInnerHTML(&quot;WebSocket连接关闭&quot;);
+}
+</code></pre>
+<p>当然这些都是浏览器环境</p>
+<h2 id="实战">实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>此次目标为B站，随便找个直播间，来爬一下直播间的弹幕</p>
+<p>首先找到给出WSS信息的API，这个是B站的<br>
+<img src="https://sz134055.github.io//post-images/1673094658056.png" alt="" loading="lazy"></p>
+<p>其实B站还有一个API能够拿到弹幕，详见 <a href="https://www.bilibili.com/read/cv8186413">Bilibili直播API</a>，我估计是为了填补WSS连接前的空档期</p>
+<p>同时也可以在<code>WS</code>这看到建立的连接：<br>
+<img src="https://sz134055.github.io//post-images/1673095050698.png" alt="" loading="lazy"></p>
+<p>当然数据是加密的，通过发起程序或者搜索关键字找到代码处：<br>
+最终给我一顿找找到这里：<br>
+<img src="https://sz134055.github.io//post-images/1673159737531.png" alt="" loading="lazy"></p>
+<p>这个要说明一下就是WS建立可能会因为你调试导致失败，比如我这个就导致直播推流失败，但是弹幕仍然有效，因此并不影响<br>
+<img src="https://sz134055.github.io//post-images/1673159806833.png" alt="" loading="lazy"></p>
+<p>失败的会自动重新建立几次连接，记得关注URL适当放行几次，这个得自己把握，同时每次数据都会变，不像HTTP每次请求对应一次数据，像B站这个，点开就一个二进制数据选项，每次进每次数据不一样，但有一点可以确定的是数据加密过</p>
+<p>在上下不断寻找后，最终找到可能的解密处：<br>
+<img src="https://sz134055.github.io//post-images/1673160291004.png" alt="" loading="lazy"></p>
+<p>其实现在可以有两种办法，一是植入代码，浏览器保持运行，本地一个客户端同时接受，即做一个转发，另一个种那就是本地客户端直接接受了，但是那种可能还需要处理心跳问题，这里直接试试不用逆向解密方法的植入方式。</p>
+<h3 id="植入代码">植入代码</h3>
+<p>植入方式最大好处就是浏览器环境，难以被反爬了吧</p>
+<p>准备好js代码：</p>
+<pre><code class="language-js">!function(){
+    const ws = new WebSocket('ws://127.0.0.1:7788');
+    window.wsHook = ws;
+    ws.onopen = function(e){
+        ws.send('CONNECTED')
+    }
+    ws.onmessage = function(e){
+        ws.send(JSON.stringify(n.body))
+    }
+}();
+</code></pre>
+<p>然后选择替换（或者覆盖），然后对对应的JS文件右键-保存以覆盖（记住选择未格式化的！），直接在浏览器中打开已保存的代码进行编辑，在这段解密后的代码后面添加上面的代码即可<br>
+<img src="https://sz134055.github.io//post-images/1673165523541.png" alt="" loading="lazy"></p>
+<p>当然这不够优雅，可以考虑以下代码：<br>
+在文件头部加入</p>
+<pre><code class="language-js">!function(){
+    const ws = new WebSocket('ws://127.0.0.1:7788');
+    window.wsHook = ws;
+    ws.onopen = function(e){
+        ws.send('CONNECTED')
+    }
+
+}();
+</code></pre>
+<p>然后在对应地方加入以下代码：</p>
+<pre><code class="language-js">window.wsHook.send(JSON.stringify(n.body));
+</code></pre>
+<p>现在确保开发者工具开启且启用覆盖，刷新一下页面，如果你恰好看着控制台，你会看到连接到<code>127.0.0.1:7788</code>失败的消息，这是因为还没有客户端来接收</p>
+<p>再用一下下面抄来的Python代码（懒）：</p>
+<pre><code class="language-python">import asyncio
+# encoding: utf-8
+import asyncio
+import websockets
+
+
+async def echo(websocket):
+    # 使用WebSocket在客户端和服务器之间建立全双工双向连接后，就可以在连接打开时调用send()方法。
+    message = 'hello world'
+    # 发送数据
+    await websocket.send(message)
+    return True
+
+
+async def recv_msg(websocket):
+    while 1:
+        # 接收数据
+        recv_text = await websocket.recv()
+        print(recv_text)
+
+
+async def main_logic(websocket, path):
+    await echo(websocket)
+    await recv_msg(websocket)
+
+
+start_server = websockets.serve(main_logic, '127.0.0.1', 7788)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(start_server)
+loop.run_forever()
+</code></pre>
+<p>开RUN，可以看到直播间的消息已经都摆在你面前了<br>
+<img src="https://sz134055.github.io//post-images/1673165753184.png" alt="" loading="lazy"></p>
+<p>这时候是存入MongoDB还是现场就开始分析全看个人，仅仅插入一段代码，不用破解任何方法，正常看着直播就把弹幕爬了，这还扣啥代码，要什么自行车。</p>
+<p><strong>思路拓展</strong><br>
+当遇到一个极难的网站，即使找到了解密方法，也很难扣的时候，是否可以使用这种办法转发解密后的数据给本地？这样虽然还是需要配合自动化但却省去了用BeautifulSoup等工具对网页的解析，自动化只需要做到能帮助翻页等功能即可。</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/octet-stream-ji-shi-zhan/" class="post-title gt-a-link">
+                    octet-stream及实战
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,691 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>七麦数据榜单API加密参数逆向 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    七麦数据榜单API加密参数逆向
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-11-20 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="初始准备">初始准备</h2>
+<p>以爬取此页面中APP榜单为例：<br>
+<img src="https://sz134055.github.io//post-images/1668927592648.png" alt="七麦榜单首页" loading="lazy"></p>
+<p>向下滑动发现是动态加载：<br>
+<img src="https://sz134055.github.io//post-images/1668927772295.png" alt="发现API" loading="lazy"></p>
+<p>找到API，发现有一加密参数，且为<strong>动态变化</strong>：<br>
+<img src="https://sz134055.github.io//post-images/1668927897531.png" alt="加密参数" loading="lazy"></p>
+<p>尝试XHR重播，仍然成功获取：<br>
+<img src="https://sz134055.github.io//post-images/1668927924114.png" alt="XHR重播" loading="lazy"></p>
+<p>基本断定和时间戳无关</p>
+<h2 id="开始逆向">开始逆向</h2>
+<h3 id="查询参数名">查询参数名</h3>
+<p>尝试搜寻加密的参数名<code>analysis</code>：<br>
+<img src="https://sz134055.github.io//post-images/1668928288880.png" alt="搜寻参数名" loading="lazy"></p>
+<p>无果，转求其它方法</p>
+<h3 id="使用xhr断点">使用XHR断点</h3>
+<p>根据之前发现的请求：</p>
+<pre><code>https://api.qimai.cn/rank/index?analysis=ezUnUysSLA16W3ZTKQtwQSwIKhA1LT9BfF0iHi9UeBQ4DS4UIy1ZRlYkXRRjZ1xfI0dXCxtbWhgKCgVcTiFBVFNISkwFBwdSUyEaBQ==&amp;brand=free&amp;device=iphone&amp;country=cn&amp;genre=36&amp;date=2022-11-20&amp;page=2&amp;is_rank_index=1&amp;snapshot=14:50:04
+</code></pre>
+<p>可以下如下XHR断点：<br>
+<img src="https://sz134055.github.io//post-images/1668928488479.png" alt="XHR断点" loading="lazy"></p>
+<p>继续滚动页面获取新榜单列表或刷新页面重新获取榜单列表来触发断点：<br>
+<img src="https://sz134055.github.io//post-images/1668928619402.png" alt="断点成功触发" loading="lazy"></p>
+<p>单步跳过函数调用，直到此段代码，可以看到回调函数以及一些变量值和我们发现的API相关：<br>
+<img src="https://sz134055.github.io//post-images/1668928791982.png" alt="单步跳过函数直到此处" loading="lazy"></p>
+<p>单步执行函数调用，进去函数可以发现这段函数确实与我们需要逆向的API相关，可以看到变量<code>t</code>的值接收了网络调用返回：<br>
+<img src="https://sz134055.github.io//post-images/1668929180318.png" alt="t" loading="lazy"></p>
+<p>但我们的目标是请求参数中的加密参数<code>analysis</code>，因此我们可以尝试继续单步跳过函数调用，直到：<br>
+<img src="https://sz134055.github.io//post-images/1668929429979.png" alt="诡异处" loading="lazy"><br>
+可以看到<code>[Kt]</code>、<code>[Xt]</code>和<code>[Ft]</code>分别对应的是<code>['interceptors']</code>、<code>['response']</code>和<code>['use']</code>，这里补充一个知识点：</p>
+<blockquote>
+<p>在JavaScript中，可以使用点<code>.</code>的形式或<code>[]</code>这两种操作符来访问对象属性，但是它们区别是：<code>.</code>操作符是静态的，右侧必须是一个对象属性名称，而<code>[]</code>操作符则不同，属性名通过字符串表示，这意味着在代码运行中，可以通过修改这个字符串来达到动态访问目的</p>
+</blockquote>
+<p>我们可以大胆猜测此处是一个响应拦截器，我们需要的是请求拦截器，一般来说这两个拦截器应该放在一起，向上搜寻果然发现<code>[Kt][Ut][Ft]</code>，可以发现<code>Ut</code>即<code>request</code>，即我们需要的请求拦截器，因此在代码段首尾下断点：<br>
+<img src="https://sz134055.github.io//post-images/1668930927158.png" alt="拦截器" loading="lazy"></p>
+<h3 id="根据断点追溯">根据断点追溯</h3>
+<p>前面通过XHR断点追溯到拦截器并在其首位下断点，现在准备使用断点来追溯，取消XHR断点后取消调试然后继续滚动获取新数据或者刷新页面，代码执行至断点：<br>
+<img src="https://sz134055.github.io//post-images/1668930927158.png" alt="首断点" loading="lazy"></p>
+<p>我们恢复脚本执行一次，让代码执行到第二个断点，可以适当单步跳过下一个函数调用来观察变量值的变化来搜寻目标参数值：<br>
+<img src="https://sz134055.github.io//post-images/1668931234283.png" alt="尾断点" loading="lazy"></p>
+<p>与当前正在发送的请求参数对比，可以发现断点处的<code>e</code>变量值有一些相似<br>
+<img src="https://sz134055.github.io//post-images/1668931491655.png" alt="正在发送的请求参数" loading="lazy"></p>
+<p>我们可以大胆猜测，可能是最后一行代码对<code>e</code>等变量值进行了拼接处理，为了验证这个猜测，我们在控制台中手动执行一次最后一行代码（注意复制）：<br>
+<img src="https://sz134055.github.io//post-images/1668931796498.png" alt="GET IT" loading="lazy"></p>
+<p>可以发现已经成功获得加密参数</p>
+<h3 id="分析加密">分析加密</h3>
+<p>前面步骤成功追溯到加密关键处，现在开始分析加密过程</p>
+<p>我们可以方便地使用鼠标来获取到变量的值：<br>
+<img src="https://sz134055.github.io//post-images/1668932132825.png" alt="鼠标获取变量值" loading="lazy"><br>
+可以获知：</p>
+<pre><code class="language-js">p+B1+z[V1](e)
+</code></pre>
+<p>便是以下代码：</p>
+<pre><code class="language-js">'analysis' + '=' + Window.encodeURIComponent(e)
+</code></pre>
+<p>其中<code>Window.encodeURIComponent()</code>用于将字符串编码成URL，那么参数<code>e</code>便是逆向关键</p>
+<p>向上追溯，发现与<code>e</code>相关代码：</p>
+<pre><code class="language-js">e = (0, i[jt])((0,i[qt])(a, d))
+</code></pre>
+<p>此处涉及一个技巧：</p>
+<blockquote>
+<p>对于<code>(0,function)</code>这种表达式，可以看作为<code>(true &amp;&amp; function)</code>或<code>(0?0:function)</code>，这种间接调用的function保证了其在全局范围的执行</p>
+</blockquote>
+<p>因此我们可以将代码拆分：</p>
+<pre><code class="language-js">e = (0, i[jt])((0,i[qt])(a, d)); //拆分前
+e = i[jt](i[qt](a, d)); //拆分后
+</code></pre>
+<p>现在，我们基本断点<code>e</code>便是加密处，我们仅需解决<code>e</code>的值来源问题即可完成逆向并获取到加密值</p>
+<h2 id="获取加密值">获取加密值</h2>
+<p>我们已经知晓了加密过程以及对应函数，现在应着手让我们自己也能生成加密值</p>
+<h3 id="使用扣代码方式获取加密值">使用“扣代码”方式获取加密值</h3>
+<p>现在我们待解决的问题是：</p>
+<ul>
+<li><code>i[jt]</code>函数</li>
+<li><code>i[qt]</code>函数</li>
+<li><code>a</code>值来源</li>
+<li><code>d</code>值来源</li>
+</ul>
+<p>可以预见的是后面将会是混淆后的JS代码，用于加密参数，我们可以通过“扣代码” 的方式，将必要的加密函数复制下来为我们所用，如果使用Python来编写爬虫，我们仅仅需要将这些“扣”下来的代码，在需要的时候接收参数并返回加密后的<code>analysis</code>值供Python调用，这样便避免了完全了解加密过程和逻辑并改用Python重写加密函数，节约时间。</p>
+<p>“扣代码”即将涉及到的加密代码复制到本地，然后将未知的变量进行替换操作，即补全代码，当然对于这些变量值，可能是动态生成，可能是写死，但是通过代码生成也可能是一个定值，以减少上面仅仅通过搜索就获取对应值的情况，对于这些本质上还是写死的值，我们大可不必深究下去，直接将其值补全至代码即可。</p>
+<p>判断“写死值”最轻松办法即多次请求并调试（一般三次即可）关注其变化</p>
+<h4 id="先解决函数">先解决函数</h4>
+<p>我们先来解决两个函数，将<code>a</code>，<code>d</code>值先分别到村到本地JS文件中，以用于函数调用</p>
+<p>从<code>i[qt]</code>开始，进入该函数，该函数为<code>h(n,t)</code>：<br>
+<img src="https://sz134055.github.io//post-images/1668934606707.png" alt="函数h" loading="lazy"><br>
+当然，也可以在控制台输出该函数然后进入：<br>
+<img src="https://sz134055.github.io//post-images/1668934684041.png" alt="函数h" loading="lazy"></p>
+<p>我们将该函数代码复制到本地JS文件中，并开始尝试补足缺少变量对应值。<br>
+本地代码如下：</p>
+<pre><code class="language-js">var a = 'Mjg=@#/index/banner@#7707053466@#3'
+var d = 'xyz517cda96abcd'
+
+function h(n, t) {
+    t = t || u();
+    for (var e = (n = n[$1](_))[R], r = t[R], a = q1, i = H; i &lt; e; i++)
+        n[i] = o(n[i][a](H) ^ t[(i + 10) % r][a](H));
+    return n[I1](_)
+}
+
+console.log(h(a,d))
+</code></pre>
+<p>通过控制台（获取鼠标来获取值），我们可以很方便地先将字符串类型的值进行替换，例如<code>$1</code>，通过控制台可以发现其值为<code>split</code>：<br>
+<img src="https://sz134055.github.io//post-images/1668935234701.png" alt="替换值" loading="lazy"><br>
+我们可以猜测这可能为字符串<code>split()</code>方法，但是我们并不需要关心这么多，因为只需要关心成功运行并去的结果</p>
+<p>依次类推，逐步替换未知变量，直到<code>o()</code>方法，同样进入该函数并复制到本地。<strong>注意</strong>，因为代码混淆过，因此<code>o</code>不一定是所需要的代码，若想获取<code>o()</code>的代码，应该通过调试<code>h()</code>处代码，让其执行到<code>o()</code>后停止，再进入，此时代码才是在<code>h()</code>中调用的代码。<br>
+此时本地代码为：</p>
+<pre><code class="language-js">var a = 'Mjg=@#/index/banner@#7707053466@#3'
+var d = 'xyz517cda96abcd'
+
+function o(n) {
+    t = _,
+    [f2, s2, d2, m2, l2, v2, p2, s2, l2, d2, h2, y2][M](function(n) {
+        t += z[g2](w2 + n)
+    });
+    var t, e = t;
+    return z[b2][e](n)
+}
+
+function h(n, t) {
+    t = t || u();
+    for (var e = (n = n['split'](''))['length'], r = t['length'], a = 'charCodeAt', i = 0; i &lt; e; i++)
+        n[i] = o(n[i][a](0) ^ t[(i + 10) % r][a](0));
+    return n['(^| )']('')
+}
+
+console.log(h(a,d))
+</code></pre>
+<p>继续补足代码，直到<code>z</code>，前面已获知其为<code>Window</code>对象，而<code>g2</code>为<code>'unescape'</code>，即调用<code>Window.unescape()</code>，在本地代码中我们可以直接使用该函数（可以在浏览器中运行，如果成功运行，即可在本地运行），同理后面的<code>z[b2]</code>为直接调用<code>String()</code><br>
+最终代码：</p>
+<pre><code class="language-js">var a = 'Mjg=@#/index/banner@#7707053466@#3'
+var d = 'xyz517cda96abcd'
+
+function o(n) {
+    t = '',
+    ['66', '72', '6f', '6d', '43', '68', '61', '72', '43', '6f', '64', '65']['forEach'](function(n) {
+        t += unescape('%u00' + n)
+    });
+    var t, e = t;
+    return String.fromCharCode(n)
+}
+
+function h(n, t) {
+    t = t || u();
+    for (var e = (n = n['split'](''))['length'], r = t['length'], a = 'charCodeAt', i = 0; i &lt; e; i++)
+        n[i] = o(n[i][a](0) ^ t[(i + 10) % r][a](0));
+    return n['join']('')
+}
+
+console.log(h(a,d))
+</code></pre>
+<p>同理，现在处理<code>i[jt]</code>，进入函数，该函数为<code>v(t)</code>：<br>
+<img src="https://sz134055.github.io//post-images/1668933150709.png" alt="进入函数1" loading="lazy"></p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1668933688863.png" alt="函数1" loading="lazy"></figure>
+<p>将其复制到本地JS文件，补足缺少的变量对应值：</p>
+<pre><code class="language-js">function v(t) {
+    t = z[V1](t)[T](/%([0-9A-F]{2})/g, function(n, t) {
+        return o(Y1 + t)
+    });
+    try {
+        return z[Q1](t)
+    } catch (n) {
+        return z[W1][K1](t)[U1](Z1)
+    }
+}
+</code></pre>
+<p>最终代码：</p>
+<pre><code class="language-js">var a = 'Mjg=@#/index/banner@#7707053466@#3'
+var d = 'xyz517cda96abcd'
+
+function o(n) {
+    t = '',
+    ['66', '72', '6f', '6d', '43', '68', '61', '72', '43', '6f', '64', '65']['forEach'](function(n) {
+        t += unescape('%u00' + n)
+    });
+    var t, e = t;
+    return String.fromCharCode(n)
+}
+
+function h(n, t) {
+    t = t || u();
+    for (var e = (n = n['split'](''))['length'], r = t['length'], a = 'charCodeAt', i = 0; i &lt; e; i++)
+        n[i] = o(n[i][a](0) ^ t[(i + 10) % r][a](0));
+    return n['join']('')
+}
+
+function v(t) {
+    t = encodeURIComponent(t)['replace'](/%([0-9A-F]{2})/g, function(n, t) {
+        return o('0x' + t)
+    });
+    try {
+        return btoa(t)
+    } catch (n) {
+        return Buffer['from'](t)['toString']('base64')     //这里为异常处理，其实可以不用管，不用补足替换
+    }
+}
+
+result = v(h(a,d))
+
+console.log(result)
+</code></pre>
+<p>运行代码：<br>
+<img src="https://sz134055.github.io//post-images/1668937921632.png" alt="获得加密参数" loading="lazy"></p>
+<p>成功获得加密参数</p>
+<p>现在验证一下：<br>
+再次请求一次，获得<code>a</code>,<code>d</code>参数分别为</p>
+<pre><code class="language-js">a = &quot;MzZjbmZyZWVpcGhvbmU=@#/rank/index@#7714163242@#3&quot;
+d = &quot;xyz517cda96abcd&quot;
+</code></pre>
+<p>用以本地运行，对比结果：<br>
+<img src="https://sz134055.github.io//post-images/1668938678586.png" alt="FINAL" loading="lazy"><br>
+结果一致，至此两函数破解完毕</p>
+<h4 id="解决ad值">解决a,d值</h4>
+<p>再次观察拦截器处代码：<br>
+<img src="https://sz134055.github.io//post-images/1668939161079.png" alt="for a" loading="lazy"><br>
+涉及到<code>a</code>代码：</p>
+<pre><code class="language-js">var e, r = +new z[W] - (s || H) - 1661224081041, a = [];
+return void 0 === t[Zt] &amp;&amp; (t[Zt] = {}),
+z[Z][i7](t[Zt])[M](function(n) {
+    if (n == p)
+        return !B;
+    t[Zt][N2](n) &amp;&amp; a[b](t[Zt][n])
+}),
+a = a[Ot]()[I1](_),
+a = (0,
+i[jt])(a),
+a = (a += v + t[Jt][T](t[Mt], _)) + (v + r) + (v + 3),
+</code></pre>
+<p>基本可以断定<code>a</code>就诞生于这段代码，<br>
+我们可以先在此处下断点</p>
+<pre><code class="language-js">return void 0 === t[Zt] &amp;&amp; (t[Zt] = {}),
+z[Z][i7](t[Zt])[M](function(n) {
+    if (n == p)
+        return !B;
+    t[Zt][N2](n) &amp;&amp; a[b](t[Zt][n])
+}),
+</code></pre>
+<p>观察到<code>a</code>值为：<code> ['free', 'iphone', 'cn', '36', '2022-11-20', 4, 1, '17:46:04']</code>，与下面<code>t</code>中<code>params</code>类似<br>
+我们试着把</p>
+<pre><code class="language-js">z[Z][i7](t[Zt])[M](function(n) {
+    if (n == p)
+        return !B;
+    t[Zt][N2](n) &amp;&amp; a[b](t[Zt][n])
+}),
+</code></pre>
+<p>补全</p>
+<pre><code class="language-js">var a = []
+Object.keys(t['params'])['forEach'](function(n) {
+    if (n == 'analysis')
+        return !1;
+    t['params']['hasOwnProperty'](n) &amp;&amp; a['push'](t['params'][n])
+})
+console.log(a)
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">[ 'free', 'iphone', 'cn', '36', '2022-11-20', 4, 1, '17:46:04' ]
+</code></pre>
+<p>继续将代码复制到本地并补全，并封装成一个函数：</p>
+<pre><code class="language-js">function a_make(){
+    var a = []
+    Object.keys(t['params'])['forEach'](function(n) {
+        if (n == 'analysis')
+            return !1;
+        t['params']['hasOwnProperty'](n) &amp;&amp; a['push'](t['params'][n])
+    })
+    a = a[Ot]()[I1](_)
+    a = (0,i[jt])(a)
+    a = (a += v + t[Jt][T](t[Mt], _)) + (v + r) + (v + 3),
+</code></pre>
+<p>其中<code>r</code>为<code>new z[W] - (s || H) - 1661224081041</code>，<br>
+补足为<code>new Date() - (-208||0) - 1661224081041</code></p>
+<p>发现<code>t</code>为对象：</p>
+<pre><code class="language-js">t = {
+    &quot;url&quot;: &quot;/rank/index&quot;,
+    &quot;method&quot;: &quot;get&quot;,
+    &quot;headers&quot;: {
+        &quot;common&quot;: {
+            &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;
+        },
+        &quot;delete&quot;: {},
+        &quot;get&quot;: {},
+        &quot;head&quot;: {},
+        &quot;post&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;put&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;patch&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        }
+    },
+    &quot;params&quot;: {
+        &quot;brand&quot;: &quot;free&quot;,
+        &quot;device&quot;: &quot;iphone&quot;,
+        &quot;country&quot;: &quot;cn&quot;,
+        &quot;genre&quot;: &quot;36&quot;,
+        &quot;date&quot;: &quot;2022-11-20&quot;,
+        &quot;page&quot;: 3,
+        &quot;is_rank_index&quot;: 1,
+        &quot;snapshot&quot;: &quot;17:46:04&quot;
+    },
+    &quot;baseURL&quot;: &quot;https://api.qimai.cn&quot;,
+    &quot;transformRequest&quot;: [
+        null
+    ],
+    &quot;transformResponse&quot;: [
+        null
+    ],
+    &quot;timeout&quot;: 15000,
+    &quot;withCredentials&quot;: true,
+    &quot;xsrfCookieName&quot;: &quot;XSRF-TOKEN&quot;,
+    &quot;xsrfHeaderName&quot;: &quot;X-XSRF-TOKEN&quot;,
+    &quot;maxContentLength&quot;: -1,
+    &quot;maxBodyLength&quot;: -1
+}
+</code></pre>
+<p>这个对象基本可以作为一个定值使用（基本是API信息，因此基本不会改动），甚至可以将加密中对应调用处直接改写成对应值，例如:<br>
+<code>t[Jt]</code>补全后为<code> t['url']</code>，对应值为<code>/rank/index</code>，可以直接将此处改写成<code>/rank/index</code><br>
+此处暂时将其作为参数传入，最终代码为：</p>
+<pre><code class="language-js">var t = {
+    &quot;url&quot;: &quot;/rank/index&quot;,
+    &quot;method&quot;: &quot;get&quot;,
+    &quot;headers&quot;: {
+        &quot;common&quot;: {
+            &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;
+        },
+        &quot;delete&quot;: {},
+        &quot;get&quot;: {},
+        &quot;head&quot;: {},
+        &quot;post&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;put&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;patch&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        }
+    },
+    &quot;params&quot;: {
+        &quot;brand&quot;: &quot;free&quot;,
+        &quot;device&quot;: &quot;iphone&quot;,
+        &quot;country&quot;: &quot;cn&quot;,
+        &quot;genre&quot;: &quot;36&quot;,
+        &quot;date&quot;: &quot;2022-11-20&quot;,
+        &quot;page&quot;: 3,
+        &quot;is_rank_index&quot;: 1,
+        &quot;snapshot&quot;: &quot;17:46:04&quot;
+    },
+    &quot;baseURL&quot;: &quot;https://api.qimai.cn&quot;,
+    &quot;transformRequest&quot;: [
+        null
+    ],
+    &quot;transformResponse&quot;: [
+        null
+    ],
+    &quot;timeout&quot;: 15000,
+    &quot;withCredentials&quot;: true,
+    &quot;xsrfCookieName&quot;: &quot;XSRF-TOKEN&quot;,
+    &quot;xsrfHeaderName&quot;: &quot;X-XSRF-TOKEN&quot;,
+    &quot;maxContentLength&quot;: -1,
+    &quot;maxBodyLength&quot;: -1
+}
+
+function a_make(t){
+    var r = new Date() - (-208||0) - 1661224081041
+    var a = []
+    Object.keys(t['params'])['forEach'](function(n) {
+        if (n == 'analysis')
+            return !1;
+        t['params']['hasOwnProperty'](n) &amp;&amp; a['push'](t['params'][n])
+    })
+    a = a['sort']()['join']('')
+    a = v(a)
+    a = (a += '@#' + t['url']['replace'](t['baseURL'], '')) + ('@#' + r) + ('@#' + 3)
+    return a
+}
+</code></pre>
+<p>至此<code>a</code>值破解完毕，现在关注<code>d</code>值。</p>
+<p>在拦截器代码中，并未发现<code>d</code>值的赋值操作，转而寻求拦截器函数上层函数代码，找到如下代码：<br>
+<img src="https://sz134055.github.io//post-images/1668942317360.png" alt="d" loading="lazy"></p>
+<pre><code class="language-js">d = (0, i[zt])(Rt, B)
+d = i[zt](Rt, B)
+</code></pre>
+<p>初步补全：</p>
+<pre><code class="language-js">d = i[zt]('qimai@2022&amp;Technology',1)
+</code></pre>
+<p>现在关注函数<code>i[zt]</code>，进入该函数，函数为<code>y(n,t,e)</code><br>
+<img src="https://sz134055.github.io//post-images/1668942561857.png" alt="y" loading="lazy"></p>
+<p>复制到本地并补全，最终涉及到<code>d</code>的代码为：</p>
+<pre><code class="language-js">function y(n, t, e) {
+    for (var r = void 0 === e ? 2166136261 : e, a = 0, i = n['length']; a &lt; i; a++)
+        r = (r ^= n['charCodeAt'](a)) + ((r &lt;&lt; 1) + (r &lt;&lt; 4) + (r &lt;&lt; 7) + (r &lt;&lt; 8) + (r &lt;&lt; 24));
+    return t ? ('xyz' + (r &gt;&gt;&gt; 0)['toString'](16) + 'abcd')['substr'](-16) : r &gt;&gt;&gt; 0
+}
+
+function d_make(){
+    return y('qimai@2022&amp;Technology',1)
+}
+</code></pre>
+<p>至此为止，先前的两函数和两变量都已逆向完毕，进行包装后本地代码如下：</p>
+<pre><code class="language-js">function o(n) {
+    t = '',
+    ['66', '72', '6f', '6d', '43', '68', '61', '72', '43', '6f', '64', '65']['forEach'](function(n) {
+        t += unescape('%u00' + n)
+    });
+    var t, e = t;
+    return String.fromCharCode(n)
+}
+
+function h(n, t) {
+    t = t || u();
+    for (var e = (n = n['split'](''))['length'], r = t['length'], a = 'charCodeAt', i = 0; i &lt; e; i++)
+        n[i] = o(n[i][a](0) ^ t[(i + 10) % r][a](0));
+    return n['join']('')
+}
+
+function v(t) {
+    t = encodeURIComponent(t)['replace'](/%([0-9A-F]{2})/g, function(n, t) {
+        return o('0x' + t)
+    });
+    try {
+        return btoa(t)
+    } catch (n) {
+        //return z[W1][K1](t)[U1](Z1)
+        return Buffer['from'](t)['toString']('base64')
+    }
+}
+
+function y(n, t, e) {
+    for (var r = void 0 === e ? 2166136261 : e, a = 0, i = n['length']; a &lt; i; a++)
+        r = (r ^= n['charCodeAt'](a)) + ((r &lt;&lt; 1) + (r &lt;&lt; 4) + (r &lt;&lt; 7) + (r &lt;&lt; 8) + (r &lt;&lt; 24));
+    return t ? ('xyz' + (r &gt;&gt;&gt; 0)['toString'](16) + 'abcd')['substr'](-16) : r &gt;&gt;&gt; 0
+}
+
+
+function a_make(t){
+    var r = new Date() - (-208||0) - 1661224081041
+    a = []
+    a = a['sort']()['join']('')
+    a = v(a)
+    a = (a += '@#' + t['url']['replace'](t['baseURL'], '')) + ('@#' + r) + ('@#' + 3)
+    return a
+}
+
+function d_make(){
+    return y('qimai@2022&amp;Technology',1)
+}
+
+function get_analysis(t){
+    return v(h(a_make(t),d_make()))
+}
+
+var t = {
+    &quot;url&quot;: &quot;/rank/index&quot;,
+    &quot;method&quot;: &quot;get&quot;,
+    &quot;headers&quot;: {
+        &quot;common&quot;: {
+            &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;
+        },
+        &quot;delete&quot;: {},
+        &quot;get&quot;: {},
+        &quot;head&quot;: {},
+        &quot;post&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;put&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        },
+        &quot;patch&quot;: {
+            &quot;Content-Type&quot;: &quot;application/x-www-form-urlencoded&quot;
+        }
+    },
+    &quot;params&quot;: {
+        &quot;brand&quot;: &quot;free&quot;,
+        &quot;device&quot;: &quot;iphone&quot;,
+        &quot;country&quot;: &quot;cn&quot;,
+        &quot;genre&quot;: &quot;36&quot;,
+        &quot;date&quot;: &quot;2022-11-20&quot;,
+        &quot;page&quot;: 3,
+        &quot;is_rank_index&quot;: 1,
+        &quot;snapshot&quot;: &quot;17:46:04&quot;
+    },
+    &quot;baseURL&quot;: &quot;https://api.qimai.cn&quot;,
+    &quot;transformRequest&quot;: [
+        null
+    ],
+    &quot;transformResponse&quot;: [
+        null
+    ],
+    &quot;timeout&quot;: 15000,
+    &quot;withCredentials&quot;: true,
+    &quot;xsrfCookieName&quot;: &quot;XSRF-TOKEN&quot;,
+    &quot;xsrfHeaderName&quot;: &quot;X-XSRF-TOKEN&quot;,
+    &quot;maxContentLength&quot;: -1,
+    &quot;maxBodyLength&quot;: -1
+}
+
+console.log(get_analysis(t))
+
+</code></pre>
+<h2 id="收尾">收尾</h2>
+<p>在逆向<code>a</code>值时，我们其实已经直到<code>a</code>的值与<code>t</code>的<code>params</code>有关</p>
+<pre><code class="language-js">&quot;params&quot;: {
+        &quot;brand&quot;: &quot;free&quot;,
+        &quot;device&quot;: &quot;iphone&quot;,
+        &quot;country&quot;: &quot;cn&quot;,
+        &quot;genre&quot;: &quot;36&quot;,
+        &quot;date&quot;: &quot;2022-11-20&quot;,
+        &quot;page&quot;: 3,
+        &quot;is_rank_index&quot;: 1,
+        &quot;snapshot&quot;: &quot;17:46:04&quot;
+}
+</code></pre>
+<p>其值与榜单页的选项有很大关系：<br>
+<img src="https://sz134055.github.io//post-images/1668947755328.png" alt="榜单页选项" loading="lazy"><br>
+而其中<code>page</code>则很容易推测出，是动态翻页（例如上面值为3，则表示请求第三页）</p>
+<p>因此在实际应用中重点传递<code>params</code>，通过传递<code>params</code>即可生成加密值</p>
+<p><em>通过配置相同的参数生成加密值，加密值一致</em><br>
+<img src="https://sz134055.github.io//post-images/1668948239098.png" alt="RESULT" loading="lazy"></p>
+<p><a href="shi-yong-express-gei-python-ti-gong-api">Python脚本调用示例</a></p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/shi-yong-express-kuang-jia-kai-fa-ke-gong-python-diao-yong-de-api/" class="post-title gt-a-link">
+                    Ubuntu22 Node.js安装及换源
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

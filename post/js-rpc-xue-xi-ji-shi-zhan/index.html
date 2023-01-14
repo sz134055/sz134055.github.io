@@ -1,0 +1,653 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>JS RPC学习及实战 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    JS RPC学习及实战
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2023-01-09 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/python/" class="post-tags">
+                            # python
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="介绍">介绍</h2>
+<blockquote>
+<p>RPC（Remote Procedure Call）中文名「远程过程调用」，又是一个很蹩脚的翻译。我们拆开理解下，「过程」也叫方法或函数，「远程」就是说方法不在当前进程里，而是在其他进程或机器上面，合起来 RPC 就是调用其他进程或机器上面的函数。<br>
+——<a href="https://zhuanlan.zhihu.com/p/38012481">聊聊 Node.js RPC（一）— 协议</a></p>
+</blockquote>
+<blockquote>
+<p>JS RPC是指在浏览器开启一个ws和go服务连接，以调用http接口的形式来通信，浏览器端收到调用通信执行原先设置好的js代码。可以用于js逆向调用加密函数直接返回结果，也可以用来直接获取数据。<br>
+——<a href="https://www.jianshu.com/p/57c4a483fb87">Python网络爬虫之js逆向之远程调用(rpc)免去抠代码补环境简介</a></p>
+</blockquote>
+<p>上次实战，其实就算是实现了一次JS RPC实战， 对于JS RPC，和爬虫一样，可以手搓，也可以选择成熟的第三方框架，这里推荐使用 <a href="https://github.com/virjar/sekiro">Sekrio</a>-<a href="https://sekiro.virjar.com/sekiro-doc/index.html">官方文档</a></p>
+<h2 id="sekiro">Sekiro</h2>
+<blockquote>
+<p><img src="https://sekiro.virjar.com/sekiro-doc/img/sekiro.svg" alt="" loading="lazy"><br>
+SEKIRO 是一个android下的API服务暴露框架，可以用在app逆向、app数据抓取、android群控等场景。同时Sekiro也是目前公开方案唯一稳定的JSRPC框架。<br>
+——来自<a href="https://sekiro.virjar.com/sekiro-doc/index.html">官方文档</a></p>
+</blockquote>
+<p>下载：https://oss.iinti.cn/sekiro/sekiro-demo</p>
+<h3 id="使用">使用</h3>
+<p>首先需要确保已准备好 Java 环境，需要下载并配置JDK，随后运行<code>bin/sekiro.bat</code>（或<code>bin/sekiro.sh</code>）即可开启本地服务端</p>
+<p>而客户端，请参考官方文档 <a href="https://sekiro.virjar.com/sekiro-doc/01_user_manual/1.quick_start.html#webJs">浏览器入门</a></p>
+<p>下载或者注入<a href="https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js">JsClient</a></p>
+<p>然后使用以下代码暴露RPC服务：</p>
+<pre><code class="language-js">function guid() {
+    function S4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    }
+
+    return (S4() + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + S4() + S4());
+}
+
+var client = new SekiroClient(&quot;wss://sekiro.virjar.com/business/register?group=ws-group-2&amp;clientId=&quot; + guid());
+
+client.registerAction(&quot;clientTime&quot;, function (request, resolve, reject) {
+    resolve(&quot;SekiroTest：&quot; + new Date());
+});
+
+client.registerAction(&quot;executeJs&quot;, function (request, resolve, reject) {
+    var code = request['code'];
+    if (!code) {
+        reject(&quot;need param:{code}&quot;);
+        return;
+    }
+
+    code = &quot;return &quot; + code;
+
+    console.log(&quot;executeJs: &quot; + code);
+
+    try {
+        var result = new Function(code)();
+        resolve(result);
+    } catch (e) {
+        reject(&quot;error: &quot; + e);
+    }
+
+});
+</code></pre>
+<p>但是在开始之前，我们先了解下一些概念</p>
+<blockquote>
+<p><strong>名词解释</strong><br>
+<strong>group</strong><br>
+业务类型（接口组），每个业务一个group。group下面可以注册多个终端(SekiroClient),同时Group可以挂载多个Action。 Group指代一个确定的业务，group下注册的client代码需要保持协议的完全一致。如微信机器人为一个group、xxx爬虫为另一个group。sekiro系统中Group全局唯一，同时Sekiro根据Group进行调用转发路由，并认为统一个group下面的所有client能够提供一致性的服务能力.也就是说，对sekiro来说，转发请求的时候，sekiro认为统一个group下的任意一个设备(手机、浏览器、客户端代码等)都是等价的，转发到任意一个终端都是相同的语义</p>
+<p><strong>SekiroClient</strong><br>
+服务提供者客户端，主要场景为手机/浏览器等。最终的sekiro调用会转发到SekiroClient。每个client需要有一个惟一的clientId， ClientId最好用户自己生成，并且保证ClientId具备特定含义</p>
+<p><strong>action</strong><br>
+接口，同一个Group下面可以有多个接口，分别做不同的功能。如视频app，区分用户搜索接口、用户视频接口、直播接口、用户详情接口等。action是为了方便用户开发的时候隔离多个业务进行的抽象，在sekiro层面可以帮你进行一次路由。 这是因为在实际开发过程中可以发现同一个设备，可能可以提供多个接口</p>
+<p><strong>clientId</strong><br>
+ClientId指代设备，多个设备使用多个机器提供API服务，提供群控能力和负载均衡能力。如在手机上，同一个接口组下面可以挂载多台设备， ClientId大家需要保证每个客户端的ClientId的唯一性。建议使用mac地址、IMEI、ip地址+进程号等真实的物理ID作为ClientId。</p>
+<p>使用ClientId可以作为调度策略控制的ID，完成对特定设备的调用管理。</p>
+<p><strong>转自官网</strong></p>
+</blockquote>
+<p>同时如果你已经打开了本地服务，Sekiro提供了以下API：</p>
+<ul>
+<li>
+<p>查看分组列表：http://127.0.0.1:5620/business-demo/groupList</p>
+</li>
+<li>
+<p>查看分组下队列状态：http://127.0.0.1:5620/business-demo/clientQueue?group=test</p>
+<ul>
+<li>group参数：需要查看的指定分组名</li>
+</ul>
+</li>
+<li>
+<p>调用转发：http://127.0.0.1:5620/business-demo/invoke?group=test&amp;action=test&amp;param=testparm</p>
+<ul>
+<li>group参数：同上</li>
+<li>action参数：需要调用的action名</li>
+<li>param参数：需要传递的参数，注意这里param是自定义的参数名！也就是说在<code>action</code>参数后可以接比如<code>sign</code>，Sekiro客户端可以拿到此参数</li>
+</ul>
+</li>
+</ul>
+<p>现在来测试一下，以下代码是已经写好的DEMO</p>
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot;&gt;
+    &lt;title&gt;Sekiro TEST&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Sekiro TEST&lt;/h1&gt;
+&lt;!--加载JsClient--&gt;
+&lt;script src=&quot;https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+        function guid() {
+            function S4() {
+                  return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+            }
+            return (S4()+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+S4()+S4());
+        }
+        
+        //注册Group，名为rpc-test
+        var client = new SekiroClient(&quot;ws://127.0.0.1:5620/business-demo/register?group=rpc-test&amp;clientId=&quot; + guid());
+        
+        //注册Action，名为clientTime
+        client.registerAction(&quot;clientTime&quot;,function(request, resolve,reject ){
+            resolve(&quot;&quot;+new Date());
+        })
+
+        //注册Action，名为getPwd
+        client.registerAction(&quot;getPwd&quot;,function(request, resolve,reject ){
+            const pwd = request['pwd']
+            //调用假设的加密方法直接返回对应的结果
+            resolve(pwdEncypt(pwd))
+        })
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>浏览器打开此文件，确保本地服务开启，可以在浏览器开发人员工具中看到WS连接，访问<code>http://127.0.0.1:5620/business-demo/groupList</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;rpc-test&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>访问<code>http://127.0.0.1:5620/business-demo/clientQueue?group=rpc-test</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;eddc8434-4c23-f7bb-31a6-21c4523b00d2&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>现在，来调用以下刚才注册的Action。访问<code>http://127.0.0.1:5620/business-demo/invoke?group=rpc-test&amp;action=clientTime</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;eddc8434-4c23-f7bb-31a6-21c4523b00d2&quot;,&quot;data&quot;:&quot;Wed Jan 11 2023 21:27:39 GMT+0800 (香港标准时间)&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>可以看到，其将JS代码<code>new Date()</code>的结果转发了出来。</p>
+<p><strong>传递参数</strong><br>
+现在需要加密一个数据，明文为<code>123456</code>，得到其加密后的结果，DEMO中注册了一个Action名为<code>getPwd</code>，它需要一个<code>pwd</code>参数，并调用返回加密结果，因此需要调用：<br>
+<code>http://127.0.0.1:5620/business-demo/invoke?group=rpc-test&amp;action=getPwd&amp;pwd=123456</code><br>
+响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:3,&quot;clientId&quot;:&quot;38617c08-b07d-40c0-d256-0ec1670cf20d&quot;,&quot;data&quot;:&quot;123456abc123&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>其中<code>data</code>便是期待的加密值（模拟）</p>
+<h3 id="实战-控制台注入方式">实战-控制台注入方式</h3>
+<p>地址：<code>http://q.10jqka.com.cn/</code></p>
+<p>目标是<code>个股行情</code>，每次翻页都带有Cookie且不一致，为Cookie反爬<br>
+<img src="https://sz134055.github.io//post-images/1673446300754.png" alt="" loading="lazy"></p>
+<p>控制台中执行<code>document.cookie</code>，可以拿到对应的Cookie值，并猜测有JS代码在生成其值，可以在控制台执行以下代码，以在每次<code>document.cookie</code>值发生改变时，自动断住，方便在堆栈中找到可能的生成代码：</p>
+<pre><code class="language-js">(function () {
+  Object.defineProperty(document, 'cookie', {
+    set: function (val) {
+      if (val.indexOf('v') != -1) {
+        debugger;
+      }
+      console.log('Hook捕获到cookie设置-&gt;', val);
+      return val;
+    }
+  });
+})();
+</code></pre>
+<p>执行后，翻页一下，在堆栈中搜索，可以轻松找到相关代码：<br>
+<img src="https://sz134055.github.io//post-images/1673446952346.png" alt="" loading="lazy"></p>
+<p>按往常是可以开始扣代码了，但是现在使用RPC方式，要做的就是将对应加密函数导出到全局然后供RPC客户端调用，在控制台输入并执行：</p>
+<pre><code class="language-js">encypt = O
+</code></pre>
+<p>然后选择右上角的<code>停用断点</code>，取消调试状态并放行，这样就可以注入对应的RPC代码了</p>
+<p>同时记得确保JS上下文为TOP，这样才能在控制台执行刚刚导出的<code>encypt</code>，并且后面的操作都要在此种执行</p>
+<p>在控制台，输入JsClient所有源码然后执行，以及暴露RPC服务的代码：</p>
+<pre><code class="language-js">function guid() {
+    function S4() {
+          return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+    }
+    return (S4()+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+&quot;-&quot;+S4()+S4()+S4());
+}
+
+var client = new SekiroClient(&quot;ws://127.0.0.1:5620/business-demo/register?group=ths&amp;clientId=&quot; + guid());
+
+client.registerAction(&quot;getCookie&quot;,function(request, resolve,reject ){
+    resolve(encypt());
+})
+</code></pre>
+<p>此时打开<code>http://127.0.0.1:5620/business-demo/groupList</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;ths&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>表明一切正常</p>
+<p>此时再访问<code>http://127.0.0.1:5620/business-demo/invoke?group=ths&amp;action=getCookie</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;8db06d70-f1d1-defa-e975-13d3b9a0573a&quot;,&quot;data&quot;:&quot;AzUv6rCtukrtP9729bCNgsH8RLrqsuEjs3XNPbdb8wT7mlskfwL5lEO23YdE&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>可以看到Cookie值已成功被导出</p>
+<p>现在就可以用Python脚本愉快地爬取：</p>
+<pre><code class="language-python">import requests
+
+def get_cookie():
+    api = 'http://127.0.0.1:5620/business-demo/invoke?group=ths&amp;action=getCookie'
+    res = requests.get(api)
+
+    return res.json()['data']
+
+def get_info(page):
+    
+    api = f'http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/{page}/ajax/1/'
+    headers = {
+        &quot;Accept&quot;: &quot;application/json&quot;,
+        &quot;Accept-Encoding&quot;: &quot;gzip, deflate, br&quot;,
+        &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.9&quot;,
+        &quot;Cache-Control&quot;: &quot;no-cache&quot;,
+        &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.54&quot;,
+        &quot;Cookie&quot;:f&quot;v={get_cookie()}&quot;
+    }
+
+    res = requests.get(api,headers=headers)
+
+    print(res.text)
+
+if __name__ == '__main__':
+    get_info(1)
+</code></pre>
+<h3 id="实战-油猴注入方式">实战-油猴注入方式</h3>
+<blockquote>
+<p>Tampermonkey (油猴) 是拥有 超过 1000 万用户 的最流行的浏览器扩展之一。 它适用于 Chrome、Microsoft Edge、Safari、Opera Next 和 Firefox。</p>
+<p>它允许用户自定义并增强您最喜爱的网页的功能。用户脚本是小型 JavaScript 程序，可用于向网页添加新功能或修改现有功能。使用 Tampermonkey，您可以轻松在任何网站上创建、管理和运行这些用户脚本。</p>
+<p>——转自<a href="https://www.tampermonkey.net/">官网</a></p>
+</blockquote>
+<p>油猴可以让用户自行在添加脚本，并在开启对应页面时应用，可以把它认为是一个给自己注入脚本的一个工具。</p>
+<p>可以在拓展上点击<code>添加脚本</code>来添加一个新脚本<br>
+<img src="https://sz134055.github.io//post-images/1673452559212.png" alt="" loading="lazy"></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">选项</th>
+<th style="text-align:left">含义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">@name</td>
+<td style="text-align:left">脚本的名称</td>
+</tr>
+<tr>
+<td style="text-align:left">@namespace</td>
+<td style="text-align:left">命名空间，用来区分相同名称的脚本，一般写作者名字或者网址就可以</td>
+</tr>
+<tr>
+<td style="text-align:left">@version</td>
+<td style="text-align:left">脚本版本，油猴脚本的更新会读取这个版本号</td>
+</tr>
+<tr>
+<td style="text-align:left">@description</td>
+<td style="text-align:left">描述这个脚本是干什么用的</td>
+</tr>
+<tr>
+<td style="text-align:left">@author</td>
+<td style="text-align:left">编写这个脚本的作者的名字</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>@match</strong></td>
+<td style="text-align:left">从字符串的起始位置匹配正则表达式，只有匹配的网址才会执行对应的脚本，例如 <code>*</code> 匹配所有，<code>https://www.baidu.com/*</code> 匹配百度等，可以参考 Python re 模块里面的 <code>re.match()</code> 方法，允许多个实例</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>@include</strong></td>
+<td style="text-align:left">和 @match 类似，只有匹配的网址才会执行对应的脚本，但是 @include 不会从字符串起始位置匹配，例如 <code>*://*baidu.com/*</code> 匹配百度，具体区别可以参考 <strong>TamperMonkey 官方文档</strong></td>
+</tr>
+<tr>
+<td style="text-align:left">@icon</td>
+<td style="text-align:left">脚本的 icon 图标</td>
+</tr>
+<tr>
+<td style="text-align:left">@grant</td>
+<td style="text-align:left">指定脚本运行所需权限，如果脚本拥有相应的权限，就可以调用油猴扩展提供的 API 与浏览器进行交互。如果设置为 none 的话，则不使用沙箱环境，脚本会直接运行在网页的环境中，这时候无法使用大部分油猴扩展的 API。如果不指定的话，油猴会默认添加几个最常用的 API</td>
+</tr>
+<tr>
+<td style="text-align:left">@require</td>
+<td style="text-align:left">如果脚本依赖其他 JS 库的话，可以使用 require 指令导入，在运行脚本之前先加载其它库</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>@run-at</strong></td>
+<td style="text-align:left">脚本注入时机，该选项是能不能 hook 到的关键，有五个值可选：<code>document-start</code>：网页开始时；<code>document-body</code>：body出现时；<code>document-end</code>：载入时或者之后执行；<code>document-idle</code>：载入完成后执行，默认选项；<code>context-menu</code>：在浏览器上下文菜单中单击该脚本时，一般将其设置为 <code>document-start</code></td>
+</tr>
+</tbody>
+</table>
+<p>接下来将通过油猴脚本方式注入RPC来逆向一个网站</p>
+<p>目标地址：<code>https://www.toutiao.com/</code></p>
+<p>获取<code>推荐</code>栏榜单数据时，有一个关键的<code>_signature</code>参数<br>
+<img src="https://sz134055.github.io//post-images/1673453181758.png" alt="" loading="lazy"></p>
+<p>任意方式搜寻可能的生成代码（推荐搜索<code>_signature</code>），发现以下代码：<br>
+<img src="https://sz134055.github.io//post-images/1673453398054.png" alt="" loading="lazy"></p>
+<p>但是这并不意味着逆向结束，直接转发<code>n</code>，因为<code>n</code>的值是生成后的结果，要导出的目标应该是一个方法，因此进入<code>I</code>方法一探究竟<br>
+<img src="https://sz134055.github.io//post-images/1673453579812.png" alt="" loading="lazy"></p>
+<p>注意观察最后一段代码：</p>
+<pre><code class="language-js">var o = {
+                url: r + e
+            };
+return t.data &amp;&amp; (o.body = t.data), (null === (n = window.byted_acrawler) || void 0 === n || null === (a = n.sign) || void 0 === a ? void 0 : a.call(n, o)) || &quot;&quot;
+</code></pre>
+<p>重点放在后面：</p>
+<pre><code class="language-js"> (null === (n = window.byted_acrawler) || void 0 === n || null === (a = n.sign) || void 0 === a ? void 0 : a.call(n, o)) || &quot;&quot;
+</code></pre>
+<p>此处解析可参考<a href="https://pythonmana.com/2022/03/202203291733382695.html#%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90">Python 爬虫进阶必备 | 某新闻资讯站点参数 _signature 逻辑分析 (无代码)</a></p>
+<p>所以这段代码执行时其实干了以下事：</p>
+<pre><code class="language-js">n = window.byted_acrawler
+a = n.sign
+a.call(n,o)
+</code></pre>
+<p>总结一下就是<code>window.byted_acrawler.sign(window.byted_acrawler,o)</code>，其中<code>window.byted_acrawler</code>是可以忽略的，参考<a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/call#%E5%8F%82%E6%95%B0">Function.prototype.call()</a>，也就是说可以进一步简化为<code>window.byted_acrawler.sign(o)</code></p>
+<p>可以在控制台调用下：<br>
+<img src="https://sz134055.github.io//post-images/1673454996044.png" alt="" loading="lazy"></p>
+<p>成功拿到结果</p>
+<p>现在可以准备RPC代码了，同时对于<code>o</code>，可以试着自行构建一个一并返回，因此油猴代码如下：</p>
+<pre><code class="language-js">// ==UserScript==
+// @name         今日头条-RPC
+// @namespace    替换成你的命名空间
+// @version      0.1
+// @description  今日头条-RPC
+// @author       注意替换很你的名字
+// @match        https://www.toutiao.com/*
+// @icon         替换成你的图标或者干脆删除这一行
+// @grant        none
+// @require      https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js
+// ==/UserScript==
+
+(function() {
+    'use strict';
+    function guid() {
+        function S4() {
+            return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+        }
+    
+        return (S4() + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + &quot;-&quot; + S4() + S4() + S4());
+    }
+    
+    var client = new SekiroClient(&quot;ws://127.0.0.1:5620/business-demo/register?group=jrtt&amp;clientId=&quot; + guid());
+
+    client.registerAction(&quot;getUrl&quot;, function (request, resolve, reject) {
+        var channelId = request.channel;
+        if (!channelId){
+            channelId = 0;
+        }
+        var urlParams = {
+            url:'https://www.toutiao.com/api/pc/list/feed?min_behot_time='+Math.round(new Date().getTime()/1000)+'&amp;refresh_count=5&amp;category=pc_profile_recommend&amp;aid=24&amp;app_name=toutiao_web&amp;channel_id='+channelId
+        }
+
+
+        resolve(&quot;&quot;+urlParams.url+&quot;&amp;_signature=&quot;+window.byted_acrawler.sign(urlParams));
+    });
+    
+})();
+</code></pre>
+<p>并且因为<code>window.byted_acrawler</code>是全局的，因此并不需要导出。保存油猴脚本并启动，回到今日头条并刷新，访问Sekiro的分组情况：</p>
+<pre><code class="language-json">{&quot;data&quot;:[&quot;jrtt&quot;],&quot;ok&quot;:true,&quot;status&quot;:0}
+</code></pre>
+<p>可以看到成功连接</p>
+<p>现在来调用一下：<br>
+<code>http://127.0.0.1:5620/business-demo/invoke?group=jrtt&amp;action=getUrl</code>，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;72c7dff4-3e96-565e-449a-b5b5d397eb1b&quot;,&quot;data&quot;:&quot;https://www.toutiao.com/api/pc/list/feed?min_behot_time=1673458709&amp;refresh_count=5&amp;category=pc_profile_recommend&amp;aid=24&amp;app_name=toutiao_web&amp;channel_id=0&amp;_signature=_02B4Z6wo00d01Ws5WIQAAIDAe2e9vmHbDGlrHVwAADl0A6cZQQXdRzJsXzV.yrJchiysvjx.ROE4yE2PVl450x0oeAmttZk.TZlJl6Zl1arOspUvyovWNV5x7vUHvHs3SXK2nZQubYjww-1965&quot;,&quot;status&quot;:0}
+</code></pre>
+<p>可以额外添加一个<code>channel</code>参数，用来调用不同的栏目，默认<code>channel</code>为<code>0</code></p>
+<p>尝试使用Python来爬一下，发现<code>200</code>却一直乱码，在源码里翻找了一番也没看到有解密的意思，直接拿生成的url试试浏览器里编辑重放却没问题，编码也设置成了<code>utf-8</code>，找了半天才终于发现，<code>requests</code>响应头里有个<code>'Transfer-Encoding': 'chunked'</code>，我猜测问题就出在这了，<code>requests</code>并没有把完整的文件下载完，然后尝试添加<code>stream=True</code>参数也没有用。</p>
+<p>后来发现，请求头只保留一个<code>user-agent</code>就行，我TM@#!~&amp;*，折腾两小时才发现这样就行了，淦<br>
+Python 代码：</p>
+<pre><code class="language-python">import requests
+
+def get_list(channel=None):
+    def get_url(c=None):
+        params = {
+            'group':'jrtt',
+            'action':'getUrl',
+            'channel': c if c else ''
+        }
+        return requests.get('http://127.0.0.1:5620/business-demo/invoke',params=params).json()['data']
+
+    s = requests.session()
+    headers = {
+        &quot;user-agent&quot;: &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76&quot;
+
+    }
+
+    res = s.get(url=get_url(channel),headers=headers)
+    res_json = res.json()
+    return res_json['data']
+
+
+if __name__ == &quot;__main__&quot;:
+    print(get_list())
+</code></pre>
+<h3 id="实战-注入-替换方式">实战-注入、替换方式</h3>
+<p>目标：<a href="https://ygp.gdzwfw.gov.cn/#/44/jygg">广东省公共资源交易平台</a></p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1673590124871.png" alt="" loading="lazy"></figure>
+<p>表单以及响应结果都为明文，只有在请求头有签名，总共为3个，其中一个明显为时间戳，因此总共待破解的为2个</p>
+<p>对于头部参数，可以采用头部HOOK方式。<br>
+在控制台输入以下代码来断住：</p>
+<pre><code class="language-js">var code = function(){
+    var org = window.XMLHttpRequest.prototype.setRequestHeader;
+    window.XMLHttpRequest.prototype.setRequestHeader = function(k,v){
+        if(k == 'X-Dgi-Req-Signature' || k == 'X-Dgi-Req-Nonce'){
+            debugger;
+        }
+        return org.apply(this,arguments);
+    }
+}
+var script = document.createElement('script');
+script.textContent = '('+code+')()';
+(document.head||document.documentElement).appendChild(script);
+script.parentNode.removeChild(script);
+</code></pre>
+<p>在调用堆栈里一顿找，最终找到此处：<br>
+<img src="https://sz134055.github.io//post-images/1673592397400.png" alt="" loading="lazy"></p>
+<p>断点的位置便是两个参数的生成位置，相关代码如下：</p>
+<pre><code class="language-js">const a = Date.now(),
+    l = lK(16),
+    c = sr([8, 28, 20, 42, 21, 53, 65, 6]);
+
+const d = Sg({
+    p: QC.stringify(o.data, {
+        allowDots: !0
+    }),
+    t: a,
+    n: l,
+    k: c
+});
+</code></pre>
+<p><code>f</code>就是请求头的副本，因此没有给出，同时<code>sr</code>方法仅仅是通过Array解析字符串的，因此<code>c</code>为固定值，为<code>'k8tUyS$m'</code>。按照以往可以开始扣代码了，但是现在是打算使用PRC，因此可以将<code>lK</code>、<code>Sg</code>以及<code>QC</code>全部挂载到<code>window</code>对象上，方便Sekiro客户端调用。</p>
+<p>现在使用本地替换的方式来注入RPC，启用本地替代，然后保存源码已备用<br>
+<img src="https://sz134055.github.io//post-images/1673597400255.png" alt="" loading="lazy"></p>
+<p>然后在顶部注入JsClient源码，以及注册一个client，这里挂载到<code>window</code>对象上，然后刷新页面，继续来到断点位置，导出需要的三个方法，同样控制台输入：</p>
+<pre><code class="language-js">window.lK = lK
+window.Sg = Sg
+window.QC = QC
+</code></pre>
+<p>输入完毕后是时候放行然后注册Action了，放行代码，然后在控制台输入以下代码：</p>
+<pre><code class="language-js">window.rpcClient.registerAction(&quot;getPost&quot;, function (request, resolve, reject) {
+    let pageNum = request.page;
+    if(!pageNum){
+        pageNum = 1;
+    }
+
+    const c = 'k8tUyS$m',
+        l = window.lK(16),
+        a = Date.now(),
+        formData = {
+            dataType:&quot;&quot;,
+            openConvert:true,
+            pageNo:pageNum,
+            pageSize:10,
+            projectType:&quot;&quot;,
+            publishEndTime:&quot;&quot;,
+            publishStartTime:&quot;&quot;,
+            secondType:&quot;A&quot;,
+            siteCode:&quot;44&quot;,
+            thirdType:&quot;&quot;,
+            total:0,
+            type:&quot;trading-type&quot;
+        },
+        d = window.Sg({
+            p: window.QC.stringify(formData, {
+                allowDots: !0
+            }),
+            t: a,
+            n: l,
+            k: c
+        });
+
+    resolve(JSON.stringify({
+        &quot;headers&quot;:{
+            &quot;X-Dgi-Req-Nonce&quot;:l,
+            &quot;X-Dgi-Req-Signature&quot;:d.toString(),
+            &quot;X-Dgi-Req-Timestamp&quot;:a
+        },
+        &quot;form&quot;:formData
+    }))
+
+});
+</code></pre>
+<p>这时候访问<code>http://127.0.0.1:5620/business-demo/invoke?group=gdggzy&amp;action=getPost</code>就能拿到需要的数据了，响应结果：</p>
+<pre><code class="language-json">{&quot;__sekiro_seq__&quot;:2,&quot;clientId&quot;:&quot;d006a706-d960-0ff8-e7e5-3e79f761bac0&quot;,&quot;form&quot;:{&quot;dataType&quot;:&quot;&quot;,&quot;openConvert&quot;:true,&quot;pageNo&quot;:1,&quot;pageSize&quot;:10,&quot;projectType&quot;:&quot;&quot;,&quot;publishEndTime&quot;:&quot;&quot;,&quot;publishStartTime&quot;:&quot;&quot;,&quot;secondType&quot;:&quot;A&quot;,&quot;siteCode&quot;:&quot;44&quot;,&quot;thirdType&quot;:&quot;&quot;,&quot;total&quot;:0,&quot;type&quot;:&quot;trading-type&quot;},&quot;headers&quot;:{&quot;X-Dgi-Req-Nonce&quot;:&quot;V6yYQSTDBQk3KWrA&quot;,&quot;X-Dgi-Req-Signature&quot;:&quot;a65c32bc126fb2c17231b94139666889bef365bcf44f17e10b6aad531b306a62&quot;,&quot;X-Dgi-Req-Timestamp&quot;:1673595897604},&quot;status&quot;:0}
+</code></pre>
+<p>当然，既然已经修改了代码，那干脆修改的彻底一点，直接在相关代码处进行注册然后再转发也是可以的，这里不再做演示</p>
+<p>注意，这里只是演示通过RPC拿数据，签名是否有效不在讨论范围，想爬自己再研究把</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/websocket-ni-xiang-yu-shi-zhan/" class="post-title gt-a-link">
+                    Websocket逆向与B站直播间弹幕爬取实战
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

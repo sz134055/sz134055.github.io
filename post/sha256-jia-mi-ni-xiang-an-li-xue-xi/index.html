@@ -1,0 +1,402 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>哈希加密逆向案例学习-模拟登录返回及后续 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    哈希加密逆向案例学习-模拟登录返回及后续
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-11-29 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>目标地址：<a href="https://www.hh1024.com/">红人点集</a></p>
+<h2 id="模拟登录返回">模拟登录返回</h2>
+<h3 id="正常与非正常登录响应">正常与非正常登录响应</h3>
+<p>登录API及负载示例：</p>
+<pre><code class="language-http">POST https://user.hrdjyun.com/wechat/phonePwdLogin HTTP/1.1
+content-type: application/json
+
+{
+  &quot;phoneNum&quot;: &quot;18912345678&quot;,
+  &quot;pwd&quot;: &quot;25f9e794323b453885f5181f1b624d0b&quot;,
+  &quot;t&quot;: 1669724122701,
+  &quot;tenant&quot;: 1,
+  &quot;sig&quot;: &quot;6ae516c833cd58624d42f3351edef581&quot;
+}
+</code></pre>
+<p>由于逆向目的在于，破解并生成加密参数，以正常请求API，因此以下为正常响应示例：</p>
+<pre><code class="language-json">{status: 3, message: &quot;手机号还未注册&quot;, data: null}
+</code></pre>
+<p>非正常响应：</p>
+<pre><code class="language-json">{status: 1, message: &quot;参数错误&quot;, data: null}
+</code></pre>
+<h3 id="xhr断点">XHR断点</h3>
+<p>直接开始使用XHR断点，根据栈查找指定的代码区域：<br>
+<img src="https://sz134055.github.io//post-images/1669725937294.png" alt="XHR" loading="lazy"></p>
+<p>涉及到<code>pwd</code>参数加密代码：</p>
+<pre><code class="language-js">Object(S[&quot;a&quot;])(t.loginForm.password)
+</code></pre>
+<p>对比加密结果：</p>
+<pre><code class="language-js">&gt;Object(S[&quot;a&quot;])('1')
+&lt;'c4ca4238a0b923820dcc509a6f75849b'
+</code></pre>
+<p>与在线工具生成一致，为MD5加密</p>
+<p>在本地我们使用以下代码代替，免于扣代码：</p>
+<pre><code class="language-js">const crypto = require('crypto-js')
+
+function md5(text){
+    return crypto.MD5(text).toString()
+}
+</code></pre>
+<p>现在再来锁定<code>sig</code>（通过直接搜索事半功倍），找到以下代码：</p>
+<pre><code class="language-js">var l = Object(g[&quot;a&quot;])(P(S(e)));
+            return Object.assign(e, {
+                sig: l
+            }),
+</code></pre>
+<p>通过控制台调用：</p>
+<pre><code class="language-js">&gt; Object(g[&quot;a&quot;])('1')
+&lt; 'c4ca4238a0b923820dcc509a6f75849b'
+</code></pre>
+<p>可以发现依然是MD5加密</p>
+<h3 id="扣代码">扣代码：</h3>
+<pre><code class="language-js">function P(n) {
+    var e = []
+      , t = &quot;&quot;;
+    for (var a in n)
+        e.push(n[a]);
+    for (var i = 0; i &lt; e.length; i++)
+        t += e[i] + &quot;&quot;;
+    return t += &quot;JzyqgcoojMiQNuQoTlbR5EBT8TsqzJ&quot;,
+    t
+}
+
+function S(n) {
+    for (var e = Object.keys(n).sort(), t = {}, a = 0; a &lt; e.length; a++)
+        t[e[a]] = n[e[a]];
+    return t
+}
+
+function md5(text){
+    return crypto.MD5(text).toString()
+}
+
+function getSig(e){
+    return md5(P(S(e)))
+}
+</code></pre>
+<p>基本不需要处理...</p>
+<p>所以包装一下的代码为：</p>
+<pre><code class="language-js">const crypto = require('crypto-js')
+
+function P(n) {
+    var e = []
+      , t = &quot;&quot;;
+    for (var a in n)
+        e.push(n[a]);
+    for (var i = 0; i &lt; e.length; i++)
+        t += e[i] + &quot;&quot;;
+    return t += &quot;JzyqgcoojMiQNuQoTlbR5EBT8TsqzJ&quot;,
+    t
+}
+
+function S(n) {
+    for (var e = Object.keys(n).sort(), t = {}, a = 0; a &lt; e.length; a++)
+        t[e[a]] = n[e[a]];
+    return t
+}
+
+function md5(text){
+    return crypto.MD5(text).toString()
+}
+
+function getSig(e){
+    return md5(P(S(e)))
+}
+
+function getForm(account,pswd){
+    let form = {
+        phoneNum: &quot;18912345678&quot;,
+        pwd: md5(pswd),
+        t: new Date().getTime().toString(),
+        tenant: 1
+    }
+
+
+
+    form.sig = getSig(form)
+
+    return form
+}
+
+// 测试
+console.log(getForm('18912345678','123456'))
+
+</code></pre>
+<h3 id="后续测试">后续测试</h3>
+<p>使用Python测试一下：</p>
+<pre><code class="language-python">import os
+import execjs
+import requests
+import json
+
+os.environ[&quot;NODE_PATH&quot;] = os.path.join('../' + &quot;/node_modules&quot;)
+
+
+def get_form(account: str, pswd: str) -&gt; dict:
+    with open('./hrdj.js') as f:
+        js_code = f.read()
+
+    js = execjs.compile(js_code)
+    return js.call('getForm', account, pswd)
+
+
+def main(account:str,pswd:str)-&gt;dict:
+    api = 'https://user.hrdjyun.com/wechat/phonePwdLogin'
+    header = {
+        &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;,
+        &quot;Accept-Encoding&quot;: &quot;gzip, deflate, br&quot;,
+        &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,ja;q=0.5&quot;,
+        &quot;Cache-Control&quot;: &quot;no-cache&quot;,
+        &quot;Connection&quot;: &quot;keep-alive&quot;,
+        &quot;Content-Length&quot;: &quot;137&quot;,
+        &quot;Content-Type&quot;: &quot;application/json&quot;,
+        &quot;Host&quot;: &quot;user.hrdjyun.com&quot;,
+        &quot;Origin&quot;: &quot;https://www.hh1024.com&quot;,
+        &quot;Pragma&quot;: &quot;no-cache&quot;,
+        &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.56&quot;
+    }
+
+# 注意使用json.dumps()
+    res = requests.post(url=api,data=json.dumps(get_form(account,pswd)),headers=header)
+
+    res_json = res.json()
+
+    return res_json
+
+if __name__ == '__main__':
+    print(main('18912345678','123456'))
+
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-json">{'status': 3, 'message': '手机号还未注册', 'data': None}
+</code></pre>
+<p>模拟验证成功</p>
+<h2 id="商品目录api加密参数">商品目录API加密参数</h2>
+<p>API：<code>https://ucp.hrdjyun.com:60359/api/dy</code></p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1669867803326.png" alt="商品目录" loading="lazy"></figure>
+<p>其中<code>token</code>是登录后返回，因此特别关注 <code>sign</code></p>
+<h3 id="xhr断点-2">XHR断点</h3>
+<p>同理，直接尝试使用XHR断点定位<br>
+<img src="https://sz134055.github.io//post-images/1669868478160.png" alt="定位" loading="lazy"></p>
+<p>下断点再请求一遍发现为此处，开始扣代码：</p>
+<pre><code class="language-js">function E(n, e) {
+    return k(&quot;param=&quot; + JSON.stringify(n) + &quot;&amp;timestamp=&quot; + e + &quot;&amp;tenant=1&amp;salt=&quot; + C)
+}
+
+function getSign(params){
+    return E(params,new Date().getTime())
+}
+</code></pre>
+<p>其中测试<code>k()</code>，发现其是标准SHA-256加密函数<br>
+<img src="https://sz134055.github.io//post-images/1669869063859.png" alt="SHA256加密" loading="lazy"></p>
+<p>我们使用<code>crypto.SHA256().toString()</code>代替，最终代码为：</p>
+<pre><code class="language-js">function k(text){
+    return crypto.SHA256(text).toString()
+}
+
+function E(n, e) {
+    return k(&quot;param=&quot; + JSON.stringify(n) + &quot;&amp;timestamp=&quot; + e + &quot;&amp;tenant=1&amp;salt=&quot; + C)
+}
+
+function getSign(params){
+    return E(params,new Date().getTime())
+}
+</code></pre>
+<p>这里还有一个<code>C</code>未解决，控制台输出为：</p>
+<pre><code class="language-js">'kbn%&amp;)@&lt;?FGkfs8sdf4Vg1*+;`kf5ndl$'
+</code></pre>
+<p>相关代码：</p>
+<pre><code class="language-js"> var C = z();
+function z() {
+    for (var n = Object(s[&quot;a&quot;])().concat(Object(A[&quot;a&quot;])(), Object(h[&quot;a&quot;])(), Object(p[&quot;a&quot;])(), Object(f[&quot;a&quot;])(), Object(m[&quot;b&quot;])()), e = &quot;&quot;, t = 0; t &lt; n.length; t++)
+    e += String.fromCharCode(parseInt(n[t], 16));
+    return e
+}
+</code></pre>
+<p>但是，经过多次重新请求发现，<code>C</code>始终不变，所以暂时以固定值处理（如果后续无法爬取，再来处理），因此最终代码为：</p>
+<pre><code class="language-js">function k(text){
+    return crypto.SHA256(text).toString()
+}
+
+function E(n, e) {
+    return k(&quot;param=&quot; + JSON.stringify(n) + &quot;&amp;timestamp=&quot; + e + &quot;&amp;tenant=1&amp;salt=&quot; + 'kbn%&amp;)@&lt;?FGkfs8sdf4Vg1*+;`kf5ndl$')
+}
+
+function getSign(params){
+    return E(params,new Date().getTime())
+}
+
+</code></pre>
+<p>请求一次，手动生成参数对比：<br>
+<img src="https://sz134055.github.io//post-images/1669875854207.png" alt="参数生成对比" loading="lazy"></p>
+<p>参数一致</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/hmac-suan-fa-xue-xi/" class="post-title gt-a-link">
+                    HMAC算法了解
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

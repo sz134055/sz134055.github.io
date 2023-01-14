@@ -1,0 +1,555 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>对称加密-DES学习笔记及天翼云逆向 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    对称加密-DES学习笔记及天翼云逆向
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-12-19 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/python/" class="post-tags">
+                            # python
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>仅仅学习其实现、用法，以做逆向知识储备，不深入其原理</p>
+<h2 id="常见算法归纳">常见算法归纳</h2>
+<ul>
+<li>DES</li>
+<li>AES</li>
+</ul>
+<h2 id="des">DES</h2>
+<p>DES算法的入口参数有三个：<code>Key</code>、<code>Data</code>、<code>Mode</code>。</p>
+<ul>
+<li><code>Key</code>为8个字节共64位，是DES算法的工作密钥；</li>
+<li><code>Data</code>也为8个字节64位，是要被加密或被解密的数据；</li>
+<li><code>Mode</code>为DES的工作方式，有两种：<strong>加密</strong>或<strong>解密</strong>。</li>
+</ul>
+<p>其中<code>Mode</code>支持以下工作模式：</p>
+<ul>
+<li>ECB 电子密码本模式（最常用之一）</li>
+<li>CBC 密文分组链接模式（最常用之一）</li>
+<li>CFB 密文反馈模式</li>
+<li>OFB 输出反馈模式</li>
+<li>CTR 计数器模式</li>
+</ul>
+<p>对不不满足宽度的数据，会进行填充，即<code>padding</code>，支持以下：</p>
+<ul>
+<li>ZeroPadding</li>
+<li>NoPadding</li>
+<li>AnsiX923</li>
+<li>Iso10126</li>
+<li>Iso97971</li>
+<li>Pkcs7（最常用）</li>
+</ul>
+<h3 id="ecb模式">ECB模式</h3>
+<h4 id="介绍">介绍</h4>
+<p><em>引自<a href="https://www.cnblogs.com/yanzi-meng/p/9640578.html#:~:text=DES%20ECB%EF%BC%88%E7%94%B5%E5%AD%90%E5%AF%86%E6%9C%AC%E6%96%B9%E5%BC%8F%EF%BC%89%E5%85%B6%E5%AE%9E%E9%9D%9E%E5%B8%B8%E7%AE%80%E5%8D%95%EF%BC%8C%E5%B0%B1%E6%98%AF%E5%B0%86%E6%95%B0%E6%8D%AE%E6%8C%89%E7%85%A78%E4%B8%AA%E5%AD%97%E8%8A%82%E4%B8%80%E6%AE%B5%E8%BF%9B%E8%A1%8CDES%E5%8A%A0%E5%AF%86%E6%88%96%E8%A7%A3%E5%AF%86%E5%BE%97%E5%88%B0%E4%B8%80%E6%AE%B58%E4%B8%AA%E5%AD%97%E8%8A%82%E7%9A%84%E5%AF%86%E6%96%87%E6%88%96%E8%80%85%E6%98%8E%E6%96%87%EF%BC%8C%E6%9C%80%E5%90%8E%E4%B8%80%E6%AE%B5%E4%B8%8D%E8%B6%B38%E4%B8%AA%E5%AD%97%E8%8A%82%EF%BC%8C%E6%8C%89%E7%85%A7%E9%9C%80%E6%B1%82%E8%A1%A5%E8%B6%B38%E4%B8%AA%E5%AD%97%E8%8A%82%E8%BF%9B%E8%A1%8C%E8%AE%A1%E7%AE%97%EF%BC%8C%E4%B9%8B%E5%90%8E%E6%8C%89%E7%85%A7%E9%A1%BA%E5%BA%8F%E5%B0%86%E8%AE%A1%E7%AE%97%E6%89%80%E5%BE%97%E7%9A%84%E6%95%B0%E6%8D%AE%E8%BF%9E%E5%9C%A8%E4%B8%80%E8%B5%B7%E5%8D%B3%E5%8F%AF%EF%BC%8C%E5%90%84%E6%AE%B5%E6%95%B0%E6%8D%AE%E4%B9%8B%E9%97%B4%E4%BA%92%E4%B8%8D%E5%BD%B1%E5%93%8D%E3%80%82,DES%20CBC%EF%BC%88%E5%AF%86%E6%96%87%E5%88%86%E7%BB%84%E9%93%BE%E6%8E%A5%E6%96%B9%E5%BC%8F%EF%BC%89%E6%9C%89%E7%82%B9%E9%BA%BB%E7%83%A6%EF%BC%8C%E5%AE%83%E7%9A%84%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6%E4%BD%BF%E5%8A%A0%E5%AF%86%E7%9A%84%E5%90%84%E6%AE%B5%E6%95%B0%E6%8D%AE%E4%B9%8B%E9%97%B4%E6%9C%89%E4%BA%86%E8%81%94%E7%B3%BB%E3%80%82">分组加密的四种模式 (ECB、CBC、CFB、OFB) - yanzi_meng </a></em></p>
+<p>DES ECB（电子密本方式）其实非常简单，就是将数据按照8个字节一段进行DES加密或解密得到一段8个字节的密文或者明文，最后一段不足8个字节，按照需求补足8个字节进行计算，之后按照顺序将计算所得的数据连在一起即可，各段数据之间互不影响。</p>
+<p>特点：</p>
+<ul>
+<li>简单，有利于并行计算，误差不会被传送；</li>
+<li>对于相同的明文块，会生成相同的密文块</li>
+<li>可能对明文进行主动攻击：加密消息块相互独立成为被攻击的弱点</li>
+</ul>
+<h4 id="js实现">JS实现</h4>
+<p>与下CBC类似，不再演示，转而用实战演示：<br>
+<a href="https://bqcm0.cavip1.com/">某小网站</a>（注意不要相信任何赌博等非法内容，这里仅用于技术学习）</p>
+<figure data-type="image" tabindex="1"><img src="https://sz134055.github.io//post-images/1671449084282.png" alt="LOGIN" loading="lazy"></figure>
+<p>登录表单被加密，通过XHR断点找到登录的js代码处：<br>
+<img src="https://sz134055.github.io//post-images/1671450071301.png" alt="login js" loading="lazy"></p>
+<p>涉及到表单加密的代码：</p>
+<pre><code class="language-js">utils.desEncrypt(JSON.stringify(a), i)
+</code></pre>
+<p>跳转至<code>utils.desEncrypt()</code>源码，为：</p>
+<pre><code class="language-js">desEncrypt: function(e, t) {
+        var n = CryptoJS.enc.Utf8.parse(t);
+        return CryptoJS.DES.encrypt(e, n, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.Pkcs7
+        }).toString()
+    }
+</code></pre>
+<p>其中<code>a</code>在控制台输出结果为：</p>
+<pre><code class="language-js">{
+    &quot;username&quot;: &quot;asda551313&quot;,
+    &quot;password&quot;: &quot;assd45646&quot;,
+    &quot;captcha&quot;: &quot;&quot;
+}
+</code></pre>
+<p><code>i</code>为：</p>
+<pre><code class="language-js">'PSfqxlZRUXMuiX7R'
+</code></pre>
+<p>对应源码为：</p>
+<pre><code class="language-js">var i = utils.rndString();
+
+//rndString()源码：
+function rndString() {
+    for (var e = &quot;0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz&quot;, t = &quot;&quot;, n = 0; n &lt; 16; n++) {
+        var a = Math.floor(Math.random() * e.length);
+        t += e.substring(a, a + 1)
+    }
+    return t
+}
+
+</code></pre>
+<p>可以发现其为随机值且与时间戳无关，因此基本可以将其写死</p>
+<p>我们分别拿到<code>desEncrypt()</code>和<code>rndString()</code>的源码进行扣代码处理<br>
+最终结果：</p>
+<pre><code class="language-js">let CryptoJS = require('crypto-js')
+
+function rndString() {
+    for (var e = &quot;0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz&quot;, t = &quot;&quot;, n = 0; n &lt; 16; n++) {
+        var a = Math.floor(Math.random() * e.length);
+        t += e.substring(a, a + 1)
+    }
+    return t
+}
+function desEncrypt(e, t) {
+    var n = CryptoJS.enc.Utf8.parse(t);
+    return CryptoJS.DES.encrypt(e, n, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    }).toString()
+}
+
+const login_data = {
+    &quot;username&quot;: &quot;asda551313&quot;,
+    &quot;password&quot;: &quot;assd45646&quot;,
+    &quot;captcha&quot;: &quot;&quot;
+}
+
+console.log(desEncrypt(JSON.stringify(login_data),rndString()))
+
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">sVkZh+drU7OD3GcrLn25d5KP+jc2igSM7BgcTxaMT2vhyZTFHXM58+0a2sHYMICCIoYm7IS/efeUyzsZ51Y27w==
+</code></pre>
+<p>逆向完毕</p>
+<h3 id="cbc模式">CBC模式</h3>
+<h4 id="介绍-2">介绍</h4>
+<p>CBC模式会多出一个初始化向量<code>iv</code>，会在每个明文块加密前做异或处理<br>
+<img src="https://img-blog.csdn.net/20180324202411225?watermark/2/text/aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2pkaGVsbGZpcmU=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70" alt="https://blog.csdn.net/jdhellfire/article/details/79680456-加密算法学习总结---DES-CBC加密算法" loading="lazy"></p>
+<p>这样的操作是防止相同明文生成相同密文的情况，减少被破解几率</p>
+<h4 id="js实现-2">JS实现</h4>
+<p><em>Node环境，需要crypto-js模块</em><br>
+源码如下：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+function desEncrypt(desKey,desIv,desMsg){
+    let key = crypto.enc.Utf8.parse(desKey),
+        iv = crypto.enc.Utf8.parse(desIv),
+        msg = crypto.enc.Utf8.parse(desMsg),
+        encrypted = crypto.DES.encrypt(msg,key,{
+            iv:iv,
+            mode:crypto.mode.CBC,
+            padding:crypto.pad.Pkcs7
+        });
+    return encrypted.toString()
+}
+
+console.log(desEncrypt('asd4a5d7adz','zxjgcjahsgbdhj','Hello World!'))
+</code></pre>
+<p>输出结果：</p>
+<pre><code class="language-shell">MG3fwFspzdTydWuP4chAKA==
+</code></pre>
+<p>逆向完毕</p>
+<p>因此对于逆向来说，我们至少要找到明文，密钥以及初始向量，即上面的<code>msg</code>、<code>key</code>和<code>iv</code>（如果没有初始向量则不需要）</p>
+<h4 id="实战示例">实战示例</h4>
+<p><a href="http://www.91118.com/Passport/Account/Login">某教育网站</a><br>
+同样步骤：<br>
+<img src="https://sz134055.github.io//post-images/1671451886538.png" alt="login" loading="lazy"></p>
+<p>通过XHR找到对应代码：<br>
+<img src="https://sz134055.github.io//post-images/1671452046766.png" alt="js" loading="lazy"></p>
+<p>这里关注<code>pass</code>表单项</p>
+<pre><code class="language-js">pass: encryptByDES(s)
+</code></pre>
+<p><code>s</code>为输入的密码，跳转到<code>encryptByDes()</code>源码处：<br>
+<img src="https://sz134055.github.io//post-images/1671452247620.png" alt="encry" loading="lazy"></p>
+<p>可以看到很标准的一套CBC加密流程，这里不再重复写代码，逆向结束。</p>
+<h2 id="天翼云实战">天翼云实战</h2>
+<h3 id="逆向">逆向</h3>
+<p>这里以<a href="https://m.ctyun.cn/wap/main/auth/login">天翼云</a>为例：<br>
+<img src="https://sz134055.github.io//post-images/1671453504173.png" alt="tyy" loading="lazy"></p>
+<p>我们主要关注表单项里的<code>password</code>项，通过XHR断点，层层观察，发现在此处涉及到了表单项<br>
+<img src="https://sz134055.github.io//post-images/1671453597466.png" alt="js-1" loading="lazy"></p>
+<p>并且是被传入（这不废话？），追溯到上一调用处，发现传入的是<code>s</code>，而<code>s</code>的定义赫然就摆在了上面：<br>
+<img src="https://sz134055.github.io//post-images/1671453731680.png" alt="js-2" loading="lazy"></p>
+<p>现在来进行一个扣代码：<br>
+首先通过之前的表单发现，<code>userName</code>即我们输入的账号，并为进行任何处理，因此我们用账号替换掉<code>Object(v[&quot;g&quot;])(o.value)</code>，</p>
+<pre><code class="language-js">const account = 'asdasdadss@163.com'
+
+const s = {
+    userName: account,
+    password: encodeURI(Object(v[&quot;c&quot;])(a.value, Object(v[&quot;f&quot;])(account)))
+}
+</code></pre>
+<p>再通过控制台输出，发现<code>a.value</code>的值就是我们输入的密码，替换之：</p>
+<pre><code class="language-js">let account = 'asdasdadss@163.com'
+let pswd = 'asd445zx48zs4as3d5'
+
+const s = {
+    userName: account,
+    password: encodeURI(Object(v[&quot;c&quot;])(pswd, Object(v[&quot;f&quot;])(account)))
+}
+</code></pre>
+<p>再来解决<code>Object(v[&quot;f&quot;])(account)</code>，通过观察其输出值发现为：</p>
+<pre><code>'asdasdadss@163.com000000'
+</code></pre>
+<p>在控制台多次调用并输出其它结果对比发现，其输出值长度固定为24，如果不满足则在结尾加<code>0</code>致使其补足长度至24，结合其源码在本地复现：</p>
+<pre><code class="language-js">function vf(e){
+    let a = 24,
+        t = &quot;0&quot;;
+    if (e.length &lt; a)
+        for (let r = e.length; r &lt; a; r++)
+            e += t;
+    else
+        e = e.substring(0, a);
+    return e
+}
+</code></pre>
+<p>再来跳转至<code>Object(v[&quot;c&quot;])</code>的源码处，源码片段为：</p>
+<pre><code class="language-js">T = function(e) {
+    var n = arguments.length &gt; 1 &amp;&amp; void 0 !== arguments[1] ? arguments[1] : &quot;&quot;
+      , t = arguments.length &gt; 2 &amp;&amp; void 0 !== arguments[2] ? arguments[2] : {}
+      , a = t.enc
+      , r = void 0 === a ? &quot;Utf8&quot; : a
+      , i = t.mode
+      , c = void 0 === i ? &quot;ECB&quot; : i
+      , o = t.padding
+      , u = void 0 === o ? &quot;Pkcs7&quot; : o
+      , d = p.a.enc[r].parse(n)
+      , l = {
+        mode: p.a.mode[c],
+        padding: p.a.pad[u]
+    }, s = p.a.TripleDES.encrypt(e, d, l);
+    return s.toString()
+}
+</code></pre>
+<p>可以发现其参数只有一个，即原始输入的密码值，因此<code>vf(account)</code>完全可以删除，<br>
+尝试观察<code>p.a</code>的值<br>
+<img src="https://sz134055.github.io//post-images/1671463459210.png" alt="pa" loading="lazy"></p>
+<p>发现涵盖了多种加密算法，基本可以断定其为第三方加密库，而<code>crypto-js</code>更是恰好包含了这个<code>TripleDES</code>的加密方式，因此暂时使用<code>crypto-js</code>平替，待最终对比结果</p>
+<p>搜索<code>crypto-js</code>中关于<code>TripleDES</code>的用法<br>
+<em><a href="https://www.cnblogs.com/winyh/p/12442535.html">前端加解密库 CryptoJS 使用(Triple DES 对称加密)</a></em></p>
+<pre><code class="language-js">const key  = CryptoJS.enc.Utf8.parse(&quot;4c43c365a4ac05b91eb5fa95&quot;); // key
+const iv = CryptoJS.enc.Utf8.parse(&quot;4c43c365&quot;); // iv
+
+
+// 直接使用 key 是不对的,需要像上面那样处理
+// const key  = &quot;4c43c365a4ac05b91eb5fa95&quot;; // key
+// const iv = key.substr(0, 8); // iv
+
+function encrypted(){
+　　const encrypted = CryptoJS.TripleDES.encrypt(params, key, { 
+        iv: iv, 
+        mode: CryptoJS.mode.CBC,  
+        padding: CryptoJS.pad.Pkcs7  
+    });
+
+    return encrypted.toString(); // 返回加密后的字符串
+}
+</code></pre>
+<p>对比之下就非常明了了，<code>p.a.TripleDES.encrypt(e, d, l)</code>中<code>e</code>为原始密码，<code>l</code>为加密模式相关，其值基本固定为下：</p>
+<ul>
+<li>mode: ECB</li>
+<li>padding: Pkcs7</li>
+</ul>
+<p>而<code>d</code>的值为Key，与下面代码片段相关：</p>
+<pre><code class="language-js">d = p.a.enc[r].parse(n)
+
+//p.a.enc[r].parse()
+parse: function(t) {
+    return s.parse(unescape(encodeURIComponent(t)))
+}
+//s.parse
+parse: function(t) {
+        for (var e = t.length, n = [], r = 0; r &lt; e; r++)
+            n[r &gt;&gt;&gt; 2] |= (255 &amp; t.charCodeAt(r)) &lt;&lt; 24 - r % 4 * 8;
+        return new a.init(n,e)
+    }
+</code></pre>
+<p>其中<code>p.a.enc[r].parse(n)</code>中的<code>n</code>观察其值发现即为<code>vf(account)</code>，再次观察<code>d</code>的值，并结合源码，<code>return new a.init(n,e)</code>处我们可直接改为<code>return n</code>，要的就是生成的长度为6的数组，但是在填入加密函数时，<code>l</code>实际为对象，例如：</p>
+<pre><code class="language-js">l = {
+    sigBytes:24,
+    words:[]
+}
+</code></pre>
+<p>其中<code>sigBytes</code>为固定值，<code>words</code>数组便是上面函数生成后的长度6的数组<code>n</code>，因此这里可以直接返回<code>n</code>然后再自行处理，或者干脆直接返回上列格式的对象</p>
+<p>最终在本地复现生成<code>d</code>数组的代码为：</p>
+<pre><code class="language-js">function parse(t) {
+    const Sparse = function(t) {
+        for (var e = t.length, n = [], r = 0; r &lt; e; r++)
+            n[r &gt;&gt;&gt; 2] |= (255 &amp; t.charCodeAt(r)) &lt;&lt; 24 - r % 4 * 8;
+        return n
+    }
+    return Sparse(unescape(encodeURIComponent(t)))
+}
+</code></pre>
+<p>最终本地代码为：</p>
+<pre><code class="language-js">
+let crypto = require('crypto-js')
+
+function parse(t) {
+    const Sparse = function(t) {
+        for (var e = t.length, n = [], r = 0; r &lt; e; r++)
+            n[r &gt;&gt;&gt; 2] |= (255 &amp; t.charCodeAt(r)) &lt;&lt; 24 - r % 4 * 8;
+        return n
+    }
+    return Sparse(unescape(encodeURIComponent(t)))
+}
+
+function vf(e){
+    let a = 24,
+        t = &quot;0&quot;;
+    if (e.length &lt; a)
+        for (let r = e.length; r &lt; a; r++)
+            e += t;
+    else
+        e = e.substring(0, a);
+    return e
+}
+
+function getD(account){
+    return {
+        sigBytes:24,
+        words:parse(vf(account))
+    }
+    
+}
+
+function desEntrypt(desMsg,desKey){
+        const encrypted = crypto.TripleDES.encrypt(desMsg,desKey,{
+            mode:crypto.mode.ECB,
+            padding:crypto.pad.Pkcs7
+        });
+    return encrypted.toString()
+}
+
+let account = 'asdasdadss@163.com'
+let pswd = 'abc123456789'
+
+const s = {
+    userName: account,
+    password:encodeURI(desEntrypt(pswd,getD(account)))
+}
+
+console.log(s)
+</code></pre>
+<p>生成结果：</p>
+<pre><code class="language-shell">{userName: 'asdasdadss@163.com', password: 'M4rpUkzQiMGE0YP6YR26aQ=='}
+</code></pre>
+<p>与请求对比<br>
+<img src="https://sz134055.github.io//post-images/1671465356137.png" alt="请求表单" loading="lazy"></p>
+<p>结果一致</p>
+<h3 id="模拟返回">模拟返回</h3>
+<p>根据编辑重放<br>
+<img src="https://sz134055.github.io//post-images/1671465701520.png" alt="编辑重放" loading="lazy"></p>
+<p>发现仅需图上四个参数即可正常返回，除账号密码外其余均为固定值，因此可很快写出脚本</p>
+<p>为了Python的便捷调用，给上面的js代码新增以下函数：</p>
+<pre><code class="language-js">function getPswd(account,pswd){
+    return encodeURI(desEntrypt(pswd,getD(account)))
+}
+</code></pre>
+<p>Python代码如下：</p>
+<pre><code class="language-python">import os
+import execjs
+import requests
+
+
+os.environ[&quot;NODE_PATH&quot;] = os.getcwd()+&quot;/node_modules&quot;
+
+def get_encrypt(account,pswd):
+    with open('tyy.js') as f:
+        js_code = f.read()
+
+    js = execjs.compile(js_code)
+    return js.call('getPswd', account,pswd)
+
+
+def main(account,pswd):
+    header = {
+        &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;,
+        &quot;Accept-Encoding&quot;: &quot;gzip, deflate, br&quot;,
+        &quot;Accept-Language&quot;: &quot;zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6,ja;q=0.5&quot;,
+        &quot;User-Agent&quot;: &quot;Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1 Edg/108.0.0.0&quot;
+    }
+    res = requests.get(url='https://m.ctyun.cn/account/login',headers=header,params={
+        'userName':account,
+        'password':get_encrypt(account,pswd),
+        'referrer':'wap',
+        'mainVersion':'300031500'
+    })
+    if res.status_code == 200:
+        res_json = res.json()
+        return res_json
+    else:
+        return res.text
+
+if __name__ == '__main__':
+    print(main('abc123456@163.com','ashdakozxbces'))
+</code></pre>
+<p>响应结果：</p>
+<pre><code class="language-json">{'resultCode': '-1', 'resultMsg': '账户或密码不正确', 'data': None, 'extendObj': None, 'code': '', 'success': False}
+</code></pre>
+<p>逆向及模拟返回成功</p>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/ji-lu-yi-ci-playwright-de-shi-yong/" class="post-title gt-a-link">
+                    记录一次Playwright的使用
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>

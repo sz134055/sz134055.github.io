@@ -1,0 +1,383 @@
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta name="description" content=""/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+<title>对称加密-AES学习笔记及优师云登录加密参数逆向 | Hyasea</title>
+
+<link rel="shortcut icon" href="https://sz134055.github.io//favicon.ico?v=1673683411289">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://sz134055.github.io//styles/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.15.10/languages/dart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script>
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <div class="navbar-brand">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            Hyasea
+        </div>
+    </div>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+                <div class="nav-item">
+                    
+                        <a href="/" class="menu gt-a-link">
+                            首页
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/archives" class="menu gt-a-link">
+                            归档
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/tags" class="menu gt-a-link">
+                            标签
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/about" class="menu gt-a-link">
+                            关于
+                        </a>
+                    
+                </div>
+            
+                <div class="nav-item">
+                    
+                        <a href="/post/favorite" class="menu gt-a-link">
+                            收藏
+                        </a>
+                    
+                </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1673683411289" action="/search/index.html">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    对称加密-AES学习笔记及优师云登录加密参数逆向
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2022-12-20 ·
+                    </time>
+                    
+                        <a href="https://sz134055.github.io/tag/javascript/" class="post-tags">
+                            # JavaScript
+                        </a>
+                    
+                        <a href="https://sz134055.github.io/tag/spider/" class="post-tags">
+                            # 爬虫
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <h2 id="介绍">介绍</h2>
+<p>和前面DES加密学习一样，只学习用法及实现以供爬虫逆向所用，不深入原理</p>
+<p>AES加密算法是用来取代DES的，同样有一个密钥，用来加密或解密，同时支持以下：</p>
+<ul>
+<li>mode
+<ul>
+<li>CBC</li>
+<li>CFB</li>
+<li>CTR</li>
+<li>CTRGladman</li>
+<li>ECB（唯一无<code>iv</code>向量模式）</li>
+<li>OFB</li>
+</ul>
+</li>
+<li>padding
+<ul>
+<li>ZeroPadding</li>
+<li>NoPadding</li>
+<li>AnsiX923</li>
+<li>Iso10126</li>
+<li>Iso97971</li>
+<li>Pkcs7<br>
+(以上列表不完全列出)</li>
+</ul>
+</li>
+</ul>
+<p>AES加密密钥长度为AES128、AES192、AES256，即128位、192位、256位，某些库会在长度不够时自动填充</p>
+<h2 id="js实现">JS实现</h2>
+<p>同样使用<code>Crypto-Js</code>库实现，代码与前DES基本一致：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+function aesEncrypt(aesMsg,aesKey,aesIv){
+    let key = crypto.enc.Utf8.parse(aesKey),
+        iv = crypto.enc.Utf8.parse(aesIv),
+        msg = crypto.enc.Utf8.parse(aesMsg),
+        encrypted = crypto.AES.encrypt(msg,key,{
+            iv:iv,
+            mode:crypto.mode.CBC,
+            padding:crypto.pad.Pkcs7
+        })
+    return encrypted.toString()
+}
+
+console.log(aesEncrypt('HELLO WORLD','0123456789abcdef','0123456789abcdef'))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">u9CkJDGEw0frLa/SQ51GOg==
+</code></pre>
+<p>解密与之差不多，但要注意小细节</p>
+<pre><code class="language-js">function aesDecrypt(aesMsg,aesKey,aesIv){
+    let key = crypto.enc.Utf8.parse(aesKey),
+        iv = crypto.enc.Utf8.parse(aesIv),
+        encrypted = crypto.AES.decrypt(aesMsg,key,{
+            iv:iv,
+            mode:crypto.mode.CBC,
+            padding:crypto.pad.Pkcs7
+        })
+    return encrypted.toString(crypto.enc.Utf8)
+}
+console.log(aesDecrypt('u9CkJDGEw0frLa/SQ51GOg==','0123456789abcdef','0123456789abcdef'))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-shell">HELLO WORLD
+</code></pre>
+<h2 id="实战-优师云">实战-优师云</h2>
+<p><a href="https://www.youshiyun.com.cn/login/index">优师云-登录</a></p>
+<p><img src="https://sz134055.github.io//post-images/1671528047354.png" alt="data" loading="lazy"><br>
+请求表单<code>password</code>加密</p>
+<p>可以走发起程序或者XHR断点，这里选择XHR断点<br>
+找寻到这里比较直观的调用，但是<code>password</code>已是密文<br>
+<img src="https://sz134055.github.io//post-images/1671529151784.png" alt="调用" loading="lazy"></p>
+<p>继续寻找<br>
+<img src="https://sz134055.github.io//post-images/1671529621022.png" alt="FIND IT" loading="lazy"></p>
+<p>这里<code>/Android|webOS|iPhone|iPod|iPad|BlackBerry|MicroMessenger/i.test(navigator.userAgent)</code>为<code>false</code>，那么可以视代码如下：</p>
+<pre><code class="language-js"> return false || (a = Object(_[&quot;g&quot;])({
+    data: e,
+    key: &quot;password.yunjy.y&quot;,
+    param: [&quot;password&quot;]
+}))
+</code></pre>
+<p>猜测这块就是加密函数，可以直接复制进控制台调用以下看看：<br>
+<img src="https://sz134055.github.io//post-images/1671529917710.png" alt="" loading="lazy"></p>
+<p>现在来研究这个函数，跳转至源码：</p>
+<pre><code class="language-js">var u = function(t) {
+    var e = t.data
+      , n = t.type
+      , a = t.param
+      , r = t.key
+      , o = JSON.parse(JSON.stringify(e));
+    return &quot;Base64&quot; === n ? a.forEach((function(t) {
+        o[t] = btoa(o[t])
+    }
+    )) : a.forEach((function(t) {
+        var e = o[t];
+        r = i.a.enc.Latin1.parse(r);
+        var n = r
+          , a = i.a.AES.encrypt(e, r, {
+            iv: n,
+            mode: i.a.mode.CBC,
+            padding: i.a.pad.ZeroPadding
+        });
+        o[t] = a.toString()
+    }
+    )),
+    o
+}
+
+</code></pre>
+<p>注意以下被传入的参数：</p>
+<pre><code class="language-js">{
+    &quot;data&quot;: {
+        &quot;username&quot;: &quot;15312341234&quot;,
+        &quot;password&quot;: &quot;asda1348315135153&quot;,
+        &quot;redomStr&quot;: &quot;&quot;
+    },
+    &quot;key&quot;: &quot;password.yunjy.y&quot;,
+    &quot;param&quot;: [
+        &quot;password&quot;
+    ]
+}
+</code></pre>
+<p>这里出现了<code>i.a.AES.encrypt()</code>，老办法，先在在控制台输出看看<code>i.a</code>，果然是包含了很多加密方法，直接用<code>crypto-js</code>平替，最终本地代码为：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+
+function getData(t) {
+    var e = t.data
+      , n = t.type
+      , a = t.param
+      , r = t.key
+      , o = JSON.parse(JSON.stringify(e));
+    return &quot;Base64&quot; === n ? a.forEach((function(t) {
+        o[t] = btoa(o[t])
+    }
+    )) : a.forEach((function(t) {
+        var e = o[t];
+        r = crypto.enc.Latin1.parse(r);
+        var n = r
+          , a = crypto.AES.encrypt(e, r, {
+            iv: n,
+            mode: crypto.mode.CBC,
+            padding: crypto.pad.ZeroPadding
+        });
+        o[t] = a.toString()
+    }
+    )),
+    o
+}
+
+var t = {
+    &quot;data&quot;: {
+        &quot;username&quot;: &quot;15312341234&quot;,
+        &quot;password&quot;: &quot;asda1348315135153&quot;,
+        &quot;redomStr&quot;: &quot;&quot;
+    },
+    &quot;key&quot;: &quot;password.yunjy.y&quot;,
+    &quot;param&quot;: [
+        &quot;password&quot;
+    ]
+}
+
+console.log(getData(t))
+</code></pre>
+<p>运行结果：</p>
+<pre><code class="language-js">{
+  username: '15312341234',
+  password: '2JcH1czr87e1kCAbqlXtyw2b8OGpkw44Sfhhfhbz3Nw=',
+  redomStr: ''
+}
+</code></pre>
+<p>与表单重结果一致，逆向完毕</p>
+<p>最后优化下代码：</p>
+<pre><code class="language-js">let crypto = require('crypto-js')
+
+
+function __getData(t) {
+    var e = t.data
+      , n = t.type
+      , a = t.param
+      , r = t.key
+      , o = JSON.parse(JSON.stringify(e));
+    return &quot;Base64&quot; === n ? a.forEach((function(t) {
+        o[t] = btoa(o[t])
+    }
+    )) : a.forEach((function(t) {
+        var e = o[t];
+        r = crypto.enc.Latin1.parse(r);
+        var n = r
+          , a = crypto.AES.encrypt(e, r, {
+            iv: n,
+            mode: crypto.mode.CBC,
+            padding: crypto.pad.ZeroPadding
+        });
+        o[t] = a.toString()
+    }
+    )),
+    o
+}
+
+function getData(account,pswd,redomStr){
+    return __getData({
+        &quot;data&quot;: {
+        &quot;username&quot;: account,
+        &quot;password&quot;: pswd,
+        &quot;redomStr&quot;: redomStr
+        },
+        &quot;key&quot;: &quot;password.yunjy.y&quot;,
+        &quot;param&quot;: [
+            &quot;password&quot;
+        ]
+    })
+}
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://sz134055.github.io/post/yi-en-piao-fa-api-ni-xiang/" class="post-title gt-a-link">
+                    艺恩票房API逆向
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">笔记BLOG</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme by <a href="https://imhanjie.com/" target="_blank">imhanjie</a>, Powered by <a
+                href="https://github.com/getgridea/gridea" target="_blank">Gridea | <a href="https://sz134055.github.io//atom.xml" target="_blank">RSS</a></a>
+    </div>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
