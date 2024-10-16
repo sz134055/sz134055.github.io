@@ -1,0 +1,240 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>国密（SM）系列逆向学习及实战 | Serene</title><meta name="author" content="sz134055"><meta name="copyright" content="sz134055"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="简介 国密算法，即国家商用密码算法。是由国家密码管理局认定和公布的密码算法标准及其应用规范，其中部分密码算法已经成为国际标准。如SM系列密码，SM代表商密，即商业密码，是指用于商业的、不涉及国家秘密的密码技术。——国密算法介绍  例如SM4：我国SM4分组密码算法正式成为ISO&#x2F;IEC国际标准  这里常用的为SM2和SM4算法 SM2简介 它是基于椭圆曲线密码的公钥密码算法标准，其秘钥长">
+<meta property="og:type" content="article">
+<meta property="og:title" content="国密（SM）系列逆向学习及实战">
+<meta property="og:url" content="https://sz134055.github.io/2023/01/04/sm-crypto-learn/index.html">
+<meta property="og:site_name" content="Serene">
+<meta property="og:description" content="简介 国密算法，即国家商用密码算法。是由国家密码管理局认定和公布的密码算法标准及其应用规范，其中部分密码算法已经成为国际标准。如SM系列密码，SM代表商密，即商业密码，是指用于商业的、不涉及国家秘密的密码技术。——国密算法介绍  例如SM4：我国SM4分组密码算法正式成为ISO&#x2F;IEC国际标准  这里常用的为SM2和SM4算法 SM2简介 它是基于椭圆曲线密码的公钥密码算法标准，其秘钥长">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sz134055.github.io/image/logo.png">
+<meta property="article:published_time" content="2023-01-04T07:09:43.000Z">
+<meta property="article:modified_time" content="2023-01-04T07:09:43.000Z">
+<meta property="article:author" content="sz134055">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="逆向">
+<meta property="article:tag" content="Python">
+<meta property="article:tag" content="爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://sz134055.github.io/image/logo.png"><link rel="shortcut icon" href="/image/favicon.ico"><link rel="canonical" href="https://sz134055.github.io/2023/01/04/sm-crypto-learn/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"距离文章上传日期已过去","messageNext":"天，其内容可能已过时。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '国密（SM）系列逆向学习及实战',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-01-04 15:09:43'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/logo.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/image/logo.png" alt="Logo"><span class="site-name">Serene</span></a><a class="nav-page-title" href="/"><span class="site-name">国密（SM）系列逆向学习及实战</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">国密（SM）系列逆向学习及实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-01-04T07:09:43.000Z" title="发表于 2023-01-04 15:09:43">2023-01-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-01-04T07:09:43.000Z" title="更新于 2023-01-04 15:09:43">2023-01-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%80%86%E5%90%91/">逆向</a><i class="fas fa-angle-right post-meta-separator"></i><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div><article class="post-content" id="article-container"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><blockquote>
+<p>国密算法，即国家商用密码算法。是由国家密码管理局认定和公布的密码算法标准及其应用规范，其中部分密码算法已经成为国际标准。如SM系列密码，SM代表商密，即商业密码，是指用于商业的、不涉及国家秘密的密码技术。<br>——<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<p>例如SM4：<a target="_blank" rel="noopener" href="http://www.sca.gov.cn/sca/xwdt/2021-07/08/content_1060866.shtml">我国SM4分组密码算法正式成为ISO&#x2F;IEC国际标准</a></p>
+<p><img src="https://pic3.zhimg.com/v2-58c351513a73515fea7ccd48894f3196_r.jpg"></p>
+<p>这里常用的为<code>SM2</code>和<code>SM4</code>算法</p>
+<h2 id="SM2"><a href="#SM2" class="headerlink" title="SM2"></a>SM2</h2><h3 id="简介-1"><a href="#简介-1" class="headerlink" title="简介"></a>简介</h3><blockquote>
+<p>它是基于椭圆曲线密码的公钥密码算法标准，其秘钥长度256bit，包含数字签名、密钥交换和公钥加密，<strong>用于替换RSA&#x2F;DH&#x2F;ECDSA&#x2F;ECDH等国际算法</strong>。可以满足电子认证服务系统等应用需求，由国家密码管理局于2010年12月17号发布。<br>SM2采用的是ECC 256位的一种，其安全强度比RSA 2048位高，且运算速度快于RSA。<br>——<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<h3 id="JS实现"><a href="#JS实现" class="headerlink" title="JS实现"></a>JS实现</h3><p>JS已有较为成熟的实现库，这里推荐<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/sm-crypto"><code>sm-crypto</code></a>，可实现<code>SM2</code>、<code>SM3</code>和<code>SM4</code></p>
+<p>上面链接的NPM库间接已给出示例，这里直接照搬：<br>密钥对</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> sm2 = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sm-crypto&#x27;</span>).<span class="hljs-property">sm2</span><br><br><span class="hljs-keyword">let</span> keypair = sm2.<span class="hljs-title function_">generateKeyPairHex</span>()<br><br>publicKey = keypair.<span class="hljs-property">publicKey</span> <span class="hljs-comment">// 公钥</span><br>privateKey = keypair.<span class="hljs-property">privateKey</span> <span class="hljs-comment">// 私钥</span><br><br><span class="hljs-comment">// 默认生成公钥 130 位太长，可以压缩公钥到 66 位</span><br><span class="hljs-keyword">const</span> compressedPublicKey = sm2.<span class="hljs-title function_">compressPublicKeyHex</span>(publicKey) <span class="hljs-comment">// compressedPublicKey 和 publicKey 等价</span><br>sm2.<span class="hljs-title function_">comparePublicKeyHex</span>(publicKey, compressedPublicKey) <span class="hljs-comment">// 判断公钥是否等价</span><br><br><span class="hljs-comment">// 自定义随机数，参数会直接透传给 jsbn 库的 BigInteger 构造器</span><br><span class="hljs-comment">// 注意：开发者使用自定义随机数，需要自行确保传入的随机数符合密码学安全</span><br><span class="hljs-keyword">let</span> keypair2 = sm2.<span class="hljs-title function_">generateKeyPairHex</span>(<span class="hljs-string">&#x27;123123123123123&#x27;</span>)<br><span class="hljs-keyword">let</span> keypair3 = sm2.<span class="hljs-title function_">generateKeyPairHex</span>(<span class="hljs-number">256</span>, <span class="hljs-title class_">SecureRandom</span>)<br><br><span class="hljs-keyword">let</span> verifyResult = sm2.<span class="hljs-title function_">verifyPublicKey</span>(publicKey) <span class="hljs-comment">// 验证公钥</span><br>verifyResult = sm2.<span class="hljs-title function_">verifyPublicKey</span>(compressedPublicKey) <span class="hljs-comment">// 验证公钥</span><br></code></pre></td></tr></table></figure>
+
+<p>加解密</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> cipherMode = <span class="hljs-number">1</span> <span class="hljs-comment">// 1 - C1C3C2，0 - C1C2C3，默认为1</span><br><br><span class="hljs-keyword">let</span> encryptData = sm2.<span class="hljs-title function_">doEncrypt</span>(msgString, publicKey, cipherMode) <span class="hljs-comment">// 加密结果</span><br><span class="hljs-keyword">let</span> decryptData = sm2.<span class="hljs-title function_">doDecrypt</span>(encryptData, privateKey, cipherMode) <span class="hljs-comment">// 解密结果</span><br><br>encryptData = sm2.<span class="hljs-title function_">doEncrypt</span>(msgArray, publicKey, cipherMode) <span class="hljs-comment">// 加密结果，输入数组</span><br>decryptData = sm2.<span class="hljs-title function_">doDecrypt</span>(encryptData, privateKey, cipherMode, &#123;<span class="hljs-attr">output</span>: <span class="hljs-string">&#x27;array&#x27;</span>&#125;) <span class="hljs-comment">// 解密结果，输出数组</span><br></code></pre></td></tr></table></figure>
+
+<p>来测试一下：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> sm2 = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sm-crypto&#x27;</span>).<span class="hljs-property">sm2</span><br><br><span class="hljs-keyword">let</span> keypair = sm2.<span class="hljs-title function_">generateKeyPairHex</span>()<br><br>publicKey = keypair.<span class="hljs-property">publicKey</span> <span class="hljs-comment">// 公钥</span><br>privateKey = keypair.<span class="hljs-property">privateKey</span> <span class="hljs-comment">// 私钥</span><br><br><span class="hljs-comment">// 默认生成公钥 130 位太长，可以压缩公钥到 66 位</span><br><span class="hljs-keyword">const</span> compressedPublicKey = sm2.<span class="hljs-title function_">compressPublicKeyHex</span>(publicKey) <span class="hljs-comment">// compressedPublicKey 和 publicKey 等价</span><br>sm2.<span class="hljs-title function_">comparePublicKeyHex</span>(publicKey, compressedPublicKey) <span class="hljs-comment">// 判断公钥是否等价</span><br><br><span class="hljs-comment">// 自定义随机数，参数会直接透传给 jsbn 库的 BigInteger 构造器</span><br><span class="hljs-comment">// 注意：开发者使用自定义随机数，需要自行确保传入的随机数符合密码学安全</span><br><span class="hljs-comment">//let keypair2 = sm2.generateKeyPairHex(&#x27;123123123123123&#x27;)</span><br><span class="hljs-comment">//let keypair3 = sm2.generateKeyPairHex(256, SecureRandom)</span><br><br><span class="hljs-keyword">let</span> verifyResult = sm2.<span class="hljs-title function_">verifyPublicKey</span>(publicKey) <span class="hljs-comment">// 验证公钥</span><br>verifyResult = sm2.<span class="hljs-title function_">verifyPublicKey</span>(compressedPublicKey) <span class="hljs-comment">// 验证公钥</span><br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(verifyResult)<br><br><span class="hljs-keyword">const</span> cipherMode = <span class="hljs-number">1</span> <span class="hljs-comment">// 1 - C1C3C2，0 - C1C2C3，默认为1</span><br><br>msgString = <span class="hljs-string">&#x27;HELLO WORLD&#x27;</span><br><br><span class="hljs-keyword">let</span> encryptData = sm2.<span class="hljs-title function_">doEncrypt</span>(msgString, publicKey, cipherMode) <span class="hljs-comment">// 加密结果</span><br><span class="hljs-keyword">let</span> decryptData = sm2.<span class="hljs-title function_">doDecrypt</span>(encryptData, privateKey, cipherMode) <span class="hljs-comment">// 解密结果</span><br><br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(encryptData)<br><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(decryptData)<br><br><span class="hljs-comment">//encryptData = sm2.doEncrypt(msgArray, publicKey, cipherMode) // 加密结果，输入数组</span><br><span class="hljs-comment">//decryptData = sm2.doDecrypt(encryptData, privateKey, cipherMode, &#123;output: &#x27;array&#x27;&#125;) // 解密结果，输出数组</span><br></code></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">true<br>f378b1ea6ee7d8d1729ee38fc5bbe8ccc2c2813f7fc07bcad877169d57fa5e2212d994cbf4c4dff78bd58acc82304373013e5d2e793c0ad2aafc90ab2c65083af6762f53b00324f091f67df9cac9d851a31baee07dfc19114bc0188dcb7aa37c9c9f9bfb43dec6a0712225<br>HELLO WORLD<br></code></pre></td></tr></table></figure>
+
+<h2 id="SM4"><a href="#SM4" class="headerlink" title="SM4"></a>SM4</h2><blockquote>
+<p>是我国自主设计的分组对称密码算法，<strong>用于替代DES&#x2F;AES等国际算法</strong>。SM4算法与AES算法具有相同的密钥长度、分组长度，都是128bit。于2012年3月21日发布，适用于密码应用中使用分组密码的需求。<br>——<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/132352160">国密算法介绍</a></p>
+</blockquote>
+<p>SM4 NPM库中也给出了示例，同样照搬：<br>加密</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> sm4 = <span class="hljs-built_in">require</span>(<span class="hljs-string">&#x27;sm-crypto&#x27;</span>).<span class="hljs-property">sm4</span><br><span class="hljs-keyword">const</span> msg = <span class="hljs-string">&#x27;hello world! 我是 juneandgreen.&#x27;</span> <span class="hljs-comment">// 可以为 utf8 串或字节数组</span><br><span class="hljs-keyword">const</span> key = <span class="hljs-string">&#x27;0123456789abcdeffedcba9876543210&#x27;</span> <span class="hljs-comment">// 可以为 16 进制串或字节数组，要求为 128 比特</span><br><br><span class="hljs-keyword">let</span> encryptData = sm4.<span class="hljs-title function_">encrypt</span>(msg, key) <span class="hljs-comment">// 加密，默认输出 16 进制字符串，默认使用 pkcs#7 填充（传 pkcs#5 也会走 pkcs#7 填充）</span><br><span class="hljs-keyword">let</span> encryptData = sm4.<span class="hljs-title function_">encrypt</span>(msg, key, &#123;<span class="hljs-attr">padding</span>: <span class="hljs-string">&#x27;none&#x27;</span>&#125;) <span class="hljs-comment">// 加密，不使用 padding</span><br><span class="hljs-keyword">let</span> encryptData = sm4.<span class="hljs-title function_">encrypt</span>(msg, key, &#123;<span class="hljs-attr">padding</span>: <span class="hljs-string">&#x27;none&#x27;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&#x27;array&#x27;</span>&#125;) <span class="hljs-comment">// 加密，不使用 padding，输出为字节数组</span><br><span class="hljs-keyword">let</span> encryptData = sm4.<span class="hljs-title function_">encrypt</span>(msg, key, &#123;<span class="hljs-attr">mode</span>: <span class="hljs-string">&#x27;cbc&#x27;</span>, <span class="hljs-attr">iv</span>: <span class="hljs-string">&#x27;fedcba98765432100123456789abcdef&#x27;</span>&#125;) <span class="hljs-comment">// 加密，cbc 模式</span><br></code></pre></td></tr></table></figure>
+
+<p>解密</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> encryptData = <span class="hljs-string">&#x27;0e395deb10f6e8a17e17823e1fd9bd98a1bff1df508b5b8a1efb79ec633d1bb129432ac1b74972dbe97bab04f024e89c&#x27;</span> <span class="hljs-comment">// 可以为 16 进制串或字节数组</span><br><span class="hljs-keyword">const</span> key = <span class="hljs-string">&#x27;0123456789abcdeffedcba9876543210&#x27;</span> <span class="hljs-comment">// 可以为 16 进制串或字节数组，要求为 128 比特</span><br><br><span class="hljs-keyword">let</span> decryptData = sm4.<span class="hljs-title function_">decrypt</span>(encryptData, key) <span class="hljs-comment">// 解密，默认输出 utf8 字符串，默认使用 pkcs#7 填充（传 pkcs#5 也会走 pkcs#7 填充）</span><br><span class="hljs-keyword">let</span> decryptData = sm4.<span class="hljs-title function_">decrypt</span>(encryptData, key, &#123;<span class="hljs-attr">padding</span>: <span class="hljs-string">&#x27;none&#x27;</span>&#125;) <span class="hljs-comment">// 解密，不使用 padding</span><br><span class="hljs-keyword">let</span> decryptData = sm4.<span class="hljs-title function_">decrypt</span>(encryptData, key, &#123;<span class="hljs-attr">padding</span>: <span class="hljs-string">&#x27;none&#x27;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&#x27;array&#x27;</span>&#125;) <span class="hljs-comment">// 解密，不使用 padding，输出为字节数组</span><br><span class="hljs-keyword">let</span> decryptData = sm4.<span class="hljs-title function_">decrypt</span>(encryptData, key, &#123;<span class="hljs-attr">mode</span>: <span class="hljs-string">&#x27;cbc&#x27;</span>, <span class="hljs-attr">iv</span>: <span class="hljs-string">&#x27;fedcba98765432100123456789abcdef&#x27;</span>&#125;) <span class="hljs-comment">// 解密，cbc 模式</span><br></code></pre></td></tr></table></figure>
+
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="逆向"><a href="#逆向" class="headerlink" title="逆向"></a>逆向</h3><p>目标：<code>aHR0cHM6Ly9mdXd1Lm5oc2EuZ292LmNuL25hdGlvbmFsSGFsbFN0LyMvc2VhcmNoL21lZGljYWw=</code><br><strong>注意：只做技术研究、交流！</strong></p>
+<p>可以看到需要逆向的参数有很多：<br>请求头：<br><img src="/2023/01/04/sm-crypto-learn/1672918755783.png"><br>表单：<br><img src="/2023/01/04/sm-crypto-learn/1672918774847.png"><br>响应结果：<br><img src="/2023/01/04/sm-crypto-learn/1672918785027.png"></p>
+<p>一顿找（推荐搜索关键字）：<br><img src="/2023/01/04/sm-crypto-learn/1672918799438.png"></p>
+<p>本来想半扣的，毕竟这里面比如那个<code>r</code>就是个标准的SHA256加密，可以直接用三方库，SM不就说了，当时在半扣的过程中，越扣越多，索性全扣得了</p>
+<p>同时需要一个参数<code>t</code>，直接在控制台输出<code>t</code>看看：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">vat t =&#123;<br>    <span class="hljs-string">&quot;transformRequest&quot;</span>: &#123;&#125;,<br>    <span class="hljs-string">&quot;transformResponse&quot;</span>: &#123;&#125;,<br>    <span class="hljs-string">&quot;timeout&quot;</span>: <span class="hljs-number">30000</span>,<br>    <span class="hljs-string">&quot;xsrfCookieName&quot;</span>: <span class="hljs-string">&quot;XSRF-TOKEN&quot;</span>,<br>    <span class="hljs-string">&quot;xsrfHeaderName&quot;</span>: <span class="hljs-string">&quot;X-XSRF-TOKEN&quot;</span>,<br>    <span class="hljs-string">&quot;maxContentLength&quot;</span>: -<span class="hljs-number">1</span>,<br>    <span class="hljs-string">&quot;headers&quot;</span>: &#123;<br>        <span class="hljs-string">&quot;common&quot;</span>: &#123;<br>            <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;application/json, text/plain, */*&quot;</span><br>        &#125;,<br>        <span class="hljs-string">&quot;delete&quot;</span>: &#123;&#125;,<br>        <span class="hljs-string">&quot;get&quot;</span>: &#123;&#125;,<br>        <span class="hljs-string">&quot;head&quot;</span>: &#123;&#125;,<br>        <span class="hljs-string">&quot;post&quot;</span>: &#123;<br>            <span class="hljs-string">&quot;Content-Type&quot;</span>: <span class="hljs-string">&quot;application/x-www-form-urlencoded&quot;</span><br>        &#125;,<br>        <span class="hljs-string">&quot;put&quot;</span>: &#123;<br>            <span class="hljs-string">&quot;Content-Type&quot;</span>: <span class="hljs-string">&quot;application/x-www-form-urlencoded&quot;</span><br>        &#125;,<br>        <span class="hljs-string">&quot;patch&quot;</span>: &#123;<br>            <span class="hljs-string">&quot;Content-Type&quot;</span>: <span class="hljs-string">&quot;application/x-www-form-urlencoded&quot;</span><br>        &#125;,<br>        <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>,<br>        <span class="hljs-string">&quot;Content-Type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>,<br>        <span class="hljs-string">&quot;channel&quot;</span>: <span class="hljs-string">&quot;web&quot;</span><br>    &#125;,<br>    <span class="hljs-string">&quot;withCredentials&quot;</span>: <span class="hljs-literal">false</span>,<br>    <span class="hljs-string">&quot;baseURL&quot;</span>: <span class="hljs-string">&quot;/ebus/fuwu/api&quot;</span>,<br>    <span class="hljs-string">&quot;method&quot;</span>: <span class="hljs-string">&quot;post&quot;</span>,<br>    <span class="hljs-string">&quot;url&quot;</span>: <span class="hljs-string">&quot;/nthl/api/CommQuery/queryFixedHospital&quot;</span>,<br>    <span class="hljs-string">&quot;data&quot;</span>: &#123;<br>        <span class="hljs-string">&quot;addr&quot;</span>: <span class="hljs-string">&quot;&quot;</span>,<br>        <span class="hljs-string">&quot;regnCode&quot;</span>: <span class="hljs-string">&quot;340600&quot;</span>,<br>        <span class="hljs-string">&quot;medinsName&quot;</span>: <span class="hljs-string">&quot;&quot;</span>,<br>        <span class="hljs-string">&quot;medinsLvCode&quot;</span>: <span class="hljs-string">&quot;&quot;</span>,<br>        <span class="hljs-string">&quot;medinsTypeCode&quot;</span>: <span class="hljs-string">&quot;&quot;</span>,<br>        <span class="hljs-string">&quot;openElec&quot;</span>: <span class="hljs-string">&quot;&quot;</span>,<br>        <span class="hljs-string">&quot;pageNum&quot;</span>: <span class="hljs-number">5</span>,<br>        <span class="hljs-string">&quot;pageSize&quot;</span>: <span class="hljs-number">10</span><br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p><code>t</code>明显可直接写死，其中一些参数猜测可能为：</p>
+<ul>
+<li>regnCode：地区代码（打开此网站会检测你IP位置并在控制台输出）</li>
+<li>pageNum：翻页</li>
+<li>pageSize：一页内容量</li>
+</ul>
+<p>如下所示，打开网站在开发人员工具开启下重新刷新页面，会看到地区检测结果：<br><img src="/2023/01/04/sm-crypto-learn/1672925003815.png"></p>
+<p>如果想要获取到其它位置，自行研究API了</p>
+<p>将其封装进代码，最终Webpack代码6W行，如果想将生成相关的代码自己扣下来的话（因为这段代码被包含在了Webpack中）同时还要注意去掉（仅自己封装用于生成表单和请求头的代码）<code>try-catch</code>语句，不然少了参数都不知道。</p>
+<p>因为生成加密参数的代码被包含在Webpack中<code>&quot;7d92&quot;</code>，所以可以试试不自己扣（因为上面所有的Webpack代码已经全扣了），那么要如何调用呢？</p>
+<p>可以知道代码在<code>&quot;7d92&quot;</code>，那么先输出一下<code>webpack(&quot;7d92&quot;)</code>（这里是自行导出了加载器，详见Webpack文章）</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">webpack</span>(<span class="hljs-string">&quot;7d92&quot;</span>))<br></code></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">&#123; a: [Getter], b: [Getter] &#125;<br></code></pre></td></tr></table></figure>
+
+<p>选择<code>a</code>再输出：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">webpack</span>(<span class="hljs-string">&quot;7d92&quot;</span>).<span class="hljs-property">a</span>)<br></code></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">[Function: f]<br></code></pre></td></tr></table></figure>
+
+<p>可以看到<code>a</code>为一个函数，并且其名字似乎预示选对了<br>再调用一下函数：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">webpack</span>(<span class="hljs-string">&quot;7d92&quot;</span>).<span class="hljs-title function_">a</span>())<br></code></pre></td></tr></table></figure>
+
+<p>结果（只截取片段）：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">return t.headers[&quot;x-tif-paasid&quot;] = l.paasId,<br></code></pre></td></tr></table></figure>
+
+<p>发现报错，很明显，这里便是我们要找的加密方法，把上面的找到的<code>t</code>塞进去看看结果：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title function_">webpack</span>(<span class="hljs-string">&quot;7d92&quot;</span>).<span class="hljs-title function_">a</span>(t))<br></code></pre></td></tr></table></figure>
+
+<p>结果：</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><code class="hljs shell">&#123;<br>  transformRequest: &#123;&#125;,<br>  transformResponse: &#123;&#125;,<br>  timeout: 30000,<br>  xsrfCookieName: &#x27;XSRF-TOKEN&#x27;,<br>  xsrfHeaderName: &#x27;X-XSRF-TOKEN&#x27;,<br>  maxContentLength: -1,<br>  headers: &#123;<br>    common: &#123; Accept: &#x27;application/json, text/plain, */*&#x27; &#125;,<br>    delete: &#123;&#125;,<br>    get: &#123;&#125;,<br>    head: &#123;&#125;,<br>    post: &#123; &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded&#x27; &#125;,<br>    put: &#123; &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded&#x27; &#125;,<br>    patch: &#123; &#x27;Content-Type&#x27;: &#x27;application/x-www-form-urlencoded&#x27; &#125;,<br>    Accept: &#x27;application/json&#x27;,<br>    &#x27;Content-Type&#x27;: &#x27;application/json&#x27;,<br>    channel: &#x27;web&#x27;,<br>    &#x27;x-tif-paasid&#x27;: undefined,<br>    &#x27;x-tif-signature&#x27;: &#x27;092eeb43442f3633e5d22790695b39264f0f0834e14f60dfe99d514e95a2cf93&#x27;,<br>    &#x27;x-tif-timestamp&#x27;: 1672929556,<br>    &#x27;x-tif-nonce&#x27;: &#x27;Y4aUfjoK&#x27;,<br>    contentType: &#x27;application/x-www-form-urlencoded&#x27;<br>  &#125;,<br>  withCredentials: false,<br>  baseURL: &#x27;/ebus/fuwu/api&#x27;,<br>  method: &#x27;post&#x27;,<br>  url: &#x27;/nthl/api/CommQuery/queryFixedHospital&#x27;,<br>  data: &#x27;&#123;&quot;data&quot;:&#123;&quot;data&quot;:&#123;&quot;encData&quot;:&quot;3DFBCA4667B978F639BB23B95DCE4CC73F6F89D76EF932292FE8BA14BC87DB17CCD20943B4DAE96380B41164D761DE9742C84A985FE3BABC31CB352556BB87C9C1495DB24A29AB6BC3A85AB7FCA00F338EE714ACFC4C924F01CF575098AEF167B7A135B72DAC6C2F3CD510E411A3C63A7D334AF16D66C5F4C5E72412B915CB27&quot;&#125;,&quot;appCode&quot;:&quot;T98HPCGN5ZVVQBS8LZQNOAEXVI9GYHKQ&quot;,&quot;version&quot;:&quot;1.0.0&quot;,&quot;encType&quot;:&quot;SM4&quot;,&quot;signType&quot;:&quot;SM2&quot;,&quot;timestamp&quot;:1672929556,&quot;signData&quot;:&quot;2+IZoksuP1rgU4LhVryfmBs1icvANuGmjR3FNk95bJyTjyqm3TK66ts3oV7L1d3Aot5RXvB7GRCK9QjnypILxw==&quot;&#125;&#125;&#x27;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>成功拿到需要的数据！</p>
+<p>暂时放下，来看看结果如何处理。</p>
+<p>最终找到此处：<br><img src="/2023/01/04/sm-crypto-learn/1672919599116.png"><br>此时<code>e.data</code>还是原始响应结果，并未解密：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">&#123;<br>    <span class="hljs-string">&quot;code&quot;</span>: <span class="hljs-number">0</span>,<br>    <span class="hljs-string">&quot;data&quot;</span>: &#123;<br>        <span class="hljs-string">&quot;signData&quot;</span>: <span class="hljs-string">&quot;+EJhLYxiMpbwjGCsEvK+wyXNoAyMKpkGnjb7tGZ3OoFNWqKzDjIeDfqE9ZSO0anEt3z4rNoFJ5lgHxeDuddVdg==&quot;</span>,<br>        <span class="hljs-string">&quot;encType&quot;</span>: <span class="hljs-string">&quot;SM4&quot;</span>,<br>        <span class="hljs-string">&quot;data&quot;</span>: &#123;<br>            <span class="hljs-string">&quot;encData&quot;</span>: <span class="hljs-string">&quot;2DC8C08C5C251B04B9CCBA9436917607527A4CC8F48CC3C8D7C226EB9483D8FA03CECA79ABA4AC1CE5 ....篇幅有限，这里省略.....FCF4D05388AA6A2E4E171B6486547C2E9DB06B68A81A61409372E7E00A0D1691A2F222D7698DCAC&quot;</span><br>        &#125;,<br>        <span class="hljs-string">&quot;signType&quot;</span>: <span class="hljs-string">&quot;SM2&quot;</span>,<br>        <span class="hljs-string">&quot;appCode&quot;</span>: <span class="hljs-string">&quot;T98HPCGN5ZVVQBS8LZQNOAEXVI9GYHKQ&quot;</span>,<br>        <span class="hljs-string">&quot;version&quot;</span>: <span class="hljs-string">&quot;1.0.0&quot;</span>,<br>        <span class="hljs-string">&quot;timestamp&quot;</span>: <span class="hljs-string">&quot;1672919504404&quot;</span><br>    &#125;,<br>    <span class="hljs-string">&quot;message&quot;</span>: <span class="hljs-string">&quot;成功&quot;</span>,<br>    <span class="hljs-string">&quot;timestamp&quot;</span>: <span class="hljs-string">&quot;1672919504&quot;</span>,<br>    <span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;success&quot;</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>复制到本地备后测试使用。</p>
+<p>同时这段代码也被包含在Webpack中，可以选择不扣，不过因为实际涉及解密的代码都集中在了一行上，这里选择半扣：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">get_data</span>(<span class="hljs-params">data</span>)&#123;<br>    <span class="hljs-keyword">const</span> e = &#123;<span class="hljs-attr">data</span>:data&#125;,<br>        c = <span class="hljs-title function_">webpack</span>(<span class="hljs-string">&quot;7d92&quot;</span>);<br><br>    <span class="hljs-keyword">return</span> e.<span class="hljs-property">data</span>.<span class="hljs-property">data</span>.<span class="hljs-property">appCode</span> &amp;&amp; (e.<span class="hljs-property">data</span>.<span class="hljs-property">data</span> = <span class="hljs-title class_">Object</span>(c.<span class="hljs-property">b</span>)(<span class="hljs-string">&quot;SM4&quot;</span>, e.<span class="hljs-property">data</span>)),e.<span class="hljs-property">data</span><br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>看到这里可以猜测，<code>webpack(&quot;7d92&quot;)</code>里<code>a</code>负责加密，<code>b</code>负责解密<br>将备好的数据放进去看运行结果：<br><img src="/2023/01/04/sm-crypto-learn/1672920513167.png"><br>成功解密</p>
+<p>简单封装下代码，准备模拟请求</p>
+<h3 id="模拟请求"><a href="#模拟请求" class="headerlink" title="模拟请求"></a>模拟请求</h3><p>这里继续使用Python来模拟请求，只爬取一页数据<br>同时要注意，从js代码获取的值需要进行一些处理才能让<code>requests</code>得以正确传递，<br>同时如果遇到<code>UnicodeEncodeError: &#39;gbk&#39; codec...</code>问题请参照此文章：<a href="https://sz134055.github.io/post/shi-yong-pyexecjs-wei-python-pa-chong-ti-gong-jia-mi-can-shu/#%E5%87%BA%E7%8E%B0unicodeencodeerror-gbk-codec%E9%97%AE%E9%A2%98">使用PyExecJS为Python爬虫提供加密参数</a><br><img src="/2023/01/04/sm-crypto-learn/1672931066558.png"></p>
+<p>完整代码请见仓库 <a target="_blank" rel="noopener" href="https://github.com/sz134055/learning-practice/tree/main/SM/gjyb">SM&#x2F;gjyb</a></p>
+<p><strong>代码仅作学习交流之用，请勿用于非法用途！</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://sz134055.github.io">sz134055</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://sz134055.github.io/2023/01/04/sm-crypto-learn/">https://sz134055.github.io/2023/01/04/sm-crypto-learn/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://sz134055.github.io" target="_blank">Serene</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/JavaScript/">JavaScript</a><a class="post-meta__tags" href="/tags/%E9%80%86%E5%90%91/">逆向</a><a class="post-meta__tags" href="/tags/Python/">Python</a><a class="post-meta__tags" href="/tags/%E7%88%AC%E8%99%AB/">爬虫</a></div><div class="post-share"><div class="social-share" data-image="/image/logo.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="prev-post pull-left" href="/2023/01/06/js-obfuscation-try/" title="JS混淆学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">JS混淆学习及实战</div></div></a><a class="next-post pull-right" href="/2022/12/23/webpack-reverse-try/" title="JS逆向-关于Webpack的学习"><img class="cover" src="https://picx.zhimg.com/v2-b7fcfec9147cdbc9b24a9a18a3cce60a_1440w.jpg?source=172ae18b" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">JS逆向-关于Webpack的学习</div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a href="/2022/11/29/sha256-try/" title="哈希加密逆向案例学习-模拟登录返回及后续"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-29</div><div class="title">哈希加密逆向案例学习-模拟登录返回及后续</div></div></a><a href="/2022/11/23/express-api-to-py/" title="使用Express给Python提供API"><img class="cover" src="https://tse2-mm.cn.bing.net/th/id/OIP-C.i2fRBk3GsYLeUk_Rh7AzHwHaDP?pid=ImgDet&w=3334&h=1461&rs=1" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-23</div><div class="title">使用Express给Python提供API</div></div></a><a href="/2022/11/25/youdao-with-pyexecjs/" title="使用PyExecJS为Python爬虫提供加密参数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-25</div><div class="title">使用PyExecJS为Python爬虫提供加密参数</div></div></a><a href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-07</div><div class="title">disable-devtool绕过</div></div></a><a href="/2022/11/26/hmac-learn/" title="HMAC算法了解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-26</div><div class="title">HMAC算法了解</div></div></a><a href="/2023/01/06/js-obfuscation-try/" title="JS混淆学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-06</div><div class="title">JS混淆学习及实战</div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SM2"><span class="toc-number">2.</span> <span class="toc-text">SM2</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B-1"><span class="toc-number">2.1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JS%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.2.</span> <span class="toc-text">JS实现</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SM4"><span class="toc-number">3.</span> <span class="toc-text">SM4</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%88%98"><span class="toc-number">4.</span> <span class="toc-text">实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%86%E5%90%91"><span class="toc-number">4.1.</span> <span class="toc-text">逆向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A8%A1%E6%8B%9F%E8%AF%B7%E6%B1%82"><span class="toc-number">4.2.</span> <span class="toc-text">模拟请求</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向"><img src="https://is4-ssl.mzstatic.com/image/thumb/Purple111/v4/8c/fc/61/8cfc6181-0548-4ef6-ed7c-35727cf53d27/source/512x512bb.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="2024更新-有道翻译API逆向"/></a><div class="content"><a class="title" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向">2024更新-有道翻译API逆向</a><time datetime="2024-10-08T05:27:00.000Z" title="发表于 2024-10-08 13:27:00">2024-10-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过">disable-devtool绕过</a><time datetime="2024-10-07T12:35:10.000Z" title="发表于 2024-10-07 20:35:10">2024-10-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/31/scrapy-try/" title="Scrapy爬虫框架初探">Scrapy爬虫框架初探</a><time datetime="2023-01-31T03:38:20.000Z" title="发表于 2023-01-31 11:38:20">2023-01-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/09/js-rpc-try/" title="JS RPC学习及实战">JS RPC学习及实战</a><time datetime="2023-01-09T10:21:13.000Z" title="发表于 2023-01-09 18:21:13">2023-01-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/07/websocket-try/" title="Websocket在爬虫中的应用">Websocket在爬虫中的应用</a><time datetime="2023-01-07T11:27:30.000Z" title="发表于 2023-01-07 19:27:30">2023-01-07</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2024 By sz134055</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

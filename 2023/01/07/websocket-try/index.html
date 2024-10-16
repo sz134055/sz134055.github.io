@@ -1,0 +1,194 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Websocket在爬虫中的应用 | Serene</title><meta name="author" content="sz134055"><meta name="copyright" content="sz134055"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="使用Websocket将数据从真实的浏览器环境传递给脚本">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Websocket在爬虫中的应用">
+<meta property="og:url" content="https://sz134055.github.io/2023/01/07/websocket-try/index.html">
+<meta property="og:site_name" content="Serene">
+<meta property="og:description" content="使用Websocket将数据从真实的浏览器环境传递给脚本">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sz134055.github.io/image/logo.png">
+<meta property="article:published_time" content="2023-01-07T11:27:30.000Z">
+<meta property="article:modified_time" content="2023-01-07T11:27:30.000Z">
+<meta property="article:author" content="sz134055">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="爬虫">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://sz134055.github.io/image/logo.png"><link rel="shortcut icon" href="/image/favicon.ico"><link rel="canonical" href="https://sz134055.github.io/2023/01/07/websocket-try/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"距离文章上传日期已过去","messageNext":"天，其内容可能已过时。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Websocket在爬虫中的应用',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-01-07 19:27:30'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/logo.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/image/logo.png" alt="Logo"><span class="site-name">Serene</span></a><a class="nav-page-title" href="/"><span class="site-name">Websocket在爬虫中的应用</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">Websocket在爬虫中的应用</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-01-07T11:27:30.000Z" title="发表于 2023-01-07 19:27:30">2023-01-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-01-07T11:27:30.000Z" title="更新于 2023-01-07 19:27:30">2023-01-07</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%88%AC%E8%99%AB/">爬虫</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div><article class="post-content" id="article-container"><h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><ul>
+<li>WebSocket是HTML5下一种新的协议（websocket协议本质上是一个基于tcp的协议）</li>
+<li>它实现了浏览器与服务器全双工通信，能更好的节省服务器资源和带宽并达到实时通讯的目的</li>
+<li>Websocket是一个<strong>持久化</strong>的协议</li>
+<li>websocket约定了一个通信的规范，通过一个握手的机制，客户端和服务器之间能建立一个类似tcp的连接，从而方便它们之间的通信</li>
+<li>在websocket出现之前，web交互一般是基于http协议的短连接或者长连接</li>
+<li>websocket是一种全新的协议，不属于http无状态协议，协议名为”ws”</li>
+<li>和HTTP都是基于tcp的，都是可靠性传输协议，都是应用层协议</li>
+<li>WebSocket是双向通信协议，模拟Socket协议，可以双向发送或接受信息，但HTTP是单向的</li>
+<li>WebSocket是需要浏览器和服务器握手进行建立连接的，而http是浏览器发起向服务器的连接，服务器预先并不知道这个连接</li>
+</ul>
+<h2 id="JS实现"><a href="#JS实现" class="headerlink" title="JS实现"></a>JS实现</h2><p>js websocket主要有以下几个方法：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-comment">//连接发生错误的回调方法</span><br>websocket.<span class="hljs-property">onerror</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-title function_">setMessageInnerHTML</span>(<span class="hljs-string">&quot;WebSocket连接发生错误&quot;</span>);<br>&#125;;<br><br><span class="hljs-comment">//连接成功建立的回调方法</span><br>websocket.<span class="hljs-property">onopen</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-title function_">setMessageInnerHTML</span>(<span class="hljs-string">&quot;WebSocket连接成功&quot;</span>);<br>&#125;<br><br><span class="hljs-comment">//接收到消息的回调方法  接服务器信息的方法</span><br>websocket.<span class="hljs-property">onmessage</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">event</span>) &#123;<br>    <span class="hljs-title function_">setMessageInnerHTML</span>(event.<span class="hljs-property">data</span>);<br>&#125;<br><br><span class="hljs-comment">//连接关闭的回调方法</span><br>websocket.<span class="hljs-property">onclose</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-title function_">setMessageInnerHTML</span>(<span class="hljs-string">&quot;WebSocket连接关闭&quot;</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>当然这些都是浏览器环境</p>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="逆向"><a href="#逆向" class="headerlink" title="逆向"></a>逆向</h3><p>此次目标为B站，随便找个直播间，来爬一下直播间的弹幕</p>
+<p>首先找到给出WSS信息的API，这个是B站的<br><img src="/2023/01/07/websocket-try/1673094658056.png"></p>
+<p>其实B站还有一个API能够拿到弹幕，详见 <a target="_blank" rel="noopener" href="https://www.bilibili.com/read/cv8186413">Bilibili直播API</a>，我估计是为了填补WSS连接前的空档期</p>
+<p>同时也可以在<code>WS</code>这看到建立的连接：<br><img src="/2023/01/07/websocket-try/1673095050698.png"></p>
+<p>当然数据是加密的，通过发起程序或者搜索关键字找到代码处：<br>最终给我一顿找找到这里：<br><img src="/2023/01/07/websocket-try/1673159737531.png"></p>
+<p>这个要说明一下就是WS建立可能会因为你调试导致失败，比如我这个就导致直播推流失败，但是弹幕仍然有效，因此并不影响<br><img src="/2023/01/07/websocket-try/1673159806833.png"></p>
+<p>失败的会自动重新建立几次连接，记得关注URL适当放行几次，这个得自己把握，同时每次数据都会变，不像HTTP每次请求对应一次数据，像B站这个，点开就一个二进制数据选项，每次进每次数据不一样，但有一点可以确定的是数据加密过</p>
+<p>在上下不断寻找后，最终找到可能的解密处：<br><img src="/2023/01/07/websocket-try/1673160291004.png"></p>
+<p>其实现在可以有两种办法，一是植入代码，浏览器保持运行，本地一个客户端同时接受，即做一个转发，另一个种那就是本地客户端直接接受了，但是那种可能还需要处理心跳问题，这里直接试试不用逆向解密方法的植入方式。</p>
+<h3 id="植入代码"><a href="#植入代码" class="headerlink" title="植入代码"></a>植入代码</h3><p>植入方式最大好处就是浏览器环境，难以被反爬了吧</p>
+<p>准备好js代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">!<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)&#123;<br>    <span class="hljs-keyword">const</span> ws = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WebSocket</span>(<span class="hljs-string">&#x27;ws://127.0.0.1:7788&#x27;</span>);<br>    <span class="hljs-variable language_">window</span>.<span class="hljs-property">wsHook</span> = ws;<br>    ws.<span class="hljs-property">onopen</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>)&#123;<br>        ws.<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;CONNECTED&#x27;</span>)<br>    &#125;<br>    ws.<span class="hljs-property">onmessage</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>)&#123;<br>        ws.<span class="hljs-title function_">send</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(n.<span class="hljs-property">body</span>))<br>    &#125;<br>&#125;();<br></code></pre></td></tr></table></figure>
+
+<p>然后选择替换（或者覆盖），然后对对应的JS文件右键-保存以覆盖（记住选择未格式化的！），直接在浏览器中打开已保存的代码进行编辑，在这段解密后的代码后面添加上面的代码即可<br><img src="/2023/01/07/websocket-try/1673165523541.png"></p>
+<p>当然这不够优雅，可以考虑以下代码：<br>在文件头部加入</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">!<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)&#123;<br>    <span class="hljs-keyword">const</span> ws = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WebSocket</span>(<span class="hljs-string">&#x27;ws://127.0.0.1:7788&#x27;</span>);<br>    <span class="hljs-variable language_">window</span>.<span class="hljs-property">wsHook</span> = ws;<br>    ws.<span class="hljs-property">onopen</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">e</span>)&#123;<br>        ws.<span class="hljs-title function_">send</span>(<span class="hljs-string">&#x27;CONNECTED&#x27;</span>)<br>    &#125;<br><br>&#125;();<br></code></pre></td></tr></table></figure>
+
+<p>然后在对应地方加入以下代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">window</span>.<span class="hljs-property">wsHook</span>.<span class="hljs-title function_">send</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(n.<span class="hljs-property">body</span>));<br></code></pre></td></tr></table></figure>
+
+<p>现在确保开发者工具开启且启用覆盖，刷新一下页面，如果你恰好看着控制台，你会看到连接到<code>127.0.0.1:7788</code>失败的消息，这是因为还没有客户端来接收</p>
+<p>再用一下下面抄来的Python代码（懒）：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> asyncio<br><span class="hljs-comment"># encoding: utf-8</span><br><span class="hljs-keyword">import</span> asyncio<br><span class="hljs-keyword">import</span> websockets<br><br><br><span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">echo</span>(<span class="hljs-params">websocket</span>):<br>    <span class="hljs-comment"># 使用WebSocket在客户端和服务器之间建立全双工双向连接后，就可以在连接打开时调用send()方法。</span><br>    message = <span class="hljs-string">&#x27;hello world&#x27;</span><br>    <span class="hljs-comment"># 发送数据</span><br>    <span class="hljs-keyword">await</span> websocket.send(message)<br>    <span class="hljs-keyword">return</span> <span class="hljs-literal">True</span><br><br><br><span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">recv_msg</span>(<span class="hljs-params">websocket</span>):<br>    <span class="hljs-keyword">while</span> <span class="hljs-number">1</span>:<br>        <span class="hljs-comment"># 接收数据</span><br>        recv_text = <span class="hljs-keyword">await</span> websocket.recv()<br>        <span class="hljs-built_in">print</span>(recv_text)<br><br><br><span class="hljs-keyword">async</span> <span class="hljs-keyword">def</span> <span class="hljs-title function_">main_logic</span>(<span class="hljs-params">websocket, path</span>):<br>    <span class="hljs-keyword">await</span> echo(websocket)<br>    <span class="hljs-keyword">await</span> recv_msg(websocket)<br><br><br>start_server = websockets.serve(main_logic, <span class="hljs-string">&#x27;127.0.0.1&#x27;</span>, <span class="hljs-number">7788</span>)<br>loop = asyncio.get_event_loop()<br>loop.run_until_complete(start_server)<br>loop.run_forever()<br></code></pre></td></tr></table></figure>
+
+<p>开RUN，可以看到直播间的消息已经都摆在你面前了<br><img src="/2023/01/07/websocket-try/1673165753184.png"></p>
+<p>这时候是存入MongoDB还是现场就开始分析全看个人，仅仅插入一段代码，不用破解任何方法，正常看着直播就把弹幕爬了，这还扣啥代码，要什么自行车。</p>
+<p><strong>思路拓展</strong><br>当遇到一个极难的网站，即使找到了解密方法，也很难扣的时候，是否可以使用这种办法转发解密后的数据给本地？这样虽然还是需要配合自动化但却省去了用BeautifulSoup等工具对网页的解析，自动化只需要做到能帮助翻页等功能即可。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://sz134055.github.io">sz134055</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://sz134055.github.io/2023/01/07/websocket-try/">https://sz134055.github.io/2023/01/07/websocket-try/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://sz134055.github.io" target="_blank">Serene</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/JavaScript/">JavaScript</a><a class="post-meta__tags" href="/tags/%E7%88%AC%E8%99%AB/">爬虫</a></div><div class="post-share"><div class="social-share" data-image="/image/logo.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="prev-post pull-left" href="/2023/01/09/js-rpc-try/" title="JS RPC学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">JS RPC学习及实战</div></div></a><a class="next-post pull-right" href="/2023/01/07/octet-stream-try/" title="octet-stream及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">octet-stream及实战</div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a href="/2022/11/23/express-api-to-py/" title="使用Express给Python提供API"><img class="cover" src="https://tse2-mm.cn.bing.net/th/id/OIP-C.i2fRBk3GsYLeUk_Rh7AzHwHaDP?pid=ImgDet&w=3334&h=1461&rs=1" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-23</div><div class="title">使用Express给Python提供API</div></div></a><a href="/2023/01/04/sm-crypto-learn/" title="国密（SM）系列逆向学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-04</div><div class="title">国密（SM）系列逆向学习及实战</div></div></a><a href="/2022/11/29/sha256-try/" title="哈希加密逆向案例学习-模拟登录返回及后续"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-29</div><div class="title">哈希加密逆向案例学习-模拟登录返回及后续</div></div></a><a href="/2022/11/25/youdao-with-pyexecjs/" title="使用PyExecJS为Python爬虫提供加密参数"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-25</div><div class="title">使用PyExecJS为Python爬虫提供加密参数</div></div></a><a href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-07</div><div class="title">disable-devtool绕过</div></div></a><a href="/2022/11/26/hmac-learn/" title="HMAC算法了解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-26</div><div class="title">HMAC算法了解</div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JS%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">JS实现</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%88%98"><span class="toc-number">3.</span> <span class="toc-text">实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%86%E5%90%91"><span class="toc-number">3.1.</span> <span class="toc-text">逆向</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%A4%8D%E5%85%A5%E4%BB%A3%E7%A0%81"><span class="toc-number">3.2.</span> <span class="toc-text">植入代码</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向"><img src="https://is4-ssl.mzstatic.com/image/thumb/Purple111/v4/8c/fc/61/8cfc6181-0548-4ef6-ed7c-35727cf53d27/source/512x512bb.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="2024更新-有道翻译API逆向"/></a><div class="content"><a class="title" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向">2024更新-有道翻译API逆向</a><time datetime="2024-10-08T05:27:00.000Z" title="发表于 2024-10-08 13:27:00">2024-10-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过">disable-devtool绕过</a><time datetime="2024-10-07T12:35:10.000Z" title="发表于 2024-10-07 20:35:10">2024-10-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/31/scrapy-try/" title="Scrapy爬虫框架初探">Scrapy爬虫框架初探</a><time datetime="2023-01-31T03:38:20.000Z" title="发表于 2023-01-31 11:38:20">2023-01-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/09/js-rpc-try/" title="JS RPC学习及实战">JS RPC学习及实战</a><time datetime="2023-01-09T10:21:13.000Z" title="发表于 2023-01-09 18:21:13">2023-01-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/07/websocket-try/" title="Websocket在爬虫中的应用">Websocket在爬虫中的应用</a><time datetime="2023-01-07T11:27:30.000Z" title="发表于 2023-01-07 19:27:30">2023-01-07</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2024 By sz134055</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>JS混淆学习及实战 | Serene</title><meta name="author" content="sz134055"><meta name="copyright" content="sz134055"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="简介 JavaScript 压缩即去除 JavaScript 代码中的不必要的空格、换行等内容或者把一些可能公用的代码进行处理实现共享，最后输出的结果都被压缩为几行内容，代码可读性变得很差，同时也能提高网站加载速度。   如果仅仅是去除空格换行这样的压缩方式，其实几乎是没有任何防护作用的，因为这种压缩方式仅仅是降低了代码的直接可读性。如果我们有一些格式化工具可以轻松将 JavaScript 代码变">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JS混淆学习及实战">
+<meta property="og:url" content="https://sz134055.github.io/2023/01/06/js-obfuscation-try/index.html">
+<meta property="og:site_name" content="Serene">
+<meta property="og:description" content="简介 JavaScript 压缩即去除 JavaScript 代码中的不必要的空格、换行等内容或者把一些可能公用的代码进行处理实现共享，最后输出的结果都被压缩为几行内容，代码可读性变得很差，同时也能提高网站加载速度。   如果仅仅是去除空格换行这样的压缩方式，其实几乎是没有任何防护作用的，因为这种压缩方式仅仅是降低了代码的直接可读性。如果我们有一些格式化工具可以轻松将 JavaScript 代码变">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sz134055.github.io/image/logo.png">
+<meta property="article:published_time" content="2023-01-06T07:09:44.000Z">
+<meta property="article:modified_time" content="2023-01-06T07:09:44.000Z">
+<meta property="article:author" content="sz134055">
+<meta property="article:tag" content="JavaScript">
+<meta property="article:tag" content="逆向">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://sz134055.github.io/image/logo.png"><link rel="shortcut icon" href="/image/favicon.ico"><link rel="canonical" href="https://sz134055.github.io/2023/01/06/js-obfuscation-try/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"距离文章上传日期已过去","messageNext":"天，其内容可能已过时。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'JS混淆学习及实战',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-01-06 15:09:44'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/logo.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/image/logo.png" alt="Logo"><span class="site-name">Serene</span></a><a class="nav-page-title" href="/"><span class="site-name">JS混淆学习及实战</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">JS混淆学习及实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-01-06T07:09:44.000Z" title="发表于 2023-01-06 15:09:44">2023-01-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2023-01-06T07:09:44.000Z" title="更新于 2023-01-06 15:09:44">2023-01-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%80%86%E5%90%91/">逆向</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div><article class="post-content" id="article-container"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><blockquote>
+<p>JavaScript 压缩即去除 JavaScript 代码中的不必要的空格、换行等内容或者把一些可能公用的代码进行处理实现共享，最后输出的结果都被压缩为几行内容，代码可读性变得很差，同时也能提高网站加载速度。</p>
+</blockquote>
+<blockquote>
+<p>如果仅仅是去除空格换行这样的压缩方式，其实几乎是没有任何防护作用的，因为这种压缩方式仅仅是降低了代码的直接可读性。如果我们有一些格式化工具可以轻松将 JavaScript 代码变得易读，比如利用 IDE、在线工具或 Chrome 浏览器都能还原格式化的代码。</p>
+</blockquote>
+<blockquote>
+<p>目前主流的前端开发技术大多都会利用 Webpack 进行打包，Webpack 会对源代码进行编译和压缩，输出几个打包好的 JavaScript 文件，其中我们可以看到输出的 JavaScript 文件名带有一些不规则字符串，同时文件内容可能只有几行内容，变量名都是一些简单字母表示。这其中就包含 JavaScript 压缩技术，比如一些公共的库输出成 bundle 文件，一些调用逻辑压缩和转义成几行代码，这些都属于 JavaScript 压缩。另外其中也包含了一些很基础的 JavaScript 混淆技术，比如把变量名、方法名替换成一些简单字符，降低代码可读性。<br>JavaScript 加密基本思路是将一些核心逻辑使用诸如 C&#x2F;C++ 语言来编写，并通过 JavaScript 调用执行，从而起到防护作用。</p>
+<p>其加密的方式现在有 Emscripten 和 WebAssembly 等，其中后者越来越成为主流。</p>
+<p>Emscripten： Emscripten编译器可以将 C&#x2F;C++ 代码编译成 asm.js 的 JavaScript 变体，再由 JavaScript 调用执行。因此某些 JavaScript 的核心功能可以使用 C&#x2F;C++ 语言实现，这可以算是一种前端加密技术。</p>
+<p>WebAssembly： WebAssembly 的技术也能将 C&#x2F;C++ 转成 JavaScript 引擎可以运行的代码，但转出来的代码是二进制字节码，而asm.js 是文本，</p>
+<p>因此运行速度更快、体积更小。得到的字节码具有和 JavaScript 相同的功能，在语法上完全脱离 JavaScript，同时具有沙盒化的执行环境。</p>
+<p>利用 WebAssembly 技术，我们可以将一些核心的功能利用 C&#x2F;C++ 语言实现，形成浏览器字节码的形式。然后在 JavaScript 中通过类似如下的方式调用：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-title class_">WebAssembly</span>.<span class="hljs-title function_">compile</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Uint8Array</span>(<span class="hljs-string">`</span><br><span class="hljs-string">  00 61 73 6d  01 00 00 00  01 0c 02 60  02 7f 7f 01</span><br><span class="hljs-string">  7f 60 01 7f  01 7f 03 03  02 00 01 07  10 02 03 61</span><br><span class="hljs-string">  64 64 00 00  06 73 71 75  61 72 65 00  01 0a 13 02</span><br><span class="hljs-string">  08 00 20 00  20 01 6a 0f  0b 08 00 20  00 20 00 6c</span><br><span class="hljs-string">  0f 0b`</span>.<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">split</span>(<span class="hljs-regexp">/[\s\r\n]+/g</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">str</span> =&gt;</span> <span class="hljs-built_in">parseInt</span>(str, <span class="hljs-number">16</span>))<br>)).<span class="hljs-title function_">then</span>(<span class="hljs-function"><span class="hljs-params">module</span> =&gt;</span> &#123;<br>  <span class="hljs-keyword">const</span> instance = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WebAssembly</span>.<span class="hljs-title class_">Instance</span>(<span class="hljs-variable language_">module</span>)<br>  <span class="hljs-keyword">const</span> &#123; add, square &#125; = instance.<span class="hljs-property">exports</span><br>  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;2 + 4 =&#x27;</span>, <span class="hljs-title function_">add</span>(<span class="hljs-number">2</span>, <span class="hljs-number">4</span>))<br>  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;3^2 =&#x27;</span>, <span class="hljs-title function_">square</span>(<span class="hljs-number">3</span>))<br>  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;(2 + 5)^2 =&#x27;</span>, <span class="hljs-title function_">square</span>(<span class="hljs-title function_">add</span>(<span class="hljs-number">2</span> + <span class="hljs-number">5</span>)))<br>&#125;)<br></code></pre></td></tr></table></figure>
+
+<p>这种加密方式更加安全，想要逆向或破解那得需要逆向 WebAssembly，难度极大。</p>
+<p>但整体来说，JavaScript 压缩技术只能在很小的程度上起到防护作用，要想真正提高防护效果还得依靠 JavaScript 混淆和加密技术。<a target="_blank" rel="noopener" href="https://blog.csdn.net/as604049322/article/details/114159252">原文链接「小小明-代码实体」</a></p>
+</blockquote>
+<blockquote>
+<p>混淆主要涉及两种思路：<br>a.通过正则替换实现的混淆器；<br>b.通过语法树替换实现的混淆器。<br>第一种实现成本低，但是效果也一般，适合对混淆要求不高的场景。第二种实现成本较高，但是更灵活，而且更安全，更适合对抗场景。<br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/88300966">JS混淆简单参考：几个实用的JS混淆工具。</a></p>
+</blockquote>
+<p>主要混淆技术：</p>
+<ul>
+<li><p>变量混淆<br>将带有含意的变量名、方法名、常量名随机变为无意义的类乱码字符串，降低代码可读性，如转成单个字符或十六进制字符串。</p>
+</li>
+<li><p>字符串混淆<br>将字符串阵列化集中放置、并可进行 <code>MD5</code> 或 <code>Base64</code> 加密存储，使代码中不出现明文字符串，这样可以避免使用全局搜索字符串的方式定位到入口点。</p>
+</li>
+<li><p>属性加密<br>针对 JavaScript 对象的属性进行加密转化，隐藏代码之间的调用关系。</p>
+</li>
+<li><p>控制流平坦化<br>打乱函数原有代码执行流程及函数调用关系，使代码逻变得混乱无序。</p>
+</li>
+<li><p>僵尸代码<br>随机在代码中插入无用的僵尸代码、僵尸函数，进一步使代码混乱。</p>
+</li>
+<li><p>调试保护<br>基于调试器特性，对当前运行环境进行检验，加入一些强制调试 <code>debugger</code> 语句，使其在调试模式下难以顺利执行 JavaScript 代码。</p>
+</li>
+<li><p>多态变异<br>使 JavaScript 代码每次被调用时，将代码自身即立刻自动发生变异，变化为与之前完全不同的代码，即功能完全不变，只是代码形式变异，以此杜绝代码被动态分析调试。</p>
+</li>
+<li><p>锁定域名<br>使 JavaScript 代码只能在指定域名下执行。</p>
+</li>
+<li><p>反格式化<br>如果对 JavaScript 代码进行格式化，则无法执行，导致浏览器假死。</p>
+</li>
+<li><p>特殊编码<br>将 JavaScript 完全编码为人不可读的代码，如表情符号、特殊表示内容等等。</p>
+</li>
+</ul>
+<p>总之，以上方案都是 JavaScript 混淆的实现方式，可以在不同程度上保护 JavaScript 代码。</p>
+<p>混淆工具有UglifyJS，JScrambler，jsbeautifier，JSDetox，obfuscator等</p>
+<p>此次介绍OB混淆，即obfuscator</p>
+<h2 id="OB混淆"><a href="#OB混淆" class="headerlink" title="OB混淆"></a>OB混淆</h2><h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>OB混淆官网：<a target="_blank" rel="noopener" href="https://obfuscator.io/">JavaScript Obfuscator Tool</a><br>来自官方的混淆示例：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// Paste your JavaScript code here</span><br><span class="hljs-keyword">function</span> <span class="hljs-title function_">hi</span>(<span class="hljs-params"></span>) &#123;<br>  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;Hello World!&quot;</span>);<br>&#125;<br><span class="hljs-title function_">hi</span>();<br></code></pre></td></tr></table></figure>
+
+<p>混淆后（已格式化）：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">(<span class="hljs-keyword">function</span> (<span class="hljs-params">_0x5e3669, _0x797fa0</span>) &#123; <br>    <span class="hljs-keyword">var</span> _0x4222ee = _0x4119, _0x40a199 = <span class="hljs-title function_">_0x5e3669</span>();<br>    <span class="hljs-keyword">while</span> (!![]) &#123;<br>        <span class="hljs-keyword">try</span> &#123;<br>            <span class="hljs-keyword">var</span> _0xf23fb6 = <span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xd9</span>)) / <span class="hljs-number">0x1</span> + <span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xdc</span>)) / <span class="hljs-number">0x2</span> + <span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xd3</span>)) / <span class="hljs-number">0x3</span> + -<span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xda</span>)) / <span class="hljs-number">0x4</span> + <span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xd7</span>)) / <span class="hljs-number">0x5</span> + <span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xd6</span>)) / <span class="hljs-number">0x6</span> * (-<span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xd8</span>)) / <span class="hljs-number">0x7</span>) + -<span class="hljs-built_in">parseInt</span>(<span class="hljs-title function_">_0x4222ee</span>(<span class="hljs-number">0xd5</span>)) / <span class="hljs-number">0x8</span>;<br>            <span class="hljs-keyword">if</span> (_0xf23fb6 === _0x797fa0) <span class="hljs-keyword">break</span>;<br>            <span class="hljs-keyword">else</span> _0x40a199[<span class="hljs-string">&#x27;push&#x27;</span>](_0x40a199[<span class="hljs-string">&#x27;shift&#x27;</span>]()); <br>        &#125; <span class="hljs-keyword">catch</span> (_0x2d2067) &#123;<br>            _0x40a199[<span class="hljs-string">&#x27;push&#x27;</span>](_0x40a199[<span class="hljs-string">&#x27;shift&#x27;</span>]()); <br>        &#125; <br>    &#125; <br>&#125;(_0x5ac2, <span class="hljs-number">0xa50c3</span>));<br><span class="hljs-keyword">function</span> <span class="hljs-title function_">hi</span>(<span class="hljs-params"></span>) &#123; <br>    <span class="hljs-keyword">var</span> _0x543b06 = _0x4119; <br>    <span class="hljs-variable language_">console</span>[<span class="hljs-title function_">_0x543b06</span>(<span class="hljs-number">0xdb</span>)](<span class="hljs-title function_">_0x543b06</span>(<span class="hljs-number">0xd4</span>)); <br>&#125; <br><span class="hljs-keyword">function</span> <span class="hljs-title function_">_0x4119</span>(<span class="hljs-params">_0x13dc26, _0xc31dd5</span>) &#123;<br>    <span class="hljs-keyword">var</span> _0x5ac260 = <span class="hljs-title function_">_0x5ac2</span>(); <br>    <span class="hljs-keyword">return</span> _0x4119 = <span class="hljs-keyword">function</span> (<span class="hljs-params">_0x4119c2, _0xbffe6d</span>) &#123; <br>        _0x4119c2 = _0x4119c2 - <span class="hljs-number">0xd3</span>; <br>        <span class="hljs-keyword">var</span> _0x42ea54 = _0x5ac260[_0x4119c2]; <br>        <span class="hljs-keyword">return</span> _0x42ea54; <br>    &#125;,<br>    <span class="hljs-title function_">_0x4119</span>(_0x13dc26, _0xc31dd5); <br>&#125; <br><span class="hljs-title function_">hi</span>(); <br><span class="hljs-keyword">function</span> <span class="hljs-title function_">_0x5ac2</span>(<span class="hljs-params"></span>) &#123; <br>    <span class="hljs-keyword">var</span> _0x3de06f = [<span class="hljs-string">&#x27;Hello\x20World!&#x27;</span>, <span class="hljs-string">&#x27;3046168LiXzXu&#x27;</span>, <span class="hljs-string">&#x27;6JNGVAy&#x27;</span>, <span class="hljs-string">&#x27;4550545CwPJCt&#x27;</span>, <span class="hljs-string">&#x27;5231807GgAdWc&#x27;</span>, <span class="hljs-string">&#x27;847568YVXvAQ&#x27;</span>, <span class="hljs-string">&#x27;2733296cTWkBb&#x27;</span>, <span class="hljs-string">&#x27;log&#x27;</span>, <span class="hljs-string">&#x27;879906prswui&#x27;</span>, <span class="hljs-string">&#x27;869703bTiBZl&#x27;</span>]; <br>    _0x5ac2 = <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123; <br>        <span class="hljs-keyword">return</span> _0x3de06f; <br>    &#125;; <br>    <span class="hljs-keyword">return</span> <span class="hljs-title function_">_0x5ac2</span>(); <br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>OB 混淆特点</p>
+<ul>
+<li>一般由一个大数组或者含有大数组的函数、自执行函数、解密函数和加密后函数四部分组成</li>
+<li>函数名和变量名通常以<code>_0x</code>或者<code>0x</code>开头，后接1~6位数字或字母组合</li>
+<li>自执行函数进行移位操作有明显的<code>push</code>、<code>shift</code>关键字</li>
+</ul>
+<h2 id="实战"><a href="#实战" class="headerlink" title="实战"></a>实战</h2><h3 id="逆向"><a href="#逆向" class="headerlink" title="逆向"></a>逆向</h3><p>目标：<a target="_blank" rel="noopener" href="https://bz.zzzmh.cn/index">极简壁纸</a><br>该网站有无限debugger，在首页加载完毕后，可以用将以下代码保存到片段里并运行来绕过（或直接在控制台运行）：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-title class_">Function</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">constructor_</span> = <span class="hljs-title class_">Function</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">constructor</span>;<br><span class="hljs-title class_">Function</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">constructor</span> = <span class="hljs-keyword">function</span> (<span class="hljs-params">a</span>) &#123;<br>    <span class="hljs-keyword">if</span> (a == <span class="hljs-string">&#x27;debugger&#x27;</span>) &#123;<br>        <span class="hljs-keyword">return</span> <span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;&#125;;<br>    &#125;<br>    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Function</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-title function_">constructor_</span>(a);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>同时本网站有滑块（并不是每次请求都有），滑块不在讨论范围，因此以没有进行滑块验证后的请求作为研究目标<br>可以看到表单中无加密（请求头中也无）<br><img src="/2023/01/06/js-obfuscation-try/1673020019446.png"></p>
+<p>而响应结果加密：<br><img src="/2023/01/06/js-obfuscation-try/1673020033975.png"></p>
+<p>通过XHR断点或者发起程序开找，找到以下疑似处（可以多下断点广撒网）<br><img src="/2023/01/06/js-obfuscation-try/1673020954012.png"></p>
+<p>可以发现基本就是这了<br><img src="/2023/01/06/js-obfuscation-try/1673021045976.png"></p>
+<p>以下代码便是解密代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">_0xa60097[<span class="hljs-string">&#x27;a&#x27;</span>][<span class="hljs-string">&#x27;decipher&#x27;</span>](_0x3bb7ad[<span class="hljs-title function_">_0x430ddf</span>(<span class="hljs-number">0x1f7</span>, <span class="hljs-string">&#x27;JJcn&#x27;</span>)][<span class="hljs-string">&#x27;result&#x27;</span>])<br></code></pre></td></tr></table></figure>
+
+<p>而<code>_0x3bb7ad[_0x430ddf(0x1f7, &#39;JJcn&#39;)][&#39;result&#39;]</code>便是响应结果中的<code>result</code>，因此只需要扣<code>_0xa60097[&#39;a&#39;][&#39;decipher&#39;]</code>即可<br>跳转代码如下（已封装至本地）：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">get_data</span>(<span class="hljs-params">result</span>)&#123;<br>    <span class="hljs-keyword">return</span> <span class="hljs-title function_">_0x1372a9</span>(<span class="hljs-title function_">_0x230351</span>(<span class="hljs-title function_">_0x43f8fa</span>(result)));<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>开始慢扣三个函数，发现运行无结果，于是在已扣出<code>_0x1372a9</code>、<code>_0x230351</code>和<code>_0x43f8fa</code>的情况下（因为这三个函数包含在一个对象中，有点像webpack），直接全盘复制，不过要注意去掉涉及到无限<code>debugger</code>的代码（不要和老夫说什么半扣优雅，老夫上来就是一个全扣，省时省力），运行，结果正常，这样就拿到了图片的ID（但是想获取图片还需要逆向对应的API，这里点到为止），逆向结束<br><img src="/2023/01/06/js-obfuscation-try/1673023202919.png"></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://sz134055.github.io">sz134055</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://sz134055.github.io/2023/01/06/js-obfuscation-try/">https://sz134055.github.io/2023/01/06/js-obfuscation-try/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://sz134055.github.io" target="_blank">Serene</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/JavaScript/">JavaScript</a><a class="post-meta__tags" href="/tags/%E9%80%86%E5%90%91/">逆向</a></div><div class="post-share"><div class="social-share" data-image="/image/logo.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="prev-post pull-left" href="/2023/01/07/octet-stream-try/" title="octet-stream及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">octet-stream及实战</div></div></a><a class="next-post pull-right" href="/2023/01/04/sm-crypto-learn/" title="国密（SM）系列逆向学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">国密（SM）系列逆向学习及实战</div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-07</div><div class="title">disable-devtool绕过</div></div></a><a href="/2023/01/07/octet-stream-try/" title="octet-stream及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-07</div><div class="title">octet-stream及实战</div></div></a><a href="/2022/11/20/qimai-2022/" title="七麦数据榜单API加密参数逆向"><img class="cover" src="https://pic2.zhimg.com/v2-8d74c7be6440561a1518996e060a36aa_xll.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-20</div><div class="title">七麦数据榜单API加密参数逆向</div></div></a><a href="/2023/01/04/sm-crypto-learn/" title="国密（SM）系列逆向学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-04</div><div class="title">国密（SM）系列逆向学习及实战</div></div></a><a href="/2022/11/29/sha256-try/" title="哈希加密逆向案例学习-模拟登录返回及后续"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-29</div><div class="title">哈希加密逆向案例学习-模拟登录返回及后续</div></div></a><a href="/2022/12/23/webpack-reverse-try/" title="JS逆向-关于Webpack的学习"><img class="cover" src="https://picx.zhimg.com/v2-b7fcfec9147cdbc9b24a9a18a3cce60a_1440w.jpg?source=172ae18b" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-12-23</div><div class="title">JS逆向-关于Webpack的学习</div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#OB%E6%B7%B7%E6%B7%86"><span class="toc-number">2.</span> <span class="toc-text">OB混淆</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">2.1.</span> <span class="toc-text">介绍</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9E%E6%88%98"><span class="toc-number">3.</span> <span class="toc-text">实战</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%80%86%E5%90%91"><span class="toc-number">3.1.</span> <span class="toc-text">逆向</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向"><img src="https://is4-ssl.mzstatic.com/image/thumb/Purple111/v4/8c/fc/61/8cfc6181-0548-4ef6-ed7c-35727cf53d27/source/512x512bb.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="2024更新-有道翻译API逆向"/></a><div class="content"><a class="title" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向">2024更新-有道翻译API逆向</a><time datetime="2024-10-08T05:27:00.000Z" title="发表于 2024-10-08 13:27:00">2024-10-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过">disable-devtool绕过</a><time datetime="2024-10-07T12:35:10.000Z" title="发表于 2024-10-07 20:35:10">2024-10-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/31/scrapy-try/" title="Scrapy爬虫框架初探">Scrapy爬虫框架初探</a><time datetime="2023-01-31T03:38:20.000Z" title="发表于 2023-01-31 11:38:20">2023-01-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/09/js-rpc-try/" title="JS RPC学习及实战">JS RPC学习及实战</a><time datetime="2023-01-09T10:21:13.000Z" title="发表于 2023-01-09 18:21:13">2023-01-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/07/websocket-try/" title="Websocket在爬虫中的应用">Websocket在爬虫中的应用</a><time datetime="2023-01-07T11:27:30.000Z" title="发表于 2023-01-07 19:27:30">2023-01-07</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2024 By sz134055</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

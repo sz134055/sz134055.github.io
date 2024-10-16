@@ -1,0 +1,353 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>JS RPC学习及实战 | Serene</title><meta name="author" content="sz134055"><meta name="copyright" content="sz134055"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="JS RPC是指在浏览器开启一个ws和go服务连接，以调用http接口的形式来通信，浏览器端收到调用通信执行原先设置好的js代码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JS RPC学习及实战">
+<meta property="og:url" content="https://sz134055.github.io/2023/01/09/js-rpc-try/index.html">
+<meta property="og:site_name" content="Serene">
+<meta property="og:description" content="JS RPC是指在浏览器开启一个ws和go服务连接，以调用http接口的形式来通信，浏览器端收到调用通信执行原先设置好的js代码。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sz134055.github.io/image/logo.png">
+<meta property="article:published_time" content="2023-01-09T10:21:13.000Z">
+<meta property="article:modified_time" content="2024-10-08T08:38:21.938Z">
+<meta property="article:author" content="sz134055">
+<meta property="article:tag" content="逆向">
+<meta property="article:tag" content="javascript">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://sz134055.github.io/image/logo.png"><link rel="shortcut icon" href="/image/favicon.ico"><link rel="canonical" href="https://sz134055.github.io/2023/01/09/js-rpc-try/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"距离文章上传日期已过去","messageNext":"天，其内容可能已过时。"},
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'JS RPC学习及实战',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-10-08 16:38:21'
+}</script><meta name="generator" content="Hexo 7.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/image/logo.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">17</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">5</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><img class="site-icon" src="/image/logo.png" alt="Logo"><span class="site-name">Serene</span></a><a class="nav-page-title" href="/"><span class="site-name">JS RPC学习及实战</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 文章分类</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">JS RPC学习及实战</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2023-01-09T10:21:13.000Z" title="发表于 2023-01-09 18:21:13">2023-01-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2024-10-08T08:38:21.938Z" title="更新于 2024-10-08 16:38:21">2024-10-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E9%80%86%E5%90%91/">逆向</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">浏览量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div><article class="post-content" id="article-container"><blockquote>
+<p>Sekkiro对官网做出调整，文章中的相关链接也做了对应更新，但其余内容依旧保持原样，所以文中内容可能已经过时，仅供思路参考。</p>
+</blockquote>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><blockquote>
+<p>RPC（Remote Procedure Call）中文名「远程过程调用」，又是一个很蹩脚的翻译。我们拆开理解下，「过程」也叫方法或函数，「远程」就是说方法不在当前进程里，而是在其他进程或机器上面，合起来 RPC 就是调用其他进程或机器上面的函数。<br>——<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/38012481">聊聊 Node.js RPC（一）— 协议</a></p>
+</blockquote>
+<blockquote>
+<p>JS RPC是指在浏览器开启一个ws和go服务连接，以调用http接口的形式来通信，浏览器端收到调用通信执行原先设置好的js代码。可以用于js逆向调用加密函数直接返回结果，也可以用来直接获取数据。<br>——<a target="_blank" rel="noopener" href="https://www.jianshu.com/p/57c4a483fb87">Python网络爬虫之js逆向之远程调用(rpc)免去抠代码补环境简介</a></p>
+</blockquote>
+<p>上次实战，其实就算是实现了一次JS RPC实战， 对于JS RPC，和爬虫一样，可以手搓，也可以选择成熟的第三方框架，这里推荐使用 <a target="_blank" rel="noopener" href="https://github.com/virjar/sekiro">Sekrio</a>-<a target="_blank" rel="noopener" href="http://sekiro.iinti.cn/sekiro-doc/">官方文档</a></p>
+<h2 id="Sekiro"><a href="#Sekiro" class="headerlink" title="Sekiro"></a>Sekiro</h2><blockquote>
+<p><img src="https://sekiro.iinti.cn/sekiro-doc/images/logo.png"><br>SEKIRO 是一个android下的API服务暴露框架，可以用在app逆向、app数据抓取、android群控等场景。同时Sekiro也是目前公开方案唯一稳定的JSRPC框架。<br>——来自<a target="_blank" rel="noopener" href="https://sekiro.virjar.com/sekiro-doc/index.html">官方文档</a></p>
+</blockquote>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>参考官方文档，准备好环境：<a target="_blank" rel="noopener" href="https://sekiro.virjar.com/sekiro-doc/index.html">官方文档</a></p>
+<p>首先需要确保已准备好 Java 环境，需要下载并配置JDK，随后运行<code>bin/sekiro.bat</code>（或<code>bin/sekiro.sh</code>）即可开启本地服务端</p>
+<p>然后使用以下代码暴露RPC服务：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">guid</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-keyword">function</span> <span class="hljs-title function_">S4</span>(<span class="hljs-params"></span>) &#123;<br>        <span class="hljs-keyword">return</span> (((<span class="hljs-number">1</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()) * <span class="hljs-number">0x10000</span>) | <span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>).<span class="hljs-title function_">substring</span>(<span class="hljs-number">1</span>);<br>    &#125;<br><br>    <span class="hljs-keyword">return</span> (<span class="hljs-title function_">S4</span>() + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-title function_">S4</span>() + <span class="hljs-title function_">S4</span>());<br>&#125;<br><br><span class="hljs-keyword">var</span> client = <span class="hljs-keyword">new</span> <span class="hljs-title class_">SekiroClient</span>(<span class="hljs-string">&quot;wss://sekiro.virjar.com/business/register?group=ws-group-2&amp;clientId=&quot;</span> + <span class="hljs-title function_">guid</span>());<br><br>client.<span class="hljs-title function_">registerAction</span>(<span class="hljs-string">&quot;clientTime&quot;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">request, resolve, reject</span>) &#123;<br>    <span class="hljs-title function_">resolve</span>(<span class="hljs-string">&quot;SekiroTest：&quot;</span> + <span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>());<br>&#125;);<br><br>client.<span class="hljs-title function_">registerAction</span>(<span class="hljs-string">&quot;executeJs&quot;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">request, resolve, reject</span>) &#123;<br>    <span class="hljs-keyword">var</span> code = request[<span class="hljs-string">&#x27;code&#x27;</span>];<br>    <span class="hljs-keyword">if</span> (!code) &#123;<br>        <span class="hljs-title function_">reject</span>(<span class="hljs-string">&quot;need param:&#123;code&#125;&quot;</span>);<br>        <span class="hljs-keyword">return</span>;<br>    &#125;<br><br>    code = <span class="hljs-string">&quot;return &quot;</span> + code;<br><br>    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&quot;executeJs: &quot;</span> + code);<br><br>    <span class="hljs-keyword">try</span> &#123;<br>        <span class="hljs-keyword">var</span> result = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Function</span>(code)();<br>        <span class="hljs-title function_">resolve</span>(result);<br>    &#125; <span class="hljs-keyword">catch</span> (e) &#123;<br>        <span class="hljs-title function_">reject</span>(<span class="hljs-string">&quot;error: &quot;</span> + e);<br>    &#125;<br><br>&#125;);<br></code></pre></td></tr></table></figure>
+
+<p>但是在开始之前，我们先了解下一些概念</p>
+<blockquote>
+<p><strong>名词解释</strong><br><strong>group</strong><br>业务类型（接口组），每个业务一个group。group下面可以注册多个终端(SekiroClient),同时Group可以挂载多个Action。 Group指代一个确定的业务，group下注册的client代码需要保持协议的完全一致。如微信机器人为一个group、xxx爬虫为另一个group。sekiro系统中Group全局唯一，同时Sekiro根据Group进行调用转发路由，并认为统一个group下面的所有client能够提供一致性的服务能力.也就是说，对sekiro来说，转发请求的时候，sekiro认为统一个group下的任意一个设备(手机、浏览器、客户端代码等)都是等价的，转发到任意一个终端都是相同的语义</p>
+<p><strong>SekiroClient</strong><br>服务提供者客户端，主要场景为手机&#x2F;浏览器等。最终的sekiro调用会转发到SekiroClient。每个client需要有一个惟一的clientId， ClientId最好用户自己生成，并且保证ClientId具备特定含义</p>
+<p><strong>action</strong><br>接口，同一个Group下面可以有多个接口，分别做不同的功能。如视频app，区分用户搜索接口、用户视频接口、直播接口、用户详情接口等。action是为了方便用户开发的时候隔离多个业务进行的抽象，在sekiro层面可以帮你进行一次路由。 这是因为在实际开发过程中可以发现同一个设备，可能可以提供多个接口</p>
+<p><strong>clientId</strong><br>ClientId指代设备，多个设备使用多个机器提供API服务，提供群控能力和负载均衡能力。如在手机上，同一个接口组下面可以挂载多台设备， ClientId大家需要保证每个客户端的ClientId的唯一性。建议使用mac地址、IMEI、ip地址+进程号等真实的物理ID作为ClientId。</p>
+<p>使用ClientId可以作为调度策略控制的ID，完成对特定设备的调用管理。</p>
+<p><strong>转自官网</strong></p>
+</blockquote>
+<p>同时如果你已经打开了本地服务，Sekiro提供了以下API：</p>
+<ul>
+<li><p>查看分组列表：<a target="_blank" rel="noopener" href="http://127.0.0.1:5620/business-demo/groupList">http://127.0.0.1:5620/business-demo/groupList</a></p>
+</li>
+<li><p>查看分组下队列状态：<a target="_blank" rel="noopener" href="http://127.0.0.1:5620/business-demo/clientQueue?group=test">http://127.0.0.1:5620/business-demo/clientQueue?group=test</a></p>
+<ul>
+<li>group参数：需要查看的指定分组名</li>
+</ul>
+</li>
+<li><p>调用转发：<a target="_blank" rel="noopener" href="http://127.0.0.1:5620/business-demo/invoke?group=test&action=test&param=testparm">http://127.0.0.1:5620/business-demo/invoke?group=test&amp;action=test&amp;param=testparm</a></p>
+<ul>
+<li>group参数：同上</li>
+<li>action参数：需要调用的action名</li>
+<li>param参数：需要传递的参数，注意这里param是自定义的参数名！也就是说在<code>action</code>参数后可以接比如<code>sign</code>，Sekiro客户端可以拿到此参数</li>
+</ul>
+</li>
+</ul>
+<p>现在来测试一下，以下代码是已经写好的DEMO</p>
+<figure class="highlight html"><table><tr><td class="code"><pre><code class="hljs html"><span class="hljs-meta">&lt;!DOCTYPE <span class="hljs-keyword">html</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;en&quot;</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">head</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">meta</span> <span class="hljs-attr">charset</span>=<span class="hljs-string">&quot;UTF-8&quot;</span>&gt;</span><br>    <span class="hljs-tag">&lt;<span class="hljs-name">title</span>&gt;</span>Sekiro TEST<span class="hljs-tag">&lt;/<span class="hljs-name">title</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">head</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">h1</span>&gt;</span>Sekiro TEST<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span><br><span class="hljs-comment">&lt;!--加载JsClient--&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br><span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="language-javascript"></span><br><span class="language-javascript">        <span class="hljs-keyword">function</span> <span class="hljs-title function_">guid</span>(<span class="hljs-params"></span>) &#123;</span><br><span class="language-javascript">            <span class="hljs-keyword">function</span> <span class="hljs-title function_">S4</span>(<span class="hljs-params"></span>) &#123;</span><br><span class="language-javascript">                  <span class="hljs-keyword">return</span> (((<span class="hljs-number">1</span>+<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>())*<span class="hljs-number">0x10000</span>)|<span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>).<span class="hljs-title function_">substring</span>(<span class="hljs-number">1</span>);</span><br><span class="language-javascript">            &#125;</span><br><span class="language-javascript">            <span class="hljs-keyword">return</span> (<span class="hljs-title function_">S4</span>()+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-title function_">S4</span>()+<span class="hljs-title function_">S4</span>());</span><br><span class="language-javascript">        &#125;</span><br><span class="language-javascript"></span><br><span class="language-javascript">        <span class="hljs-comment">//注册Group，名为rpc-test</span></span><br><span class="language-javascript">        <span class="hljs-keyword">var</span> client = <span class="hljs-keyword">new</span> <span class="hljs-title class_">SekiroClient</span>(<span class="hljs-string">&quot;ws://127.0.0.1:5620/business-demo/register?group=rpc-test&amp;clientId=&quot;</span> + <span class="hljs-title function_">guid</span>());</span><br><span class="language-javascript"></span><br><span class="language-javascript">        <span class="hljs-comment">//注册Action，名为clientTime</span></span><br><span class="language-javascript">        client.<span class="hljs-title function_">registerAction</span>(<span class="hljs-string">&quot;clientTime&quot;</span>,<span class="hljs-keyword">function</span>(<span class="hljs-params">request, resolve,reject </span>)&#123;</span><br><span class="language-javascript">            <span class="hljs-title function_">resolve</span>(<span class="hljs-string">&quot;&quot;</span>+<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>());</span><br><span class="language-javascript">        &#125;)</span><br><span class="language-javascript"></span><br><span class="language-javascript">        <span class="hljs-comment">//注册Action，名为getPwd</span></span><br><span class="language-javascript">        client.<span class="hljs-title function_">registerAction</span>(<span class="hljs-string">&quot;getPwd&quot;</span>,<span class="hljs-keyword">function</span>(<span class="hljs-params">request, resolve,reject </span>)&#123;</span><br><span class="language-javascript">            <span class="hljs-keyword">const</span> pwd = request[<span class="hljs-string">&#x27;pwd&#x27;</span>]</span><br><span class="language-javascript">            <span class="hljs-comment">//调用假设的加密方法直接返回对应的结果</span></span><br><span class="language-javascript">            <span class="hljs-title function_">resolve</span>(<span class="hljs-title function_">pwdEncypt</span>(pwd))</span><br><span class="language-javascript">        &#125;)</span><br><span class="language-javascript"></span><br><span class="language-javascript"></span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">body</span>&gt;</span><br><span class="hljs-tag">&lt;/<span class="hljs-name">html</span>&gt;</span><br></code></pre></td></tr></table></figure>
+
+<p>浏览器打开此文件，确保本地服务开启，可以在浏览器开发人员工具中看到WS连接，访问<code>http://127.0.0.1:5620/business-demo/groupList</code>，响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">[</span><span class="hljs-string">&quot;rpc-test&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;ok&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>访问<code>http://127.0.0.1:5620/business-demo/clientQueue?group=rpc-test</code>，响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">[</span><span class="hljs-string">&quot;eddc8434-4c23-f7bb-31a6-21c4523b00d2&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;ok&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>现在，来调用以下刚才注册的Action。访问<code>http://127.0.0.1:5620/business-demo/invoke?group=rpc-test&amp;action=clientTime</code>，响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;__sekiro_seq__&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">2</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;clientId&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;eddc8434-4c23-f7bb-31a6-21c4523b00d2&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;Wed Jan 11 2023 21:27:39 GMT+0800 (香港标准时间)&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以看到，其将JS代码<code>new Date()</code>的结果转发了出来。</p>
+<p><strong>传递参数</strong><br>现在需要加密一个数据，明文为<code>123456</code>，得到其加密后的结果，DEMO中注册了一个Action名为<code>getPwd</code>，它需要一个<code>pwd</code>参数，并调用返回加密结果，因此需要调用：<br><code>http://127.0.0.1:5620/business-demo/invoke?group=rpc-test&amp;action=getPwd&amp;pwd=123456</code><br>响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;__sekiro_seq__&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">3</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;clientId&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;38617c08-b07d-40c0-d256-0ec1670cf20d&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;123456abc123&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>其中<code>data</code>便是期待的加密值（模拟）</p>
+<h3 id="实战-控制台注入方式"><a href="#实战-控制台注入方式" class="headerlink" title="实战-控制台注入方式"></a>实战-控制台注入方式</h3><p>地址：<code>http://q.10jqka.com.cn/</code></p>
+<p>目标是<code>个股行情</code>，每次翻页都带有Cookie且不一致，为Cookie反爬<br><img src="/2023/01/09/js-rpc-try/1673446300754.png"></p>
+<p>控制台中执行<code>document.cookie</code>，可以拿到对应的Cookie值，并猜测有JS代码在生成其值，可以在控制台执行以下代码，以在每次<code>document.cookie</code>值发生改变时，自动断住，方便在堆栈中找到可能的生成代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">(<span class="hljs-keyword">function</span> (<span class="hljs-params"></span>) &#123;<br>  <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">defineProperty</span>(<span class="hljs-variable language_">document</span>, <span class="hljs-string">&#x27;cookie&#x27;</span>, &#123;<br>    <span class="hljs-attr">set</span>: <span class="hljs-keyword">function</span> (<span class="hljs-params">val</span>) &#123;<br>      <span class="hljs-keyword">if</span> (val.<span class="hljs-title function_">indexOf</span>(<span class="hljs-string">&#x27;v&#x27;</span>) != -<span class="hljs-number">1</span>) &#123;<br>        <span class="hljs-keyword">debugger</span>;<br>      &#125;<br>      <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">&#x27;Hook捕获到cookie设置-&gt;&#x27;</span>, val);<br>      <span class="hljs-keyword">return</span> val;<br>    &#125;<br>  &#125;);<br>&#125;)();<br></code></pre></td></tr></table></figure>
+
+<p>执行后，翻页一下，在堆栈中搜索，可以轻松找到相关代码：<br><img src="/2023/01/09/js-rpc-try/1673446952346.png"></p>
+<p>按往常是可以开始扣代码了，但是现在使用RPC方式，要做的就是将对应加密函数导出到全局然后供RPC客户端调用，在控制台输入并执行：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">encypt = O<br></code></pre></td></tr></table></figure>
+
+<p>然后选择右上角的<code>停用断点</code>，取消调试状态并放行，这样就可以注入对应的RPC代码了</p>
+<p>同时记得确保JS上下文为TOP，这样才能在控制台执行刚刚导出的<code>encypt</code>，并且后面的操作都要在此种执行</p>
+<p>在控制台，输入JsClient所有源码然后执行，以及暴露RPC服务的代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">guid</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-keyword">function</span> <span class="hljs-title function_">S4</span>(<span class="hljs-params"></span>) &#123;<br>          <span class="hljs-keyword">return</span> (((<span class="hljs-number">1</span>+<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>())*<span class="hljs-number">0x10000</span>)|<span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>).<span class="hljs-title function_">substring</span>(<span class="hljs-number">1</span>);<br>    &#125;<br>    <span class="hljs-keyword">return</span> (<span class="hljs-title function_">S4</span>()+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-string">&quot;-&quot;</span>+<span class="hljs-title function_">S4</span>()+<span class="hljs-title function_">S4</span>()+<span class="hljs-title function_">S4</span>());<br>&#125;<br><br><span class="hljs-keyword">var</span> client = <span class="hljs-keyword">new</span> <span class="hljs-title class_">SekiroClient</span>(<span class="hljs-string">&quot;ws://127.0.0.1:5620/business-demo/register?group=ths&amp;clientId=&quot;</span> + <span class="hljs-title function_">guid</span>());<br><br>client.<span class="hljs-title function_">registerAction</span>(<span class="hljs-string">&quot;getCookie&quot;</span>,<span class="hljs-keyword">function</span>(<span class="hljs-params">request, resolve,reject </span>)&#123;<br>    <span class="hljs-title function_">resolve</span>(<span class="hljs-title function_">encypt</span>());<br>&#125;)<br></code></pre></td></tr></table></figure>
+
+<p>此时打开<code>http://127.0.0.1:5620/business-demo/groupList</code>，响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">[</span><span class="hljs-string">&quot;ths&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;ok&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>表明一切正常</p>
+<p>此时再访问<code>http://127.0.0.1:5620/business-demo/invoke?group=ths&amp;action=getCookie</code>，响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;__sekiro_seq__&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">2</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;clientId&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;8db06d70-f1d1-defa-e975-13d3b9a0573a&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;AzUv6rCtukrtP9729bCNgsH8RLrqsuEjs3XNPbdb8wT7mlskfwL5lEO23YdE&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以看到Cookie值已成功被导出</p>
+<p>现在就可以用Python脚本愉快地爬取：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> requests<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_cookie</span>():<br>    api = <span class="hljs-string">&#x27;http://127.0.0.1:5620/business-demo/invoke?group=ths&amp;action=getCookie&#x27;</span><br>    res = requests.get(api)<br><br>    <span class="hljs-keyword">return</span> res.json()[<span class="hljs-string">&#x27;data&#x27;</span>]<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_info</span>(<span class="hljs-params">page</span>):<br><br>    api = <span class="hljs-string">f&#x27;http://q.10jqka.com.cn/index/index/board/all/field/zdf/order/desc/page/<span class="hljs-subst">&#123;page&#125;</span>/ajax/1/&#x27;</span><br>    headers = &#123;<br>        <span class="hljs-string">&quot;Accept&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>,<br>        <span class="hljs-string">&quot;Accept-Encoding&quot;</span>: <span class="hljs-string">&quot;gzip, deflate, br&quot;</span>,<br>        <span class="hljs-string">&quot;Accept-Language&quot;</span>: <span class="hljs-string">&quot;zh-CN,zh;q=0.9&quot;</span>,<br>        <span class="hljs-string">&quot;Cache-Control&quot;</span>: <span class="hljs-string">&quot;no-cache&quot;</span>,<br>        <span class="hljs-string">&quot;User-Agent&quot;</span>: <span class="hljs-string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.54&quot;</span>,<br>        <span class="hljs-string">&quot;Cookie&quot;</span>:<span class="hljs-string">f&quot;v=<span class="hljs-subst">&#123;get_cookie()&#125;</span>&quot;</span><br>    &#125;<br><br>    res = requests.get(api,headers=headers)<br><br>    <span class="hljs-built_in">print</span>(res.text)<br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&#x27;__main__&#x27;</span>:<br>    get_info(<span class="hljs-number">1</span>)<br></code></pre></td></tr></table></figure>
+
+<h3 id="实战-油猴注入方式"><a href="#实战-油猴注入方式" class="headerlink" title="实战-油猴注入方式"></a>实战-油猴注入方式</h3><blockquote>
+<p>Tampermonkey (油猴) 是拥有 超过 1000 万用户 的最流行的浏览器扩展之一。 它适用于 Chrome、Microsoft Edge、Safari、Opera Next 和 Firefox。</p>
+<p>它允许用户自定义并增强您最喜爱的网页的功能。用户脚本是小型 JavaScript 程序，可用于向网页添加新功能或修改现有功能。使用 Tampermonkey，您可以轻松在任何网站上创建、管理和运行这些用户脚本。</p>
+<p>——转自<a target="_blank" rel="noopener" href="https://www.tampermonkey.net/">官网</a></p>
+</blockquote>
+<p>油猴可以让用户自行在添加脚本，并在开启对应页面时应用，可以把它认为是一个给自己注入脚本的一个工具。</p>
+<p>可以在拓展上点击<code>添加脚本</code>来添加一个新脚本<br><img src="/2023/01/09/js-rpc-try/1673452559212.png"></p>
+<table>
+<thead>
+<tr>
+<th align="left">选项</th>
+<th align="left">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">@name</td>
+<td align="left">脚本的名称</td>
+</tr>
+<tr>
+<td align="left">@namespace</td>
+<td align="left">命名空间，用来区分相同名称的脚本，一般写作者名字或者网址就可以</td>
+</tr>
+<tr>
+<td align="left">@version</td>
+<td align="left">脚本版本，油猴脚本的更新会读取这个版本号</td>
+</tr>
+<tr>
+<td align="left">@description</td>
+<td align="left">描述这个脚本是干什么用的</td>
+</tr>
+<tr>
+<td align="left">@author</td>
+<td align="left">编写这个脚本的作者的名字</td>
+</tr>
+<tr>
+<td align="left"><strong>@match</strong></td>
+<td align="left">从字符串的起始位置匹配正则表达式，只有匹配的网址才会执行对应的脚本，例如 <code>*</code> 匹配所有，<code>https://www.baidu.com/*</code> 匹配百度等，可以参考 Python re 模块里面的 <code>re.match()</code> 方法，允许多个实例</td>
+</tr>
+<tr>
+<td align="left"><strong>@include</strong></td>
+<td align="left">和 @match 类似，只有匹配的网址才会执行对应的脚本，但是 @include 不会从字符串起始位置匹配，例如 <code>*://*baidu.com/*</code> 匹配百度，具体区别可以参考 <strong>TamperMonkey 官方文档</strong></td>
+</tr>
+<tr>
+<td align="left">@icon</td>
+<td align="left">脚本的 icon 图标</td>
+</tr>
+<tr>
+<td align="left">@grant</td>
+<td align="left">指定脚本运行所需权限，如果脚本拥有相应的权限，就可以调用油猴扩展提供的 API 与浏览器进行交互。如果设置为 none 的话，则不使用沙箱环境，脚本会直接运行在网页的环境中，这时候无法使用大部分油猴扩展的 API。如果不指定的话，油猴会默认添加几个最常用的 API</td>
+</tr>
+<tr>
+<td align="left">@require</td>
+<td align="left">如果脚本依赖其他 JS 库的话，可以使用 require 指令导入，在运行脚本之前先加载其它库</td>
+</tr>
+<tr>
+<td align="left"><strong>@run-at</strong></td>
+<td align="left">脚本注入时机，该选项是能不能 hook 到的关键，有五个值可选：<code>document-start</code>：网页开始时；<code>document-body</code>：body出现时；<code>document-end</code>：载入时或者之后执行；<code>document-idle</code>：载入完成后执行，默认选项；<code>context-menu</code>：在浏览器上下文菜单中单击该脚本时，一般将其设置为 <code>document-start</code></td>
+</tr>
+</tbody></table>
+<p>接下来将通过油猴脚本方式注入RPC来逆向一个网站</p>
+<p>目标地址：<code>https://www.toutiao.com/</code></p>
+<p>获取<code>推荐</code>栏榜单数据时，有一个关键的<code>_signature</code>参数<br><img src="/2023/01/09/js-rpc-try/1673453181758.png"></p>
+<p>任意方式搜寻可能的生成代码（推荐搜索<code>_signature</code>），发现以下代码：<br><img src="/2023/01/09/js-rpc-try/1673453398054.png"></p>
+<p>但是这并不意味着逆向结束，直接转发<code>n</code>，因为<code>n</code>的值是生成后的结果，要导出的目标应该是一个方法，因此进入<code>I</code>方法一探究竟<br><img src="/2023/01/09/js-rpc-try/1673453579812.png"></p>
+<p>注意观察最后一段代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> o = &#123;<br>                <span class="hljs-attr">url</span>: r + e<br>            &#125;;<br><span class="hljs-keyword">return</span> t.<span class="hljs-property">data</span> &amp;&amp; (o.<span class="hljs-property">body</span> = t.<span class="hljs-property">data</span>), (<span class="hljs-literal">null</span> === (n = <span class="hljs-variable language_">window</span>.<span class="hljs-property">byted_acrawler</span>) || <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> === n || <span class="hljs-literal">null</span> === (a = n.<span class="hljs-property">sign</span>) || <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> === a ? <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> : a.<span class="hljs-title function_">call</span>(n, o)) || <span class="hljs-string">&quot;&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>重点放在后面：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">(<span class="hljs-literal">null</span> === (n = <span class="hljs-variable language_">window</span>.<span class="hljs-property">byted_acrawler</span>) || <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> === n || <span class="hljs-literal">null</span> === (a = n.<span class="hljs-property">sign</span>) || <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> === a ? <span class="hljs-keyword">void</span> <span class="hljs-number">0</span> : a.<span class="hljs-title function_">call</span>(n, o)) || <span class="hljs-string">&quot;&quot;</span><br></code></pre></td></tr></table></figure>
+
+<p>此处解析可参考<a target="_blank" rel="noopener" href="https://pythonmana.com/2022/03/202203291733382695.html#%E5%8A%A0%E5%AF%86%E5%88%86%E6%9E%90">Python 爬虫进阶必备 | 某新闻资讯站点参数 _signature 逻辑分析 (无代码)</a></p>
+<p>所以这段代码执行时其实干了以下事：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js">n = <span class="hljs-variable language_">window</span>.<span class="hljs-property">byted_acrawler</span><br>a = n.<span class="hljs-property">sign</span><br>a.<span class="hljs-title function_">call</span>(n,o)<br></code></pre></td></tr></table></figure>
+
+<p>总结一下就是<code>window.byted_acrawler.sign(window.byted_acrawler,o)</code>，其中<code>window.byted_acrawler</code>是可以忽略的，参考<a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Function/call#%E5%8F%82%E6%95%B0">Function.prototype.call()</a>，也就是说可以进一步简化为<code>window.byted_acrawler.sign(o)</code></p>
+<p>可以在控制台调用下：<br><img src="/2023/01/09/js-rpc-try/1673454996044.png"></p>
+<p>成功拿到结果</p>
+<p>现在可以准备RPC代码了，同时对于<code>o</code>，可以试着自行构建一个一并返回，因此油猴代码如下：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-comment">// ==UserScript==</span><br><span class="hljs-comment">// @name         今日头条-RPC</span><br><span class="hljs-comment">// @namespace    替换成你的命名空间</span><br><span class="hljs-comment">// @version      0.1</span><br><span class="hljs-comment">// @description  今日头条-RPC</span><br><span class="hljs-comment">// @author       注意替换很你的名字</span><br><span class="hljs-comment">// @match        https://www.toutiao.com/*</span><br><span class="hljs-comment">// @icon         替换成你的图标或者干脆删除这一行</span><br><span class="hljs-comment">// @grant        none</span><br><span class="hljs-comment">// @require      https://sekiro.virjar.com/sekiro-doc/assets/sekiro_web_client.js</span><br><span class="hljs-comment">// ==/UserScript==</span><br><br>(<span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) &#123;<br>    <span class="hljs-string">&#x27;use strict&#x27;</span>;<br>    <span class="hljs-keyword">function</span> <span class="hljs-title function_">guid</span>(<span class="hljs-params"></span>) &#123;<br>        <span class="hljs-keyword">function</span> <span class="hljs-title function_">S4</span>(<span class="hljs-params"></span>) &#123;<br>            <span class="hljs-keyword">return</span> (((<span class="hljs-number">1</span> + <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">random</span>()) * <span class="hljs-number">0x10000</span>) | <span class="hljs-number">0</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-number">16</span>).<span class="hljs-title function_">substring</span>(<span class="hljs-number">1</span>);<br>        &#125;<br><br>        <span class="hljs-keyword">return</span> (<span class="hljs-title function_">S4</span>() + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-string">&quot;-&quot;</span> + <span class="hljs-title function_">S4</span>() + <span class="hljs-title function_">S4</span>() + <span class="hljs-title function_">S4</span>());<br>    &#125;<br><br>    <span class="hljs-keyword">var</span> client = <span class="hljs-keyword">new</span> <span class="hljs-title class_">SekiroClient</span>(<span class="hljs-string">&quot;ws://127.0.0.1:5620/business-demo/register?group=jrtt&amp;clientId=&quot;</span> + <span class="hljs-title function_">guid</span>());<br><br>    client.<span class="hljs-title function_">registerAction</span>(<span class="hljs-string">&quot;getUrl&quot;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">request, resolve, reject</span>) &#123;<br>        <span class="hljs-keyword">var</span> channelId = request.<span class="hljs-property">channel</span>;<br>        <span class="hljs-keyword">if</span> (!channelId)&#123;<br>            channelId = <span class="hljs-number">0</span>;<br>        &#125;<br>        <span class="hljs-keyword">var</span> urlParams = &#123;<br>            <span class="hljs-attr">url</span>:<span class="hljs-string">&#x27;https://www.toutiao.com/api/pc/list/feed?min_behot_time=&#x27;</span>+<span class="hljs-title class_">Math</span>.<span class="hljs-title function_">round</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Date</span>().<span class="hljs-title function_">getTime</span>()/<span class="hljs-number">1000</span>)+<span class="hljs-string">&#x27;&amp;refresh_count=5&amp;category=pc_profile_recommend&amp;aid=24&amp;app_name=toutiao_web&amp;channel_id=&#x27;</span>+channelId<br>        &#125;<br><br><br>        <span class="hljs-title function_">resolve</span>(<span class="hljs-string">&quot;&quot;</span>+urlParams.<span class="hljs-property">url</span>+<span class="hljs-string">&quot;&amp;_signature=&quot;</span>+<span class="hljs-variable language_">window</span>.<span class="hljs-property">byted_acrawler</span>.<span class="hljs-title function_">sign</span>(urlParams));<br>    &#125;);<br><br>&#125;)();<br></code></pre></td></tr></table></figure>
+
+<p>并且因为<code>window.byted_acrawler</code>是全局的，因此并不需要导出。保存油猴脚本并启动，回到今日头条并刷新，访问Sekiro的分组情况：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">[</span><span class="hljs-string">&quot;jrtt&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;ok&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以看到成功连接</p>
+<p>现在来调用一下：<br><code>http://127.0.0.1:5620/business-demo/invoke?group=jrtt&amp;action=getUrl</code>，响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;__sekiro_seq__&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">2</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;clientId&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;72c7dff4-3e96-565e-449a-b5b5d397eb1b&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;https://www.toutiao.com/api/pc/list/feed?min_behot_time=1673458709&amp;refresh_count=5&amp;category=pc_profile_recommend&amp;aid=24&amp;app_name=toutiao_web&amp;channel_id=0&amp;_signature=_02B4Z6wo00d01Ws5WIQAAIDAe2e9vmHbDGlrHVwAADl0A6cZQQXdRzJsXzV.yrJchiysvjx.ROE4yE2PVl450x0oeAmttZk.TZlJl6Zl1arOspUvyovWNV5x7vUHvHs3SXK2nZQubYjww-1965&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以额外添加一个<code>channel</code>参数，用来调用不同的栏目，默认<code>channel</code>为<code>0</code></p>
+<p>尝试使用Python来爬一下，发现<code>200</code>却一直乱码，在源码里翻找了一番也没看到有解密的意思，直接拿生成的url试试浏览器里编辑重放却没问题，编码也设置成了<code>utf-8</code>，找了半天才终于发现，<code>requests</code>响应头里有个<code>&#39;Transfer-Encoding&#39;: &#39;chunked&#39;</code>，我猜测问题就出在这了，<code>requests</code>并没有把完整的文件下载完，然后尝试添加<code>stream=True</code>参数也没有用。</p>
+<p>后来发现，请求头只保留一个<code>user-agent</code>就行，我TM@#!~&amp;*，折腾两小时才发现这样就行了，淦<br>Python 代码：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><code class="hljs python"><span class="hljs-keyword">import</span> requests<br><br><span class="hljs-keyword">def</span> <span class="hljs-title function_">get_list</span>(<span class="hljs-params">channel=<span class="hljs-literal">None</span></span>):<br>    <span class="hljs-keyword">def</span> <span class="hljs-title function_">get_url</span>(<span class="hljs-params">c=<span class="hljs-literal">None</span></span>):<br>        params = &#123;<br>            <span class="hljs-string">&#x27;group&#x27;</span>:<span class="hljs-string">&#x27;jrtt&#x27;</span>,<br>            <span class="hljs-string">&#x27;action&#x27;</span>:<span class="hljs-string">&#x27;getUrl&#x27;</span>,<br>            <span class="hljs-string">&#x27;channel&#x27;</span>: c <span class="hljs-keyword">if</span> c <span class="hljs-keyword">else</span> <span class="hljs-string">&#x27;&#x27;</span><br>        &#125;<br>        <span class="hljs-keyword">return</span> requests.get(<span class="hljs-string">&#x27;http://127.0.0.1:5620/business-demo/invoke&#x27;</span>,params=params).json()[<span class="hljs-string">&#x27;data&#x27;</span>]<br><br>    s = requests.session()<br>    headers = &#123;<br>        <span class="hljs-string">&quot;user-agent&quot;</span>: <span class="hljs-string">&quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76&quot;</span><br><br>    &#125;<br><br>    res = s.get(url=get_url(channel),headers=headers)<br>    res_json = res.json()<br>    <span class="hljs-keyword">return</span> res_json[<span class="hljs-string">&#x27;data&#x27;</span>]<br><br><br><span class="hljs-keyword">if</span> __name__ == <span class="hljs-string">&quot;__main__&quot;</span>:<br>    <span class="hljs-built_in">print</span>(get_list())<br></code></pre></td></tr></table></figure>
+
+<h3 id="实战-注入、替换方式"><a href="#实战-注入、替换方式" class="headerlink" title="实战-注入、替换方式"></a>实战-注入、替换方式</h3><p>目标：<a target="_blank" rel="noopener" href="https://ygp.gdzwfw.gov.cn/#/44/jygg">广东省公共资源交易平台</a></p>
+<p><img src="/2023/01/09/js-rpc-try/1673590124871.png"></p>
+<p>表单以及响应结果都为明文，只有在请求头有签名，总共为3个，其中一个明显为时间戳，因此总共待破解的为2个</p>
+<p>对于头部参数，可以采用头部HOOK方式。<br>在控制台输入以下代码来断住：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">var</span> code = <span class="hljs-keyword">function</span>(<span class="hljs-params"></span>)&#123;<br>    <span class="hljs-keyword">var</span> org = <span class="hljs-variable language_">window</span>.<span class="hljs-property">XMLHttpRequest</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">setRequestHeader</span>;<br>    <span class="hljs-variable language_">window</span>.<span class="hljs-property">XMLHttpRequest</span>.<span class="hljs-property"><span class="hljs-keyword">prototype</span></span>.<span class="hljs-property">setRequestHeader</span> = <span class="hljs-keyword">function</span>(<span class="hljs-params">k,v</span>)&#123;<br>        <span class="hljs-keyword">if</span>(k == <span class="hljs-string">&#x27;X-Dgi-Req-Signature&#x27;</span> || k == <span class="hljs-string">&#x27;X-Dgi-Req-Nonce&#x27;</span>)&#123;<br>            <span class="hljs-keyword">debugger</span>;<br>        &#125;<br>        <span class="hljs-keyword">return</span> org.<span class="hljs-title function_">apply</span>(<span class="hljs-variable language_">this</span>,<span class="hljs-variable language_">arguments</span>);<br>    &#125;<br>&#125;<br><span class="hljs-keyword">var</span> script = <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">createElement</span>(<span class="hljs-string">&#x27;script&#x27;</span>);<br>script.<span class="hljs-property">textContent</span> = <span class="hljs-string">&#x27;(&#x27;</span>+code+<span class="hljs-string">&#x27;)()&#x27;</span>;<br>(<span class="hljs-variable language_">document</span>.<span class="hljs-property">head</span>||<span class="hljs-variable language_">document</span>.<span class="hljs-property">documentElement</span>).<span class="hljs-title function_">appendChild</span>(script);<br>script.<span class="hljs-property">parentNode</span>.<span class="hljs-title function_">removeChild</span>(script);<br></code></pre></td></tr></table></figure>
+
+<p>在调用堆栈里一顿找，最终找到此处：<br><img src="/2023/01/09/js-rpc-try/1673592397400.png"></p>
+<p>断点的位置便是两个参数的生成位置，相关代码如下：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-keyword">const</span> a = <span class="hljs-title class_">Date</span>.<span class="hljs-title function_">now</span>(),<br>    l = <span class="hljs-title function_">lK</span>(<span class="hljs-number">16</span>),<br>    c = <span class="hljs-title function_">sr</span>([<span class="hljs-number">8</span>, <span class="hljs-number">28</span>, <span class="hljs-number">20</span>, <span class="hljs-number">42</span>, <span class="hljs-number">21</span>, <span class="hljs-number">53</span>, <span class="hljs-number">65</span>, <span class="hljs-number">6</span>]);<br><br><span class="hljs-keyword">const</span> d = <span class="hljs-title class_">Sg</span>(&#123;<br>    <span class="hljs-attr">p</span>: <span class="hljs-variable constant_">QC</span>.<span class="hljs-title function_">stringify</span>(o.<span class="hljs-property">data</span>, &#123;<br>        <span class="hljs-attr">allowDots</span>: !<span class="hljs-number">0</span><br>    &#125;),<br>    <span class="hljs-attr">t</span>: a,<br>    <span class="hljs-attr">n</span>: l,<br>    <span class="hljs-attr">k</span>: c<br>&#125;);<br></code></pre></td></tr></table></figure>
+
+<p><code>f</code>就是请求头的副本，因此没有给出，同时<code>sr</code>方法仅仅是通过Array解析字符串的，因此<code>c</code>为固定值，为<code>&#39;k8tUyS$m&#39;</code>。按照以往可以开始扣代码了，但是现在是打算使用PRC，因此可以将<code>lK</code>、<code>Sg</code>以及<code>QC</code>全部挂载到<code>window</code>对象上，方便Sekiro客户端调用。</p>
+<p>现在使用本地替换的方式来注入RPC，启用本地替代，然后保存源码已备用<br><img src="/2023/01/09/js-rpc-try/1673597400255.png"></p>
+<p>然后在顶部注入JsClient源码，以及注册一个client，这里挂载到<code>window</code>对象上，然后刷新页面，继续来到断点位置，导出需要的三个方法，同样控制台输入：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">window</span>.<span class="hljs-property">lK</span> = lK<br><span class="hljs-variable language_">window</span>.<span class="hljs-property">Sg</span> = <span class="hljs-title class_">Sg</span><br><span class="hljs-variable language_">window</span>.<span class="hljs-property">QC</span> = <span class="hljs-variable constant_">QC</span><br></code></pre></td></tr></table></figure>
+
+<p>输入完毕后是时候放行然后注册Action了，放行代码，然后在控制台输入以下代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><code class="hljs js"><span class="hljs-variable language_">window</span>.<span class="hljs-property">rpcClient</span>.<span class="hljs-title function_">registerAction</span>(<span class="hljs-string">&quot;getPost&quot;</span>, <span class="hljs-keyword">function</span> (<span class="hljs-params">request, resolve, reject</span>) &#123;<br>    <span class="hljs-keyword">let</span> pageNum = request.<span class="hljs-property">page</span>;<br>    <span class="hljs-keyword">if</span>(!pageNum)&#123;<br>        pageNum = <span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">const</span> c = <span class="hljs-string">&#x27;k8tUyS$m&#x27;</span>,<br>        l = <span class="hljs-variable language_">window</span>.<span class="hljs-title function_">lK</span>(<span class="hljs-number">16</span>),<br>        a = <span class="hljs-title class_">Date</span>.<span class="hljs-title function_">now</span>(),<br>        formData = &#123;<br>            <span class="hljs-attr">dataType</span>:<span class="hljs-string">&quot;&quot;</span>,<br>            <span class="hljs-attr">openConvert</span>:<span class="hljs-literal">true</span>,<br>            <span class="hljs-attr">pageNo</span>:pageNum,<br>            <span class="hljs-attr">pageSize</span>:<span class="hljs-number">10</span>,<br>            <span class="hljs-attr">projectType</span>:<span class="hljs-string">&quot;&quot;</span>,<br>            <span class="hljs-attr">publishEndTime</span>:<span class="hljs-string">&quot;&quot;</span>,<br>            <span class="hljs-attr">publishStartTime</span>:<span class="hljs-string">&quot;&quot;</span>,<br>            <span class="hljs-attr">secondType</span>:<span class="hljs-string">&quot;A&quot;</span>,<br>            <span class="hljs-attr">siteCode</span>:<span class="hljs-string">&quot;44&quot;</span>,<br>            <span class="hljs-attr">thirdType</span>:<span class="hljs-string">&quot;&quot;</span>,<br>            <span class="hljs-attr">total</span>:<span class="hljs-number">0</span>,<br>            <span class="hljs-attr">type</span>:<span class="hljs-string">&quot;trading-type&quot;</span><br>        &#125;,<br>        d = <span class="hljs-variable language_">window</span>.<span class="hljs-title class_">Sg</span>(&#123;<br>            <span class="hljs-attr">p</span>: <span class="hljs-variable language_">window</span>.<span class="hljs-property">QC</span>.<span class="hljs-title function_">stringify</span>(formData, &#123;<br>                <span class="hljs-attr">allowDots</span>: !<span class="hljs-number">0</span><br>            &#125;),<br>            <span class="hljs-attr">t</span>: a,<br>            <span class="hljs-attr">n</span>: l,<br>            <span class="hljs-attr">k</span>: c<br>        &#125;);<br><br>    <span class="hljs-title function_">resolve</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(&#123;<br>        <span class="hljs-string">&quot;headers&quot;</span>:&#123;<br>            <span class="hljs-string">&quot;X-Dgi-Req-Nonce&quot;</span>:l,<br>            <span class="hljs-string">&quot;X-Dgi-Req-Signature&quot;</span>:d.<span class="hljs-title function_">toString</span>(),<br>            <span class="hljs-string">&quot;X-Dgi-Req-Timestamp&quot;</span>:a<br>        &#125;,<br>        <span class="hljs-string">&quot;form&quot;</span>:formData<br>    &#125;))<br><br>&#125;);<br></code></pre></td></tr></table></figure>
+
+<p>这时候访问<code>http://127.0.0.1:5620/business-demo/invoke?group=gdggzy&amp;action=getPost</code>就能拿到需要的数据了，响应结果：</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;__sekiro_seq__&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">2</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;clientId&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;d006a706-d960-0ff8-e7e5-3e79f761bac0&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;form&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;dataType&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;openConvert&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;pageNo&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">1</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;pageSize&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">10</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;projectType&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;publishEndTime&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;publishStartTime&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;secondType&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;A&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;siteCode&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;44&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;thirdType&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;total&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;trading-type&quot;</span><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;headers&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">&#123;</span><span class="hljs-attr">&quot;X-Dgi-Req-Nonce&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;V6yYQSTDBQk3KWrA&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;X-Dgi-Req-Signature&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-string">&quot;a65c32bc126fb2c17231b94139666889bef365bcf44f17e10b6aad531b306a62&quot;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;X-Dgi-Req-Timestamp&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">1673595897604</span><span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-number">0</span><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>当然，既然已经修改了代码，那干脆修改的彻底一点，直接在相关代码处进行注册然后再转发也是可以的，这里不再做演示</p>
+<p>注意，这里只是演示通过RPC拿数据，签名是否有效不在讨论范围，想爬自己再研究把</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://sz134055.github.io">sz134055</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://sz134055.github.io/2023/01/09/js-rpc-try/">https://sz134055.github.io/2023/01/09/js-rpc-try/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://sz134055.github.io" target="_blank">Serene</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E9%80%86%E5%90%91/">逆向</a><a class="post-meta__tags" href="/tags/javascript/">javascript</a></div><div class="post-share"><div class="social-share" data-image="/image/logo.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="prev-post pull-left" href="/2023/01/31/scrapy-try/" title="Scrapy爬虫框架初探"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Scrapy爬虫框架初探</div></div></a><a class="next-post pull-right" href="/2023/01/07/websocket-try/" title="Websocket在爬虫中的应用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Websocket在爬虫中的应用</div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2024-10-07</div><div class="title">disable-devtool绕过</div></div></a><a href="/2023/01/06/js-obfuscation-try/" title="JS混淆学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-06</div><div class="title">JS混淆学习及实战</div></div></a><a href="/2023/01/07/octet-stream-try/" title="octet-stream及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-07</div><div class="title">octet-stream及实战</div></div></a><a href="/2022/11/20/qimai-2022/" title="七麦数据榜单API加密参数逆向"><img class="cover" src="https://pic2.zhimg.com/v2-8d74c7be6440561a1518996e060a36aa_xll.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-20</div><div class="title">七麦数据榜单API加密参数逆向</div></div></a><a href="/2023/01/04/sm-crypto-learn/" title="国密（SM）系列逆向学习及实战"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-01-04</div><div class="title">国密（SM）系列逆向学习及实战</div></div></a><a href="/2022/11/29/sha256-try/" title="哈希加密逆向案例学习-模拟登录返回及后续"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-29</div><div class="title">哈希加密逆向案例学习-模拟登录返回及后续</div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8B%E7%BB%8D"><span class="toc-number">1.</span> <span class="toc-text">介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Sekiro"><span class="toc-number">2.</span> <span class="toc-text">Sekiro</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8"><span class="toc-number">2.1.</span> <span class="toc-text">使用</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E6%88%98-%E6%8E%A7%E5%88%B6%E5%8F%B0%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F"><span class="toc-number">2.2.</span> <span class="toc-text">实战-控制台注入方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E6%88%98-%E6%B2%B9%E7%8C%B4%E6%B3%A8%E5%85%A5%E6%96%B9%E5%BC%8F"><span class="toc-number">2.3.</span> <span class="toc-text">实战-油猴注入方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%9E%E6%88%98-%E6%B3%A8%E5%85%A5%E3%80%81%E6%9B%BF%E6%8D%A2%E6%96%B9%E5%BC%8F"><span class="toc-number">2.4.</span> <span class="toc-text">实战-注入、替换方式</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向"><img src="https://is4-ssl.mzstatic.com/image/thumb/Purple111/v4/8c/fc/61/8cfc6181-0548-4ef6-ed7c-35727cf53d27/source/512x512bb.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="2024更新-有道翻译API逆向"/></a><div class="content"><a class="title" href="/2024/10/08/youdao-api-2024/" title="2024更新-有道翻译API逆向">2024更新-有道翻译API逆向</a><time datetime="2024-10-08T05:27:00.000Z" title="发表于 2024-10-08 13:27:00">2024-10-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2024/10/07/disable-devtool-reverse/" title="disable-devtool绕过">disable-devtool绕过</a><time datetime="2024-10-07T12:35:10.000Z" title="发表于 2024-10-07 20:35:10">2024-10-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/31/scrapy-try/" title="Scrapy爬虫框架初探">Scrapy爬虫框架初探</a><time datetime="2023-01-31T03:38:20.000Z" title="发表于 2023-01-31 11:38:20">2023-01-31</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/09/js-rpc-try/" title="JS RPC学习及实战">JS RPC学习及实战</a><time datetime="2023-01-09T10:21:13.000Z" title="发表于 2023-01-09 18:21:13">2023-01-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/01/07/websocket-try/" title="Websocket在爬虫中的应用">Websocket在爬虫中的应用</a><time datetime="2023-01-07T11:27:30.000Z" title="发表于 2023-01-07 19:27:30">2023-01-07</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 - 2024 By sz134055</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
